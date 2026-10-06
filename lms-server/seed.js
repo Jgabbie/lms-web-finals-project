@@ -15,21 +15,42 @@ mongoose.connect(process.env.MONGO_URI)
     });
 
     await User.create([
-      {
-        firstName: 'Admin',
-        lastName: 'Portal',
-        email: 'admin2@portal.com',
-        password: hashed,
-        role: 'admin'
-      },
-      {
-        firstName: 'Instructor',
-        lastName: 'Portal',
-        email: 'instructor@portal.com',
-        password: hashed,
-        role: 'instructor'
-      }
-    ]);
+  {
+    firstName: 'Admin',
+    lastName: 'Portal',
+    email: 'admin2@portal.com',
+    password: hashed,
+    role: 'admin'
+  },
+  {
+    firstName: 'Instructor',
+    lastName: 'Portal',
+    email: 'instructor@portal.com',
+    password: hashed,
+    role: 'instructor'
+  },
+  {
+    firstName: 'Tayshaun',
+    lastName: 'Santos',
+    email: 'taysan@portal.com',
+    password: hashed,
+    role: 'student'
+  },
+  {
+    firstName: 'Mitsuha',
+    lastName: 'Miyamizu',
+    email: 'mm@portal.com',
+    password: hashed,
+    role: 'student'
+  },
+  {
+    firstName: 'Barry',
+    lastName: 'Allen',
+    email: 'flash@portal.com',
+    password: hashed,
+    role: 'student'
+  }
+]);
 
     console.log('Admin account created: admin@portal.com / admin123')
     await mongoose.disconnect();

@@ -1,80 +1,78 @@
 import { Card, CardContent, Typography, Button, MenuItem, Chip, TextField, IconButton } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PeopleOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
-import { useState, useMemo } from 'react'
+import { Add, DeleteOutlined, PeopleOutlined, Search } from '@mui/icons-material'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
+import SidebarInstructor from '../../components/SidebarInstructor'
+
+const DEFAULT_COURSES = [
+    { _id: '1', courseCode: 'IT 301', courseName: 'Web Development', instructor: 'Instructor Portal', semester: '1st Semester', enrolledStudents: [1, 2, 3], status: 'Active' },
+    { _id: '2', courseCode: 'IT 204', courseName: 'Database Systems', instructor: 'Instructor Portal', semester: '1st Semester', enrolledStudents: [1, 2], status: 'Active' },
+    { _id: '3', courseCode: 'CS 101', courseName: 'Intro to OOP', instructor: 'Instructor Portal', semester: '1st Semester', enrolledStudents: [1, 2, 3, 4], status: 'Active' },
+]
 
 export default function CourseManagementPage() {
-
     const [search, setSearch] = useState('')
     const [status, setStatus] = useState('All')
+    const [courses, setCourses] = useState([])
+    const [sidebarOpen, setSidebarOpen] = useState(true)
+    const navigate = useNavigate()
 
-    const courses = [
-        {
-            id: 1,
-            code: 'IT 301',
-            name: 'Web Development',
-            instructor: 'Prof. duqwhduiqwd',
-            semester: '1st Semester',
-            students: 38,
-            modules: 8,
-            status: 'Active'
-        },
-        {
-            id: 2,
-            code: 'IT 301',
-            name: 'Web Development',
-            instructor: 'Prof. duqwhduiqwd',
-            semester: '1st Semester',
-            students: 38,
-            modules: 8,
-            status: 'Active'
-        },
-        {
-            id: 3,
-            code: 'IT 301',
-            name: 'Web Development',
-            instructor: 'Prof. duqwhduiqwd',
-            semester: '1st Semester',
-            students: 38,
-            modules: 8,
-            status: 'Active'
-        },
-    ]
+    const fetchCourses = useCallback(() => {
+        const stored = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
+        setCourses([...stored, ...DEFAULT_COURSES])
+    }, [])
+
+    useEffect(() => {
+        fetchCourses()
+    }, [fetchCourses])
+
+    const handleDeleteCourse = (id) => {
+        if (!window.confirm('Are you sure you want to delete this course?')) return
+        const updated = courses.filter(c => c._id !== id)
+        setCourses(updated)
+
+        const stored = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
+        localStorage.setItem('instructor_courses', JSON.stringify(stored.filter(c => c._id !== id)))
+    }
 
     const filteredCourses = useMemo(() => {
         const key = search.toLowerCase()
-        return courses.filter(student => {
+        return courses.filter(course => {
+            const name = course.courseName || ''
+            const code = course.courseCode || ''
+            const instructor = course.instructor || ''
             const matchesSearch =
-                student.name.toLowerCase().includes(key) ||
-                student.code.toLowerCase().includes(key) ||
-                student.instructor.toLowerCase().includes(key)
-
-            const matchesProgram =
-                status === 'All' || student.status === status
-
-            return matchesSearch && matchesProgram
+                name.toLowerCase().includes(key) ||
+                code.toLowerCase().includes(key) ||
+                instructor.toLowerCase().includes(key)
+            const matchesStatus = status === 'All' || course.status === status
+            return matchesSearch && matchesStatus
         })
-    }, [search, status])
-
+    }, [courses, search, status])
 
     return (
-        <>
+        <div className='min-h-screen bg-slate-50'>
             <Navbar />
-            <div className='min-h-screen bg-slate-50'>
+            <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+            <div
+                className='transition-all duration-300'
+                style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
+            >
                 <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
-                        <div >
+                        <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
                                 Course Management
                             </Typography>
                             <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                View, update, and manage LMS courses.
+                                View, update, and manage your courses.
                             </Typography>
                         </div>
-
                         <Button
                             variant='contained'
                             startIcon={<Add />}
+                            onClick={() => navigate('/instructor/courses/create')}
                             className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                         >
                             Create Course
@@ -85,12 +83,9 @@ export default function CourseManagementPage() {
                         {[
                             ['Total Courses', courses.length],
                             ['Active Courses', courses.filter(item => item.status === 'Active').length],
-                            ['Total Enrollments', courses.reduce((sum, item) => sum + item.students, 0)],
+                            ['Total Enrollments', courses.reduce((sum, item) => sum + (item.enrolledStudents?.length || 0), 0)],
                         ].map(([label, value]) => (
-                            <Card
-                                key={label}
-                                className='!rounded-xl !border !border-slate-200 !shadow-sm'
-                            >
+                            <Card key={label} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                 <CardContent className='!p-5'>
                                     <Typography variant='body2' className='!text-slate-500'>
                                         {label}
@@ -108,14 +103,11 @@ export default function CourseManagementPage() {
                             <div className='grid grid-cols-1 md:grid-cols-[1fr_220px] gap-4 p-5 border-b border-slate-200'>
                                 <TextField
                                     size='small'
-                                    placeholder='Search courses'
+                                    placeholder='Search courses by title or code...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    InputProps={{
-                                        startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                    }}
+                                    InputProps={{ startAdornment: <Search className='!text-slate-400 !mr-2' /> }}
                                 />
-
                                 <TextField
                                     select
                                     size='small'
@@ -133,81 +125,43 @@ export default function CourseManagementPage() {
                                 <table className='w-full min-w-[900px] text-sm'>
                                     <thead className='bg-slate-50 text-slate-500'>
                                         <tr>
-                                            <th className='text-left font-semibold px-6 py-4'>
-                                                Course
-                                            </th>
-                                            <th className='text-left font-semibold px-6 py-4'>
-                                                Instructor
-                                            </th>
-                                            <th className='text-left font-semibold px-6 py-4'>
-                                                Semester
-                                            </th>
-                                            <th className='text-left font-semibold px-6 py-4'>
-                                                Students
-                                            </th>
-                                            <th className='text-left font-semibold px-6 py-4'>
-                                                Modules
-                                            </th>
-                                            <th className='text-left font-semibold px-6 py-4'>
-                                                Status
-                                            </th>
-                                            <th className='text-right font-semibold px-6 py-4'>
-                                                Actions
-                                            </th>
+                                            <th className='text-left font-semibold px-6 py-4'>Course</th>
+                                            <th className='text-left font-semibold px-6 py-4'>Instructor</th>
+                                            <th className='text-left font-semibold px-6 py-4'>Semester</th>
+                                            <th className='text-left font-semibold px-6 py-4'>Students</th>
+                                            <th className='text-left font-semibold px-6 py-4'>Status</th>
+                                            <th className='text-right font-semibold px-6 py-4'>Actions</th>
                                         </tr>
                                     </thead>
-
                                     <tbody className='divide-y divide-slate-100'>
                                         {filteredCourses.map(course => (
-                                            <tr key={course.id} className='hover:bg-slate-50'>
+                                            <tr key={course._id} className='hover:bg-slate-50'>
                                                 <td className='px-6 py-4'>
-                                                    <Typography className='!font-semibold !text-slate-500'>
-                                                        {course.name}
+                                                    <Typography className='!font-semibold !text-slate-800'>
+                                                        {course.courseName}
                                                     </Typography>
                                                     <Typography variant='caption' className='!text-slate-500'>
-                                                        {course.code}
+                                                        {course.courseCode}
                                                     </Typography>
                                                 </td>
-
-                                                <td className='px-6 py-4 text-slate-600'>
-                                                    {course.instructor}
-                                                </td>
-                                                <td className='px-6 py-4 text-slate-600'>
-                                                    {course.semester}
-                                                </td>
-
+                                                <td className='px-6 py-4 text-slate-600'>{course.instructor}</td>
+                                                <td className='px-6 py-4 text-slate-600'>{course.semester}</td>
                                                 <td className='px-6 py-4'>
                                                     <div className='flex items-center gap-1.5 text-slate-600'>
                                                         <PeopleOutlined fontSize='small' />
-                                                        {course.students}
+                                                        {course.enrolledStudents?.length || 0}
                                                     </div>
                                                 </td>
-
-                                                <td className='px-6 py-4 text-slate-600'>
-                                                    {course.modules}
-                                                </td>
-
                                                 <td className='px-6 py-4'>
                                                     <Chip
                                                         size='small'
-                                                        label={course.status}
-                                                        className={
-                                                            course.status === 'Active'
-                                                                ? '!bg-green-50 !text-green-700'
-                                                                : '!bg-slate-100 !text-slate-600'
-                                                        }
+                                                        label={course.status || 'Active'}
+                                                        className={course.status === 'Active' ? '!bg-green-50 !text-green-700' : '!bg-slate-100 !text-slate-600'}
                                                     />
                                                 </td>
-
                                                 <td className='px-6 py-4'>
                                                     <div className='flex justify-end gap-1'>
-                                                        <IconButton size='small' title='View'>
-                                                            <VisibilityOutlined fontSize='small' />
-                                                        </IconButton>
-                                                        <IconButton size='small' title='Edit'>
-                                                            <EditOutlined fontSize='small' />
-                                                        </IconButton>
-                                                        <IconButton size='small' color='error' title='Delete'>
+                                                        <IconButton size='small' color='error' title='Delete' onClick={() => handleDeleteCourse(course._id)}>
                                                             <DeleteOutlined fontSize='small' />
                                                         </IconButton>
                                                     </div>
@@ -216,22 +170,18 @@ export default function CourseManagementPage() {
                                         ))}
                                     </tbody>
                                 </table>
-
                                 {filteredCourses.length === 0 && (
                                     <div className='py-12 text-center'>
                                         <Typography className='!font-semibold !text-slate-700'>
                                             No courses found
-                                        </Typography>
-                                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                            Try changing your search or status filter
                                         </Typography>
                                     </div>
                                 )}
                             </div>
                         </CardContent>
                     </Card>
-                </main >
-            </div >
-        </>
+                </main>
+            </div>
+        </div>
     )
 }

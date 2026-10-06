@@ -1,175 +1,239 @@
-import { Avatar, Card, CardContent, Typography, Button, FormControl, InputLabel, MenuItem, Select, Checkbox, Chip, TextField } from '@mui/material'
-import { GroupAddOutlined, Search, SchoolOutlined, } from '@mui/icons-material'
-import { useState, useMemo } from 'react'
+import {
+    Avatar,
+    Card,
+    CardContent,
+    Typography,
+    Button,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    Checkbox,
+    Chip,
+    TextField,
+    Snackbar,
+    Alert
+} from '@mui/material'
+import { GroupAddOutlined, Search, SchoolOutlined } from '@mui/icons-material'
+import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../../components/Navbar'
+import SidebarInstructor from '../../components/SidebarInstructor'
+import api from '../../api/axiosClient'
+
+const DEFAULT_COURSES = [
+    { _id: '1', courseCode: 'IT 301', courseName: 'Web Development' },
+    { _id: '2', courseCode: 'IT 204', courseName: 'Database Systems' },
+    { _id: '3', courseCode: 'CS 101', courseName: 'Intro to OOP' },
+]
 
 export default function EnrollStudentPage() {
-
-    const [course, setCourse] = useState('')
+    const [courses, setCourses] = useState([])
+    const [selectedCourse, setSelectedCourse] = useState('')
     const [search, setSearch] = useState('')
-    const [selected, setSelected] = useState([])
+    const [selectedStudents, setSelectedStudents] = useState([])
+    const [students, setStudents] = useState([])
+    const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
 
-    const students = [
-        { id: 1, studentId: '2026-82173', name: 'John Cruz', email: 'john.cruz@gmail.com', program: 'BSIT', year: '3rd Year' },
-        { id: 2, studentId: '2026-82173', name: 'John Cruz', email: 'john.cruz@gmail.com', program: 'BSIT', year: '3rd Year' },
-        { id: 3, studentId: '2026-82173', name: 'John Cruz', email: 'john.cruz@gmail.com', program: 'BSIT', year: '3rd Year' },
-        { id: 4, studentId: '2026-82173', name: 'John Cruz', email: 'john.cruz@gmail.com', program: 'BSIT', year: '3rd Year' },
+    // 1. Load active courses (including locally created ones)
+    useEffect(() => {
+        const storedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
+        const allCourses = [...storedCourses, ...DEFAULT_COURSES]
+        setCourses(allCourses)
+        if (allCourses.length > 0) {
+            setSelectedCourse(allCourses[0].courseCode)
+        }
+    }, [])
 
-    ]
+    // 2. Fetch real students from the backend
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                setLoading(true)
+                const res = await api.get('/user/accounts')
+                const allUsers = Array.isArray(res.data) ? res.data : []
+                setStudents(allUsers.filter(u => u.role?.toLowerCase() === 'student'))
+            } catch (err) {
+                console.error('Error fetching students:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchStudents()
+    }, [])
 
+    // 3. Search filter
     const filteredStudents = useMemo(() => {
         const key = search.toLowerCase()
-        return students.filter(student =>
-            student.name.toLowerCase().includes(key) ||
-            student.studentId.toLowerCase().includes(key) ||
-            student.email.toLowerCase().includes(key)
-        )
-    }, [search])
-
+        return students.filter(student => {
+            const first = student.firstName || ''
+            const last = student.lastName || ''
+            const email = student.email || ''
+            return first.toLowerCase().includes(key) ||
+                last.toLowerCase().includes(key) ||
+                email.toLowerCase().includes(key)
+        })
+    }, [students, search])
 
     const toggleStudent = (id) => {
-        setSelected(prev => prev.includes(id) ? prev.filter(item => item !== id)
-            : [...prev, id]
+        setSelectedStudents(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
         )
     }
 
+    // 4. Enroll action: updates the course's enrolled students list
     const handleEnroll = () => {
-        console.log('Enroll: ', { course, students: selected })
+        if (!selectedCourse || selectedStudents.length === 0) return
+
+        // Update local storage courses so CourseManagementPage reflects the new enrollment counts
+        const storedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
+        const updatedStored = storedCourses.map(c => {
+            if (c.courseCode === selectedCourse) {
+                const currentEnrolled = c.enrolledStudents || []
+                const newEnrolled = Array.from(new Set([...currentEnrolled, ...selectedStudents]))
+                return { ...c, enrolledStudents: newEnrolled }
+            }
+            return c
+        })
+        localStorage.setItem('instructor_courses', JSON.stringify(updatedStored))
+
+        setNotification({
+            open: true,
+            message: `Successfully enrolled ${selectedStudents.length} student(s) into ${selectedCourse}!`,
+            severity: 'success'
+        })
+        setSelectedStudents([])
     }
 
     return (
-        <>
+        <div className='min-h-screen bg-slate-50'>
             <Navbar />
-            <div className='min-h-screen bg-slate-50'>
+            <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+            <div
+                className='transition-all duration-300'
+                style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
+            >
                 <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <div className='mb-7'>
                         <Typography variant='h4' className='!font-bold !text-slate-800'>
-                            Enroll Student
+                            Enroll Students
                         </Typography>
                         <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                            Select a course and enroll one or more students
+                            Select a course and enroll registered students.
                         </Typography>
                     </div>
 
-
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mb-6'>
-                        <CardContent className='!p-6 '>
+                        <CardContent className='!p-6'>
                             <div className='grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4'>
-
-                                <FormControl
-                                    fullWidth
-                                >
-                                    <InputLabel>
-                                        Course
-                                    </InputLabel>
+                                <FormControl fullWidth size='small'>
+                                    <InputLabel>Target Course</InputLabel>
                                     <Select
-                                        value={course}
-                                        label='Course'
-                                        onChange={e => setCourse(e.target.value)}
+                                        value={selectedCourse}
+                                        label='Target Course'
+                                        onChange={e => setSelectedCourse(e.target.value)}
                                     >
-                                        <MenuItem value='IT 301'>IT 301 - Web Development</MenuItem>
-                                        <MenuItem value='IT 301'>IT 301 - Web Development</MenuItem>
-                                        <MenuItem value='IT 301'>IT 301 - Web Development</MenuItem>
+                                        {courses.map((c) => (
+                                            <MenuItem key={c._id || c.courseCode} value={c.courseCode}>
+                                                {c.courseCode} - {c.courseName}
+                                            </MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
-
                                 <TextField
                                     fullWidth
-                                    placeholder='Search Students'
+                                    size='small'
+                                    placeholder='Search students by name or email...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    InputProps={{
-                                        startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                    }}
+                                    InputProps={{ startAdornment: <Search className='!text-slate-400 !mr-2' /> }}
                                 />
-
                                 <Button
                                     variant='contained'
                                     startIcon={<GroupAddOutlined />}
-                                    disabled={!course || selected.length === 0}
+                                    disabled={!selectedCourse || selectedStudents.length === 0}
                                     onClick={handleEnroll}
                                     className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none !px-6'
                                 >
-                                    Enroll ({selected.length})
+                                    Enroll ({selectedStudents.length})
                                 </Button>
                             </div>
                         </CardContent>
                     </Card>
 
-
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
-                        <CardContent className='!p-0 '>
+                        <CardContent className='!p-0'>
                             <div className='flex items-center justify-between gap-3 px-6 py-5 border-b border-slate-200'>
-
                                 <div>
                                     <Typography variant='h6' className='!font-bold !text-slate-800'>
-                                        Available Students
+                                        Registered Students
                                     </Typography>
                                     <Typography variant='body2' className='!text-slate-500'>
-                                        {filteredStudents.length} students found
+                                        {filteredStudents.length} student(s) available
                                     </Typography>
                                 </div>
-
                                 <Chip
                                     icon={<SchoolOutlined />}
-                                    label={`${selected.length} selected`}
-                                    className='!bg-blue-50 !text-blue-700'
+                                    label={`${selectedStudents.length} selected`}
+                                    className='!bg-blue-50 !text-blue-700 !font-medium'
                                 />
                             </div>
-
 
                             <div className='divide-y divide-slate-100'>
                                 {filteredStudents.length > 0 ? (
                                     filteredStudents.map(student => (
                                         <div
-                                            key={student.id}
-                                            className='flex items-start sm:items-center gap-3 sm:gap-4 sm:px-6 py-4 hover:bg-slate-50'
+                                            key={student._id}
+                                            onClick={() => toggleStudent(student._id)}
+                                            className='flex items-center gap-3 sm:gap-4 px-6 py-4 hover:bg-slate-50 cursor-pointer transition-colors'
                                         >
                                             <Checkbox
-                                                checked={selected.includes(student.id)}
-                                                onChange={() => toggleStudent(student.id)}
+                                                checked={selectedStudents.includes(student._id)}
+                                                onChange={() => toggleStudent(student._id)}
                                             />
-
-                                            <Avatar className='!bg-blue-600'>
-                                                {student.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
+                                            <Avatar className='!bg-blue-600 !text-sm'>
+                                                {student.firstName?.charAt(0) || 'S'}
+                                                {student.lastName?.charAt(0) || ''}
                                             </Avatar>
-
                                             <div className='flex-1 min-w-0'>
                                                 <Typography className='!font-semibold !text-slate-800'>
-                                                    {student.name}
-                                                </Typography>
-                                                <Typography variant='body2' className='!text-slate-500'>
-                                                    {student.studentId}
+                                                    {student.firstName} {student.lastName}
                                                 </Typography>
                                                 <Typography variant='caption' className='!text-slate-400 break-all'>
                                                     {student.email}
                                                 </Typography>
-
-                                                <div className='flex gap-2'>
-                                                    <Chip size='small' label={student.program} />
-                                                    <Chip size='small' label={student.year} variant='outlined' />
-                                                </div>
                                             </div>
+                                            <Chip size='small' label={student.status || 'Active'} variant='outlined' />
                                         </div>
                                     ))
                                 ) : (
                                     <div className='py-14 px-6 text-center'>
                                         <SchoolOutlined className='!text-slate-300 !text-5xl' />
-
                                         <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                            No students found
+                                            {loading ? 'Loading registered students...' : 'No registered students found'}
                                         </Typography>
-                                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                            Try changing your search
+                                        <Typography variant='caption' className='!text-slate-400 !mt-1 !block'>
+                                            Sign up a student account or add one in User Management to see them here.
                                         </Typography>
                                     </div>
                                 )}
                             </div>
                         </CardContent>
                     </Card>
+                </main>
+            </div>
 
-                </main >
-            </div >
-        </>
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={3000}
+                onClose={() => setNotification(prev => ({ ...prev, open: false }))}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert severity={notification.severity} variant='filled'>
+                    {notification.message}
+                </Alert>
+            </Snackbar>
+        </div>
     )
 }
