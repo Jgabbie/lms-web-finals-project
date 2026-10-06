@@ -1,11 +1,37 @@
 
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip } from '@mui/material'
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
 import { Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
 import { useState } from 'react'
+import axios from 'axios'
 
 export default function SidebarAdmin() {
 
     const [open, setOpen] = useState(true)
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
+
+    const handleLogout = async () => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user'))
+
+            await axios.post('http://localhost:5000/api/auth/logout', {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role
+            })
+
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            window.location.href = '/login'
+
+        } catch (error) {
+            console.error('Logout error: ', error)
+
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            localStorage.removeItem('role')
+            window.location.href = '/login'
+        }
+    }
 
     const mainMenu = [
         {
@@ -230,6 +256,7 @@ export default function SidebarAdmin() {
                         >
                             <Button
                                 fullWidth
+                                onClick={() => setLogoutDialogOpen(true)}
                                 startIcon={<Logout />}
                                 className={`!justify-start !normal-case !text-slate-500 hover:!bg-red-50 hover:!text-red-600 !rounded-lg
                                 ${open ? '!justify-start' : '!justify-center'}
@@ -243,8 +270,30 @@ export default function SidebarAdmin() {
                     </div>
                 </div>
             </Drawer >
+
+
+            <Dialog
+                open={logoutDialogOpen}
+                onClose={() => setLogoutDialogOpen(false)}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Confirm Logout</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to logout?
+                    </DialogContentText>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleLogout} color="primary" variant="contained">
+                        Logout
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
-
-
     )
 }

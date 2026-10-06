@@ -88,6 +88,13 @@ export default function LoginPage({ onLogin }) {
             const res = await axios.post('http://localhost:5000/api/auth/login', { email: email.trim(), password });
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('role', res.data.role);
+
+            localStorage.setItem('user', JSON.stringify({
+                firstName: res.data.firstName,
+                lastName: res.data.lastName,
+                email: res.data.email,
+                role: res.data.role
+            }));
             onLogin(res.data.role);
         } catch (error) {
             const message = error.response?.data?.message || 'Invalid Email or Password'

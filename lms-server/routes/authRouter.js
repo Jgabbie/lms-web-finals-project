@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const nodemailer = require('nodemailer')
 const crypto = require('crypto')
 const User = require('../models/User')
+const Log = require('../models/Log')
 
 const pendingRegistrations = new Map()
 const pendingPasswordResets = new Map()
@@ -283,6 +284,15 @@ router.post('/register/verify-otp', async (req, res) => {
             email: normalizedEmail,
             password: hashedPassword,
             role: 'student'
+        })
+
+        await Log.create({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            action: 'Create',
+            description: `${user.firstName} ${user.lastName} (${user.role}) created an account`,
+            status: 'Success'
         })
 
         pendingRegistrations.delete(normalizedEmail)
@@ -815,10 +825,55 @@ router.post('/login', async (req, res) => {
         { expiresIn: '2hrs' }
     )
 
-    res.json({ token, role: user.role, name: user.name });
+    await Log.create({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        action: 'Login',
+        description: `${user.firstName} ${user.lastName} (${user.role}) logged in`,
+        status: 'Success'
+    })
+
+    res.json({
+        token,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+    });
 })
 
 
+router.post('/logout', async (req, res) => {
+    try {
+        const { firstName, lastName, role } = req.body;
 
+        if (!firstName || !lastName || !role) {
+            return res.status(400).json({
+                message: 'First name, last name, and role are required'
+            })
+        }
+
+        await Log.create({
+            firstName,
+            lastName,
+            role,
+            action: 'Logout',
+            description: `${firstName} ${lastName} (${role}) logged out`,
+            status: 'Success'
+        })
+
+        return res.status(200).json({
+            message: 'Logout successful'
+        })
+
+    } catch (error) {
+        console.error('Logout error: ', error)
+
+        return res.status(500).json({
+            message: 'Unable to log out. Please try again later.'
+        })
+    }
+})
 
 module.exports = router;
