@@ -39,12 +39,7 @@ export default function SidebarAdmin() {
         {
             label: 'Profile',
             icon: <Person />,
-            path: 'admin/dashboard'
-        },
-        {
-            label: 'Settings',
-            icon: <Settings />,
-            path: 'admin/dashboard'
+            path: '/admin/profile'
         },
     ]
 

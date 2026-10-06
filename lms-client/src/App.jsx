@@ -124,6 +124,7 @@ function App() {
             />
           }
         >
+          <Route path='/admin/profile' element={<ProfilePage />} />
           <Route path='/admin/dashboard' element={<Dashboard />} />
           <Route path='/admin/users' element={<UserManagementPage />} />
           <Route path='/admin/instructors' element={<InstructorManagement />} />
@@ -175,7 +176,6 @@ function App() {
             />
           }
         >
-          <Route path='/profile' element={<ProfilePage />} />
           <Route path='/coursedetails' element={<CourseDetailsPage role={role} />} />
           <Route path='/assigndetails' element={<AssignmentDetailsPage role={role} />} />
           <Route path='/discussion' element={<DiscussionPage role={role} />} />
