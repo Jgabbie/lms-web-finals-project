@@ -24,6 +24,7 @@ import ActivityLogs from './pages/admin/ActivityLogs'
 import UserManagementPage from './pages/admin/UserManagementPage'
 import InstructorManagement from './pages/admin/InstructorManagement'
 
+import InstructorAssignmentsPage from './pages/instructor/InstructorAssignmentsPage'
 import DashboardInstructor from './pages/instructor/DashboardInstructor'
 import EnrollStudentPage from './pages/instructor/EnrollStudentPage'
 
@@ -151,7 +152,8 @@ function App() {
         <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
         <Route path='/instructor/students' element={<StudentManagementPage />} />
         <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
-        <Route path='/instructor/assignments' element={<AssignmentPage role={role} />} />
+        <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
+
       </Route>
 
         <Route
