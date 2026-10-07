@@ -1,45 +1,55 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip } from '@mui/material'
-import { Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
-import { useState } from 'react'
+import { Dashboard, MenuBook, Assignment, Menu, ChevronLeft, FolderCopy, Forum, Logout } from '@mui/icons-material'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { getProfileInitials, getStoredProfile } from '../utils/profileStorage'
 
 export default function Sidebar() {
-
     const [open, setOpen] = useState(true)
+    const location = useLocation()
+    const navigate = useNavigate()
+    const [profile, setProfile] = useState(getStoredProfile)
+
+    useEffect(() => {
+        const refreshProfile = () => setProfile(getStoredProfile())
+        window.addEventListener('profile:updated', refreshProfile)
+        return () => window.removeEventListener('profile:updated', refreshProfile)
+    }, [])
 
     const mainMenu = [
         {
             label: 'Dashboard',
             icon: <Dashboard />,
-            path: '/admin/dashboard'
+            path: '/student/dashboard'
         },
         {
-            label: 'Users',
-            icon: <People />,
-            path: '/admin/users'
-        },
-        {
-            label: 'Courses',
+            label: 'My Courses',
             icon: <MenuBook />,
-            path: '/admin/courses'
+            path: '/student/courses'
         },
         {
-            label: 'Instructors',
-            icon: <School />,
-            path: '/admin/dashboard'
-        },
-        {
-            label: 'Activity',
+            label: 'Assignments',
             icon: <Assignment />,
-            path: '/admin/logs'
+            path: '/student/assignments'
+        },
+        {
+            label: 'Learning Materials',
+            icon: <FolderCopy />,
+            path: '/student/materials'
+        },
+        {
+            label: 'Discussions',
+            icon: <Forum />,
+            path: '/student/discussions'
         },
     ]
 
     const accountMenu = [
         {
             label: 'Profile',
-            icon: <Person />,
-            path: '/admin/profile'
+            icon: <Avatar src={profile.profileImage || undefined} sx={{ width: 24, height: 24 }}>{getProfileInitials(profile)}</Avatar>,
+            path: '/profile'
         },
     ]
 
@@ -97,9 +107,8 @@ export default function Sidebar() {
                                     placement='right'
                                 >
                                     <ListItemButton
-                                        component='a'
-                                        href={item.path}
-                                        selected={item.label === 'Dashboard'}
+                                        onClick={() => navigate(item.path)}
+                                        selected={location.pathname === item.path}
                                         sx={{
                                             borderRadius: '8px',
                                             minHeight: 46,
@@ -120,7 +129,7 @@ export default function Sidebar() {
                                                 minWidth: 40,
                                                 mr: open ? 1 : 0,
                                                 justifyContent: 'center',
-                                                color: item.label === "Dashboard" ? '#2563eb' : "#64748b"
+                                                color: location.pathname === item.path ? '#2563eb' : "#64748b"
                                             }}
                                         >
                                             {item.icon}
@@ -158,9 +167,8 @@ export default function Sidebar() {
                                     placement='right'
                                 >
                                     <ListItemButton
-                                        component='a'
-                                        href={item.path}
-                                        selected={item.label === 'Dashboard'}
+                                        onClick={() => navigate(item.path)}
+                                        selected={location.pathname === item.path}
                                         sx={{
                                             borderRadius: '8px',
                                             minHeight: 46,
@@ -207,18 +215,18 @@ export default function Sidebar() {
                                 ? 'gap-3 mb-3'
                                 : 'justify-center mb-3'
                             } `}>
-                            <Avatar className='!bg-blue-600'>
-                                A
+                            <Avatar src={profile.profileImage || undefined} className='!bg-blue-600'>
+                                {getProfileInitials(profile)}
                             </Avatar>
 
                             {open && (
                                 <div>
                                     <Typography variant='body2' className='!font-semibold !text-slate-700 !truncate'>
-                                        Admin User
+                                        {[profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'User'}
                                     </Typography>
 
                                     <Typography variant='caption' className='text-slate-400 !block !truncate'>
-                                        Administrator
+                                        {profile.role || 'Student'}
                                     </Typography>
                                 </div>
                             )}

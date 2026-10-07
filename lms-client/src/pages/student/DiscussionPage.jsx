@@ -2,6 +2,7 @@ import { Avatar, Card, CardContent, Typography, Button, Chip, Divider, Dialog, D
 import { Add, ForumOutlined, PersonOutlined, Search, Schedule, SchoolOutlined, ChatBubbleOutlined } from '@mui/icons-material'
 import { useState, useMemo } from 'react'
 import Navbar from '../../components/Navbar'
+import Sidebar from '../../components/Sidebar'
 
 export default function DiscussionPage() {
     const [search, setSearch] = useState('')
@@ -80,8 +81,9 @@ export default function DiscussionPage() {
     return (
         <>
             <Navbar />
+            <Sidebar />
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <main className='ml-0 lg:ml-[260px] transition-all max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                         <Typography variant='h4' className='!font-bold !text-slate-800'>
                             Discussions

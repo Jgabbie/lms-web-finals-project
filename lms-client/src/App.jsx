@@ -1,6 +1,6 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom"
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 
 
@@ -18,12 +18,14 @@ import AssignmentDetailsPage from './pages/student/AssignmentDetailsPage'
 import CoursePage from './pages/student/CoursePage'
 import CourseDetailsPage from './pages/student/CourseDetailsPage'
 import DiscussionPage from './pages/student/DiscussionPage'
+import LearningMaterialsPage from './pages/student/LearningMaterialsPage'
 
 import Dashboard from './pages/admin/Dashboard'
 import ActivityLogs from './pages/admin/ActivityLogs'
 import UserManagementPage from './pages/admin/UserManagementPage'
 import InstructorManagement from './pages/admin/InstructorManagement'
 
+import InstructorAssignmentsPage from './pages/instructor/InstructorAssignmentsPage'
 import DashboardInstructor from './pages/instructor/DashboardInstructor'
 import EnrollStudentPage from './pages/instructor/EnrollStudentPage'
 
@@ -82,6 +84,13 @@ function App() {
       : null
   })
 
+  useEffect(() => {
+    const handleLogout = () => setRole(null)
+    window.addEventListener('auth:logout', handleLogout)
+
+    return () => window.removeEventListener('auth:logout', handleLogout)
+  }, [])
+
   const handleLogin = (userRole) => {
     const normalizedRole = String(userRole || '').toLowerCase()
 
@@ -139,6 +148,7 @@ function App() {
 
         <Route
           element={
+<<<<<<< HEAD
             <ProtectedRoute
               role={role}
               allowedRoles={['instructor']}
@@ -153,6 +163,23 @@ function App() {
           <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
           <Route path='/instructor/assignments' element={<AssignmentPage role={role} />} />
         </Route>
+=======
+              <ProtectedRoute
+                  role={role}
+                  allowedRoles={['instructor']}
+              />
+                  }
+      >
+        <Route path='/instructor/dashboard' element={<DashboardInstructor role={role} />} />
+        <Route path='/instructor/courses' element={<CourseManagementPage />} />
+        <Route path='/instructor/courses/create' element={<CreateCoursePage />} />
+        <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
+        <Route path='/instructor/students' element={<StudentManagementPage />} />
+        <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
+        <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
+
+      </Route>
+>>>>>>> f21446a27b970afa510b545c0c59af937e7792a5
 
         <Route
           element={
@@ -163,8 +190,13 @@ function App() {
           }
         >
           <Route path='/student/dashboard' element={<DashboardStudent role={role} />} />
+          <Route path='/student/home' element={<HomePage />} />
           <Route path='/student/courses' element={<CoursePage role={role} />} />
           <Route path='/student/assignments' element={<AssignmentPage role={role} />} />
+          <Route path='/student/materials' element={<LearningMaterialsPage />} />
+          <Route path='/student/courses/details' element={<CourseDetailsPage role={role} />} />
+          <Route path='/student/assignments/details' element={<AssignmentDetailsPage role={role} />} />
+          <Route path='/student/discussions' element={<DiscussionPage role={role} />} />
         </Route>
 
         <Route
@@ -186,6 +218,8 @@ function App() {
             />
           }
         >
+          <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/settings' element={<ProfilePage />} />
           <Route path='/coursedetails' element={<CourseDetailsPage role={role} />} />
           <Route path='/assigndetails' element={<AssignmentDetailsPage role={role} />} />
           <Route path='/discussion' element={<DiscussionPage role={role} />} />

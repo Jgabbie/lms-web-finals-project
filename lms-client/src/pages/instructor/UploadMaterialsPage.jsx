@@ -23,42 +23,12 @@ import {
     Search,
     SlideshowOutlined,
     VideoLibraryOutlined,
-    DeleteOutlined,
     CheckCircle
 } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
-import { useMemo, useState, useEffect } from 'react'
-
-const INITIAL_MATERIALS = [
-    {
-        id: 1,
-        title: 'React Fundamentals & Component Architecture',
-        course: 'Web Development',
-        type: 'PDF',
-        instructor: 'Instructor Portal',
-        date: 'Oct 02, 2026',
-        size: '2.4 MB'
-    },
-    {
-        id: 2,
-        title: 'State Management and Lifecycle Slides',
-        course: 'Web Development',
-        type: 'Presentation',
-        instructor: 'Instructor Portal',
-        date: 'Oct 04, 2026',
-        size: '5.1 MB'
-    },
-    {
-        id: 3,
-        title: 'Relational Database Normalization Guide',
-        course: 'Database Management',
-        type: 'Document',
-        instructor: 'Instructor Portal',
-        date: 'Sep 28, 2026',
-        size: '1.8 MB'
-    }
-]
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import api from '../../api/axiosClient'
 
 export default function UploadMaterialsPage() {
     const [search, setSearch] = useState('')
@@ -66,24 +36,43 @@ export default function UploadMaterialsPage() {
     const [typeFilter, setTypeFilter] = useState('All')
     const [openUpload, setOpenUpload] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [materials, setMaterials] = useState([])
+    const [courses, setCourses] = useState([])
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
-
-    const [materials, setMaterials] = useState(() => {
-        const stored = localStorage.getItem('instructor_materials')
-        return stored ? JSON.parse(stored) : INITIAL_MATERIALS
-    })
 
     const [form, setForm] = useState({
         title: '',
-        course: 'Web Development',
+        course: '',
         type: 'PDF',
         description: '',
-        file: null
+        fileName: '',
+        fileSize: ''
     })
 
+    const fetchMaterials = useCallback(async () => {
+        try {
+            setLoading(true)
+            const [matRes, courseRes] = await Promise.all([
+                api.get('/materials'),
+                api.get('/courses')
+            ])
+            setMaterials(Array.isArray(matRes.data) ? matRes.data : [])
+            const loadedCourses = Array.isArray(courseRes.data) ? courseRes.data : []
+            setCourses(loadedCourses)
+            if (loadedCourses.length > 0 && !form.course) {
+                setForm(prev => ({ ...prev, course: loadedCourses[0].courseName }))
+            }
+        } catch (err) {
+            console.error('Fetch materials error:', err)
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
     useEffect(() => {
-        localStorage.setItem('instructor_materials', JSON.stringify(materials))
-    }, [materials])
+        fetchMaterials()
+    }, [fetchMaterials])
 
     const handleFormChange = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }))
@@ -92,52 +81,58 @@ export default function UploadMaterialsPage() {
     const handleFileSelect = (e) => {
         const file = e.target.files?.[0]
         if (file) {
-            handleFormChange('file', file)
+            setForm(prev => ({
+                ...prev,
+                fileName: file.name,
+                fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+            }))
         }
     }
 
-    const handleUploadSubmit = () => {
+    const handleUploadSubmit = async () => {
         if (!form.title.trim()) {
             setNotification({ open: true, message: 'Please provide a material title', severity: 'error' })
             return
         }
 
-        const newMaterial = {
-            id: Date.now(),
-            title: form.title.trim(),
-            course: form.course,
-            type: form.type,
-            description: form.description.trim(),
-            instructor: 'Instructor Portal',
-            date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-            size: form.file ? `${(form.file.size / (1024 * 1024)).toFixed(1)} MB` : '1.5 MB'
+        try {
+            await api.post('/materials/upload', {
+                title: form.title.trim(),
+                course: form.course || 'General',
+                type: form.type,
+                description: form.description.trim(),
+                instructor: 'Instructor Portal',
+                fileName: form.fileName || 'document.pdf',
+                fileSize: form.fileSize || '1.5 MB'
+            })
+
+            setNotification({ open: true, message: 'Material uploaded successfully!', severity: 'success' })
+            setOpenUpload(false)
+            setForm({
+                title: '',
+                course: courses[0]?.courseName || '',
+                type: 'PDF',
+                description: '',
+                fileName: '',
+                fileSize: ''
+            })
+            fetchMaterials()
+        } catch (err) {
+            setNotification({
+                open: true,
+                message: err.response?.data?.message || 'Failed to upload material',
+                severity: 'error'
+            })
         }
-
-        setMaterials(prev => [newMaterial, ...prev])
-        setOpenUpload(false)
-        setForm({
-            title: '',
-            course: 'Web Development',
-            type: 'PDF',
-            description: '',
-            file: null
-        })
-        setNotification({ open: true, message: 'Material uploaded successfully!', severity: 'success' })
-    }
-
-    const handleDelete = (id) => {
-        if (!window.confirm('Are you sure you want to delete this material?')) return
-        setMaterials(prev => prev.filter(m => m.id !== id))
-        setNotification({ open: true, message: 'Material deleted', severity: 'info' })
     }
 
     const filteredMaterials = useMemo(() => {
         const key = search.toLowerCase()
         return materials.filter(material => {
             const matchesSearch =
-                material.title.toLowerCase().includes(key) ||
-                material.course.toLowerCase().includes(key) ||
-                material.instructor.toLowerCase().includes(key)
+                (material.title || '').toLowerCase().includes(key) ||
+                (material.course || '').toLowerCase().includes(key) ||
+                (material.instructor || '').toLowerCase().includes(key)
             const matchesCourse = courseFilter === 'All' || material.course === courseFilter
             const matchesType = typeFilter === 'All' || material.type === typeFilter
             return matchesSearch && matchesCourse && matchesType
@@ -164,7 +159,7 @@ export default function UploadMaterialsPage() {
         }
     }
 
-    const courses = ['All', ...new Set(materials.map(item => item.course))]
+    const courseList = ['All', ...new Set(materials.map(item => item.course).filter(Boolean))]
     const types = ['All', 'PDF', 'Presentation', 'Video', 'Document']
 
     return (
@@ -228,7 +223,7 @@ export default function UploadMaterialsPage() {
                                     value={courseFilter}
                                     onChange={(e) => setCourseFilter(e.target.value)}
                                 >
-                                    {courses.map(course => (
+                                    {courseList.map(course => (
                                         <MenuItem key={course} value={course}>
                                             {course === 'All' ? 'All Courses' : course}
                                         </MenuItem>
@@ -262,12 +257,11 @@ export default function UploadMaterialsPage() {
                                             <th className='text-left font-semibold px-6 py-4'>Type</th>
                                             <th className='text-left font-semibold px-6 py-4'>Date</th>
                                             <th className='text-left font-semibold px-6 py-4'>Size</th>
-                                            <th className='text-right font-semibold px-6 py-4'>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className='divide-y divide-slate-100'>
                                         {filteredMaterials.map(material => (
-                                            <tr key={material.id} className='hover:bg-slate-50'>
+                                            <tr key={material._id} className='hover:bg-slate-50'>
                                                 <td className='px-6 py-4'>
                                                     <div className='flex items-center gap-3'>
                                                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getIconClass(material.type)}`}>
@@ -282,15 +276,10 @@ export default function UploadMaterialsPage() {
                                                 <td className='px-6 py-4'>
                                                     <Chip size='small' label={material.type} variant='outlined' />
                                                 </td>
-                                                <td className='px-6 py-4 text-slate-600'>{material.date}</td>
-                                                <td className='px-6 py-4 text-slate-600'>{material.size}</td>
-                                                <td className='px-6 py-4'>
-                                                    <div className='flex justify-end gap-1'>
-                                                        <IconButton size='small' color='error' title='Delete' onClick={() => handleDelete(material.id)}>
-                                                            <DeleteOutlined fontSize='small' />
-                                                        </IconButton>
-                                                    </div>
+                                                <td className='px-6 py-4 text-slate-600'>
+                                                    {new Date(material.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
                                                 </td>
+                                                <td className='px-6 py-4 text-slate-600'>{material.fileSize}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -299,7 +288,7 @@ export default function UploadMaterialsPage() {
                                     <div className='py-14 text-center'>
                                         <MenuBookOutlined className='!text-slate-300 !text-5xl' />
                                         <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                            No learning materials found
+                                            {loading ? 'Loading materials...' : 'No learning materials found'}
                                         </Typography>
                                     </div>
                                 )}
@@ -309,7 +298,6 @@ export default function UploadMaterialsPage() {
                 </main>
             </div>
 
-            {/* Upload Modal */}
             <Dialog open={openUpload} onClose={() => setOpenUpload(false)} fullWidth maxWidth='sm'>
                 <DialogTitle className='!font-bold !text-slate-800'>
                     Upload Learning Material
@@ -331,9 +319,11 @@ export default function UploadMaterialsPage() {
                             value={form.course}
                             onChange={(e) => handleFormChange('course', e.target.value)}
                         >
-                            <MenuItem value='Web Development'>Web Development</MenuItem>
-                            <MenuItem value='Database Management'>Database Management</MenuItem>
-                            <MenuItem value='Object-Oriented Programming'>Object-Oriented Programming</MenuItem>
+                            {courses.map(c => (
+                                <MenuItem key={c._id} value={c.courseName}>
+                                    {c.courseName}
+                                </MenuItem>
+                            ))}
                         </TextField>
                         <TextField
                             select
@@ -363,13 +353,13 @@ export default function UploadMaterialsPage() {
                             startIcon={<InsertDriveFileOutlined />}
                             className='!normal-case !rounded-lg !border-slate-300 !text-slate-700 !py-3'
                         >
-                            {form.file ? form.file.name : 'Choose File'}
+                            {form.fileName ? form.fileName : 'Choose File'}
                             <input hidden type='file' onChange={handleFileSelect} />
                         </Button>
-                        {form.file && (
+                        {form.fileName && (
                             <div className='flex items-center gap-2 text-emerald-600 text-sm'>
                                 <CheckCircle fontSize='small' />
-                                <span>{form.file.name} ({(form.file.size / 1024).toFixed(0)} KB)</span>
+                                <span>{form.fileName} ({form.fileSize})</span>
                             </div>
                         )}
                     </div>

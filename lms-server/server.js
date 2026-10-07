@@ -30,4 +30,5 @@ app.use('/api/materials', require('./routes/materialRouter'))
 app.use('/api/logs', require('./routes/logsRouter'))
 
 app.use('/api/instructors', instructorRouter)
+app.use('/api/assignments', require('./routes/assignmentRouter'))
 app.listen(process.env.PORT, () => console.log(`Server on port ${process.env.PORT}`))

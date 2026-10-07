@@ -4,36 +4,40 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
-
-const DEFAULT_COURSES = [
-    { _id: '1', courseCode: 'IT 301', courseName: 'Web Development', instructor: 'Instructor Portal', semester: '1st Semester', enrolledStudents: [1, 2, 3], status: 'Active' },
-    { _id: '2', courseCode: 'IT 204', courseName: 'Database Systems', instructor: 'Instructor Portal', semester: '1st Semester', enrolledStudents: [1, 2], status: 'Active' },
-    { _id: '3', courseCode: 'CS 101', courseName: 'Intro to OOP', instructor: 'Instructor Portal', semester: '1st Semester', enrolledStudents: [1, 2, 3, 4], status: 'Active' },
-]
+import api from '../../api/axiosClient'
 
 export default function CourseManagementPage() {
     const [search, setSearch] = useState('')
     const [status, setStatus] = useState('All')
     const [courses, setCourses] = useState([])
+    const [loading, setLoading] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const navigate = useNavigate()
 
-    const fetchCourses = useCallback(() => {
-        const stored = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
-        setCourses([...stored, ...DEFAULT_COURSES])
+    const fetchCourses = useCallback(async () => {
+        try {
+            setLoading(true)
+            const res = await api.get('/courses')
+            setCourses(Array.isArray(res.data) ? res.data : [])
+        } catch (err) {
+            console.error('Fetch courses error:', err)
+        } finally {
+            setLoading(false)
+        }
     }, [])
 
     useEffect(() => {
         fetchCourses()
     }, [fetchCourses])
 
-    const handleDeleteCourse = (id) => {
+    const handleDeleteCourse = async (id) => {
         if (!window.confirm('Are you sure you want to delete this course?')) return
-        const updated = courses.filter(c => c._id !== id)
-        setCourses(updated)
-
-        const stored = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
-        localStorage.setItem('instructor_courses', JSON.stringify(stored.filter(c => c._id !== id)))
+        try {
+            await api.delete(`/courses/${id}`)
+            setCourses(prev => prev.filter(c => c._id !== id))
+        } catch (err) {
+            alert('Failed to delete course')
+        }
     }
 
     const filteredCourses = useMemo(() => {
@@ -134,8 +138,7 @@ export default function CourseManagementPage() {
                                         </tr>
                                     </thead>
                                     <tbody className='divide-y divide-slate-100'>
-                                        {filteredCourses.map(course => (
-                                            <tr key={course._id} className='hover:bg-slate-50'>
+                                        {filteredCourses.map(course => (                                             <tr key={course._id} className='hover:bg-slate-50'>
                                                 <td className='px-6 py-4'>
                                                     <Typography className='!font-semibold !text-slate-800'>
                                                         {course.courseName}
@@ -173,7 +176,7 @@ export default function CourseManagementPage() {
                                 {filteredCourses.length === 0 && (
                                     <div className='py-12 text-center'>
                                         <Typography className='!font-semibold !text-slate-700'>
-                                            No courses found
+                                            {loading ? 'Loading courses...' : 'No courses found'}
                                         </Typography>
                                     </div>
                                 )}

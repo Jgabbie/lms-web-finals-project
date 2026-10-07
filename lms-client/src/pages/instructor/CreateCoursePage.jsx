@@ -29,38 +29,23 @@ export default function CreateCoursePage() {
         setForm(prev => ({ ...prev, [name]: value }))
     }
 
-    const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    if (!form.courseCode.trim() || !form.courseName.trim()) {
-        setError('Please enter a course code and name')
-        return
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        if (!form.courseCode.trim() || !form.courseName.trim()) {
+            setError('Please enter both course code and name')
+            return
+        }
+        try {
+            setLoading(true)
+            setError('')
+            await api.post('/courses/create', form)
+            navigate('/instructor/courses')
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to create course')
+        } finally {
+            setLoading(false)
+        }
     }
-
-    // 1. Grab any existing courses from local storage
-    const savedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
-
-    // 2. Format the new course
-    const newCourse = {
-        _id: String(Date.now()),
-        courseCode: form.courseCode.trim(),
-        courseName: form.courseName.trim(),
-        instructor: 'Instructor Portal',
-        semester: form.semester,
-        units: form.units,
-        schedule: form.schedule,
-        room: form.room,
-        description: form.description,
-        status: 'Active',
-        enrolledStudents: []
-    }
-
-    // 3. Save into local storage
-    localStorage.setItem('instructor_courses', JSON.stringify([newCourse, ...savedCourses]))
-
-    // 4. Navigate back to the Course Management page
-    navigate('/instructor/courses')
-}
 
     return (
         <div className='min-h-screen bg-slate-50'>
