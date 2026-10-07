@@ -130,12 +130,17 @@ router.put('/user/update', verifyToken, async (req, res) => {
             })
         }
 
-        const user = await User.findByIdAndUpdate(userId, {
+        const updates = {
             firstName: firstName.trim(),
             lastName: lastName.trim(),
             email: normalizedEmail,
-            profileImage: profileImage
-        }, {
+        }
+
+        if (typeof profileImage === 'string') {
+            updates.profileImage = profileImage
+        }
+
+        const user = await User.findByIdAndUpdate(userId, updates, {
             new: true
         })
 

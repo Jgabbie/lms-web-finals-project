@@ -1,13 +1,21 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip } from '@mui/material'
 import { Dashboard, MenuBook, Assignment, Menu, ChevronLeft, FolderCopy, Forum, Logout } from '@mui/icons-material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getProfileInitials, getStoredProfile } from '../utils/profileStorage'
 
 export default function Sidebar() {
     const [open, setOpen] = useState(true)
     const location = useLocation()
     const navigate = useNavigate()
+    const [profile, setProfile] = useState(getStoredProfile)
+
+    useEffect(() => {
+        const refreshProfile = () => setProfile(getStoredProfile())
+        window.addEventListener('profile:updated', refreshProfile)
+        return () => window.removeEventListener('profile:updated', refreshProfile)
+    }, [])
 
     const mainMenu = [
         {
@@ -40,8 +48,8 @@ export default function Sidebar() {
     const accountMenu = [
         {
             label: 'Profile',
-            icon: <Avatar sx={{ width: 24, height: 24 }}>S</Avatar>,
-            path: '/student/dashboard'
+            icon: <Avatar src={profile.profileImage || undefined} sx={{ width: 24, height: 24 }}>{getProfileInitials(profile)}</Avatar>,
+            path: '/profile'
         },
     ]
 
@@ -207,18 +215,18 @@ export default function Sidebar() {
                                 ? 'gap-3 mb-3'
                                 : 'justify-center mb-3'
                             } `}>
-                            <Avatar className='!bg-blue-600'>
-                                A
+                            <Avatar src={profile.profileImage || undefined} className='!bg-blue-600'>
+                                {getProfileInitials(profile)}
                             </Avatar>
 
                             {open && (
                                 <div>
                                     <Typography variant='body2' className='!font-semibold !text-slate-700 !truncate'>
-                                        Admin User
+                                        {[profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'User'}
                                     </Typography>
 
                                     <Typography variant='caption' className='text-slate-400 !block !truncate'>
-                                        Administrator
+                                        {profile.role || 'Student'}
                                     </Typography>
                                 </div>
                             )}

@@ -1,6 +1,6 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom"
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 
 
@@ -83,6 +83,13 @@ function App() {
       ? savedRole
       : null
   })
+
+  useEffect(() => {
+    const handleLogout = () => setRole(null)
+    window.addEventListener('auth:logout', handleLogout)
+
+    return () => window.removeEventListener('auth:logout', handleLogout)
+  }, [])
 
   const handleLogin = (userRole) => {
     const normalizedRole = String(userRole || '').toLowerCase()
@@ -195,6 +202,7 @@ function App() {
           }
         >
           <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/settings' element={<ProfilePage />} />
           <Route path='/coursedetails' element={<CourseDetailsPage role={role} />} />
           <Route path='/assigndetails' element={<AssignmentDetailsPage role={role} />} />
           <Route path='/discussion' element={<DiscussionPage role={role} />} />

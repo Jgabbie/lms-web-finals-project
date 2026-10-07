@@ -2,22 +2,15 @@ import { Card, CardContent, Typography, Button, Avatar, Divider, TextField, Aler
 import { Person, Email, Lock, Edit, Save, Close, Visibility, VisibilityOff, PhotoCamera } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
-import axios from 'axios'
-
-const emptyProfile = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    role: '',
-    profileImage: '',
-}
+import api from '../api/axiosClient'
+import { getStoredProfile, saveStoredProfile } from '../utils/profileStorage'
 
 const getApiMessage = (error, fallback) => error?.data?.message || error?.message || fallback || 'Something went wrong'
 
 export default function ProfilePage() {
 
-    const [profile, setProfile] = useState(emptyProfile)
-    const [draft, setDraft] = useState(emptyProfile)
+    const [profile, setProfile] = useState(getStoredProfile)
+    const [draft, setDraft] = useState(getStoredProfile)
     const [saving, setSaving] = useState(false)
     const [uploadingImage, setUploadingImage] = useState(false)
     const [showImagePreview, setShowImagePreview] = useState(false)
@@ -58,14 +51,11 @@ export default function ProfilePage() {
     const loadProfile = async () => {
         setLoading(true)
         setError(null)
+        const storedProfile = getStoredProfile()
+        setProfile(storedProfile)
+        setDraft(storedProfile)
         try {
-            const response = await axios.get('http://localhost:5000/api/profile/user',
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                }
-            )
+            const response = await api.get('/profile/user')
             const user = response?.data?.userData || response?.data?.user || {}
             const next = {
                 firstName: user?.firstName || '',
@@ -74,6 +64,7 @@ export default function ProfilePage() {
                 role: user?.role || '',
                 profileImage: user?.profileImage || '',
             }
+            saveStoredProfile(next)
             setProfile(next)
             setDraft(next)
         } catch (error) {
@@ -139,16 +130,13 @@ export default function ProfilePage() {
         try {
             setUploadingImage(true)
 
-            const response = await axios.post('http://localhost:5000/api/profile/upload-profile-image', formData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            })
+            const response = await api.post('/profile/upload-profile-image', formData)
 
             const imageUrl = response?.data?.profileImage || ''
 
-            setProfile((prev) => ({ ...prev, profileImage: imageUrl }))
-            setDraft((prev) => ({ ...prev, profileImage: imageUrl }))
+            const next = saveStoredProfile({ ...profile, profileImage: imageUrl })
+            setProfile(next)
+            setDraft(next)
             showNotification('Profile image updated successfully.', 'success')
             setSelectedImage(null)
             setSelectedImageFile(null)
@@ -186,13 +174,7 @@ export default function ProfilePage() {
 
         try {
             setSaving(true)
-            const response = await axios.put('http://localhost:5000/api/profile/user/update', fields,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                }
-            )
+            const response = await api.put('/profile/user/update', fields)
             const user = response?.data?.userData || response?.data?.user || {}
             const next = {
                 firstName: user?.firstName || '',
@@ -201,8 +183,9 @@ export default function ProfilePage() {
                 role: user?.role || '',
                 profileImage: user?.profileImage || '',
             }
-            setProfile(next)
-            setDraft(next)
+            const storedNext = saveStoredProfile(next)
+            setProfile(storedNext)
+            setDraft(storedNext)
             setEditing(false)
             setMessage('Profile updated successfully.')
         } catch (error) {
@@ -253,7 +236,7 @@ export default function ProfilePage() {
         try {
             setResendLoading(true)
             setOtpError('')
-            await axios.post('http://localhost:5000/api/profile/change-password/send-otp', { email: profile.email.trim().toLowerCase() })
+            await api.post('/profile/change-password/send-otp', { email: profile.email.trim().toLowerCase() })
             setShowOtpModal(true)
         } catch (error) {
             console.error('Request password OTP error:', error)
@@ -279,7 +262,7 @@ export default function ProfilePage() {
             setResendLoading(true)
             setOtpError('')
 
-            const response = await axios.post('http://localhost:5000/api/profile/change-password/verify-otp',
+            const response = await api.post('/profile/change-password/verify-otp',
                 {
                     email: profile.email.trim().toLowerCase(),
                     otp: otp.trim()
@@ -311,7 +294,7 @@ export default function ProfilePage() {
             setResendLoading(true)
             setOtpError('')
 
-            const response = await axios.post('http://localhost:5000/api/profile/change-password/resend-otp',
+            const response = await api.post('/profile/change-password/resend-otp',
                 {
                     email: profile.email.trim().toLowerCase(),
                 }
@@ -385,7 +368,7 @@ export default function ProfilePage() {
         try {
             setLoading(true)
 
-            const response = await axios.post('http://localhost:5000/api/profile/change-password/reset',
+            const response = await api.post('/profile/change-password/reset',
                 {
                     email: profile.email.trim().toLowerCase(),
                     password,
