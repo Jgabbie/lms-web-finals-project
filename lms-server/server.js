@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const express = require('express')
 const mongoose = require('mongoose')
+const instructorRouter = require('./routes/instructorRouter')
 
 const cors = require('cors')
 
@@ -27,4 +28,6 @@ app.use('/api/profile', require('./routes/profileRouter'))
 app.use('/api/courses', require('./routes/courseRouter'))
 app.use('/api/materials', require('./routes/materialRouter'))
 app.use('/api/logs', require('./routes/logsRouter'))
+
+app.use('/api/instructors', instructorRouter)
 app.listen(process.env.PORT, () => console.log(`Server on port ${process.env.PORT}`))

@@ -52,7 +52,7 @@ export default function SidebarAdmin() {
         {
             label: 'Instructors',
             icon: <School />,
-            path: '/admin/dashboard'
+            path: '/admin/instructors'
         },
         {
             label: 'Activity',

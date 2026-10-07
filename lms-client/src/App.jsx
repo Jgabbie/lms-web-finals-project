@@ -139,20 +139,20 @@ function App() {
 
         <Route
           element={
-              <ProtectedRoute
-                  role={role}
-                  allowedRoles={['instructor']}
-              />
-                  }
-      >
-        <Route path='/instructor/dashboard' element={<DashboardInstructor role={role} />} />
-        <Route path='/instructor/courses' element={<CourseManagementPage />} />
-        <Route path='/instructor/courses/create' element={<CreateCoursePage />} />
-        <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
-        <Route path='/instructor/students' element={<StudentManagementPage />} />
-        <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
-        <Route path='/instructor/assignments' element={<AssignmentPage role={role} />} />
-      </Route>
+            <ProtectedRoute
+              role={role}
+              allowedRoles={['instructor']}
+            />
+          }
+        >
+          <Route path='/instructor/dashboard' element={<DashboardInstructor role={role} />} />
+          <Route path='/instructor/courses' element={<CourseManagementPage />} />
+          <Route path='/instructor/courses/create' element={<CreateCoursePage />} />
+          <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
+          <Route path='/instructor/students' element={<StudentManagementPage />} />
+          <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
+          <Route path='/instructor/assignments' element={<AssignmentPage role={role} />} />
+        </Route>
 
         <Route
           element={

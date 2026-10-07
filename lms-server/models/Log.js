@@ -16,7 +16,7 @@ const logSchema = new mongoose.Schema({
         required: true
     },
     description: { type: String, required: true },
-    status: { type: String, enum: ['Success', 'Failure'], required: true },
+    status: { type: String, enum: ['Success', 'Failed'], required: true },
     timestamp: { type: Date, default: Date.now }
 }, { timestamps: true })
 

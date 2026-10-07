@@ -1,62 +1,134 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, } from '@mui/material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, CircularProgress } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import axios from 'axios'
 import Navbar from '../../components/Navbar'
 
 export default function ActivityLogs() {
     const [search, setSearch] = useState('')
     const [departmentFilter, setDepartmentFilter] = useState('All')
     const [statusFilter, setStatusFilter] = useState('All')
-    const [openAddInstructor, setOpenAddInstructor] = useState(false)
 
-    const instructors = [
-        {
-            id: 1,
-            userId: 'INS-001',
-            name: 'Prof. 001',
-            email: 'prof001@gmail.com',
-            department: 'Information Technology',
-            specialization: 'Web Development',
-            courses: 3,
-            status: 'Active'
-        },
-        {
-            id: 2,
-            userId: 'INS-001',
-            name: 'Prof. 001',
-            email: 'prof001@gmail.com',
-            department: 'Information Technology',
-            specialization: 'Web Development',
-            courses: 3,
-            status: 'Active'
-        },
-        {
-            id: 3,
-            userId: 'INS-001',
-            name: 'Prof. 001',
-            email: 'prof001@gmail.com',
-            department: 'Information Technology',
-            specialization: 'Web Development',
-            courses: 3,
-            status: 'Active'
-        },
-        {
-            id: 4,
-            userId: 'INS-001',
-            name: 'Prof. 001',
-            email: 'prof001@gmail.com',
-            department: 'Information Technology',
-            specialization: 'Web Development',
-            courses: 3,
-            status: 'Active'
-        },
-    ]
+    const [openAddInstructor, setOpenAddInstructor] = useState(false)
+    const [openEditInstructor, setOpenEditInstructor] = useState(false)
+    const [openDeleteInstructor, setOpenDeleteInstructor] = useState(false)
+    const [openViewInstructor, setOpenViewInstructor] = useState(false)
+    const [selectedInstructor, setSelectedInstructor] = useState(null)
+
+    const [instructors, setInstructors] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
+
+    const emptyForm = {
+        firstName: '',
+        lastName: '',
+        email: '',
+        department: '',
+        specialization: '',
+        status: 'active',
+    }
+
+    const [formData, setFormData] = useState(emptyForm)
+    const [saving, setSaving] = useState(false)
+
+    const fetchInstructors = async () => {
+        try {
+            setLoading(true)
+            setError('')
+            const response = await axios.get('http://localhost:5000/api/instructors')
+            setInstructors(response.data)
+        } catch (error) {
+            console.error('Error fetching instructors:', error)
+            setError(error.response?.data?.message || 'Failed to fetch instructors.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchInstructors()
+    }, [])
+
+    const handleFormChange = (e) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const handleAddInstructor = async () => {
+        if (!formData.firstName || !formData.lastName || !formData.email || !formData.department || !formData.specialization) {
+            setError('Please fill in all required fields.')
+            return
+        }
+
+        try {
+            setSaving(true)
+            setError('')
+
+            await axios.post('http://localhost:5000/api/add/instructors', formData)
+            alert('Instructor added successfully!')
+
+            setFormData(emptyForm)
+            setOpenAddInstructor(false)
+            await fetchInstructors()
+        } catch (error) {
+            console.error('Error adding instructor:', error)
+            setError(error.response?.data?.message || 'Failed to add instructor.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleEditInstructor = async () => {
+        if (!selectedInstructor) return
+
+        try {
+            setSaving(true)
+            setError('')
+
+            await axios.put(`http://localhost:5000/api/update/instructors/${selectedInstructor._id}`, formData)
+
+            setOpenEditInstructor(false)
+            setSelectedInstructor(null)
+
+            await fetchInstructors()
+
+        } catch (error) {
+            console.error('Error editing instructor:', error)
+            setError(error.response?.data?.message || 'Failed to edit instructor.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+
+    const handleDeleteInstructor = async () => {
+        if (!selectedInstructor?._id) return
+
+        try {
+            setSaving(true)
+            setError('')
+
+            await axios.delete(`http://localhost:5000/api/delete/instructors/${selectedInstructor._id}`)
+            setOpenDeleteInstructor(false)
+            setSelectedInstructor(null)
+
+            await fetchInstructors()
+        } catch (error) {
+            console.error('Error deleting instructor:', error)
+            setError(error.response?.data?.message || 'Failed to delete instructor.')
+        } finally {
+            setSaving(false)
+        }
+
+    }
 
     const filteredInstructors = useMemo(() => {
         const key = search.toLowerCase()
         return instructors.filter(instructor => {
+            const fullName = `${instructor.firstName} ${instructor.lastName}`.toLowerCase()
+
             const matchesSearch =
-                instructor.name.toLowerCase().includes(key) ||
+                fullName.includes(key) ||
                 instructor.email.toLowerCase().includes(key) ||
                 instructor.instructorId.toLowerCase().includes(key) ||
                 instructor.specialization.toLowerCase().includes(key)
@@ -64,11 +136,11 @@ export default function ActivityLogs() {
             const matchesDepartment =
                 departmentFilter === 'All' || instructor.department === departmentFilter
             const matchesStatus =
-                statusFilter === 'All' || instructor.status === statusFilter
+                statusFilter === 'All' || instructor.status?.toLowerCase() === statusFilter.toLowerCase()
 
             return matchesSearch && matchesDepartment && matchesStatus
         })
-    }, [search, statusFilter, departmentFilter])
+    }, [instructors, search, statusFilter, departmentFilter])
 
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
@@ -89,11 +161,25 @@ export default function ActivityLogs() {
                             </Typography>
                         </div>
 
+                        {error && (
+                            <Alert
+                                severity='error'
+                                onClose={() => setError('')}
+                                className='!mb-4'
+                            >
+                                {error}
+                            </Alert>
+                        )}
+
 
                         <Button
                             variant='contained'
                             startIcon={<Add />}
-                            onClick={() => setOpenAddInstructor(true)}
+                            onClick={() => {
+                                setFormData(emptyForm)
+                                setError('')
+                                setOpenAddInstructor(true)
+                            }}
                             className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                         >
                             Add Instructor
@@ -104,8 +190,8 @@ export default function ActivityLogs() {
                     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                         {[
                             ['Total Instructors', instructors.length],
-                            ['Active', instructors.filter(instructor => instructor.status === 'Student').length,],
-                            ['Inactive', instructors.filter(instructor => instructor.status === 'Instructor').length,],
+                            ['Active', instructors.filter(instructor => instructor.status?.toLowerCase() === 'active').length,],
+                            ['Inactive', instructors.filter(instructor => instructor.status?.toLowerCase() === 'inactive').length,],
                             ['Assigned Courses', instructors.reduce((sum, instructor) => sum + instructor.courses, 0)],
                         ].map(([label, value]) => (
                             <Card key={label} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
@@ -124,7 +210,7 @@ export default function ActivityLogs() {
 
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                         <CardContent className='!p-0'>
-                            <div className='grid grid-cols-1 lg:grid-cols-[1fr_2400px_200px] gap-4 p-5 border-b border-slate-200'>
+                            <div className='grid grid-cols-1 md:grid-cols-[1fr_220px_180px] gap-3 p-5 border-b border-slate-200'>
                                 <TextField
                                     size='small'
                                     placeholder='Search name, email, instructor ID or specialization...'
@@ -157,8 +243,8 @@ export default function ActivityLogs() {
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
                                     <MenuItem value='All'>All Status</MenuItem>
-                                    <MenuItem value='Active'>Active</MenuItem>
-                                    <MenuItem value='Inactive'>Inactive</MenuItem>
+                                    <MenuItem value='active'>Active</MenuItem>
+                                    <MenuItem value='inactive'>Inactive</MenuItem>
                                 </TextField>
                             </div>
 
@@ -176,71 +262,110 @@ export default function ActivityLogs() {
                                     </thead>
 
                                     <tbody className='divide-y divide-slate-100'>
-                                        {filteredInstructors.map(instructor => (
-                                            <tr key={instructor.id} className='hover:bg-slate-50'>
-                                                <td className='px-6 py-4'>
-                                                    <div className='flex items-center gap-3'>
-                                                        <Avatar className='!bg-blue-600'>
-                                                            {initials(instructor.name)}
-                                                        </Avatar>
-
-                                                        <div>
-                                                            <Typography className='!font-semibold !text-slate-800'>
-                                                                {instructor.name}
-                                                            </Typography>
-                                                            <Typography variant='caption' className='!text-slate-500'>
-                                                                {instructor.userId}
-                                                            </Typography>
-                                                            <Typography variant='caption' className='!text-slate-500'>
-                                                                {instructor.email}
-                                                            </Typography>
-                                                        </div>
-                                                    </div>
-                                                </td>
-
-                                                <td className='px-6 py-4 text-slate-600'>
-                                                    {instructor.department}
-                                                </td>
-
-                                                <td className='px-6 py-4 text-slate-600'>
-                                                    {instructor.specialization}
-                                                </td>
-
-                                                <td className='px-6 py-4'>
-                                                    <Chip
-                                                        size='small'
-                                                        label={`${instructor.courses} course${instructor.courses > 1 ? 's' : ''}`}
-                                                        className='!bg-blue-50 !text-blue-700'
-                                                    />
-                                                </td>
-
-                                                <td className='px-6 py-4'>
-                                                    <Chip
-                                                        size='small'
-                                                        label={instructor.status}
-                                                        className={
-                                                            instructor.status === 'Active'
-                                                                ? '!bg-green-50 !text-green-700'
-                                                                : '!bg-slate-100 !text-slate-600'
-                                                        }
-                                                    />
-                                                </td>
-
-                                                <td className='px-6 py-4'>
-                                                    <div className='flex justify-end gap-1'>
-                                                        <IconButton size='small' title='View'>
-                                                            <VisibilityOutlined fontSize='small' />
-                                                        </IconButton>
-                                                        <IconButton size='small' title='Edit'>
-                                                            <EditOutlined fontSize='small' />
-                                                        </IconButton>
-                                                        <IconButton size='small' color='error' title='Delete'>
-                                                            <DeleteOutlined fontSize='small' />
-                                                        </IconButton>
-                                                    </div>
+                                        {loading ? (
+                                            <tr>
+                                                <td colSpan={6} className='px-6 py-4 text-center'>
+                                                    <CircularProgress size={24} className='!text-blue-600' />
+                                                    <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                        Loading instructors...
+                                                    </Typography>
                                                 </td>
                                             </tr>
-                                        ))}
+                                        ) : (
+                                            filteredInstructors.map(instructor => (
+                                                <tr key={instructor.id} className='hover:bg-slate-50'>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center gap-3'>
+                                                            <Avatar className='!bg-blue-600'>
+                                                                {initials(`${instructor.firstName} ${instructor.lastName}`)}
+                                                            </Avatar>
+
+                                                            <div>
+                                                                <Typography className='!font-semibold !text-slate-800'>
+                                                                    {instructor.firstName} {instructor.lastName}
+                                                                </Typography>
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {instructor.email}
+                                                                </Typography>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {instructor.department}
+                                                    </td>
+
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {instructor.specialization}
+                                                    </td>
+
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={`${instructor.courses} course${instructor.courses > 1 ? 's' : ''}`}
+                                                            className='!bg-blue-50 !text-blue-700'
+                                                        />
+                                                    </td>
+
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
+                                                            className={
+                                                                instructor.status === 'active'
+                                                                    ? '!bg-green-50 !text-green-700'
+                                                                    : '!bg-slate-100 !text-slate-600'
+                                                            }
+                                                        />
+                                                    </td>
+
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex justify-end gap-1'>
+                                                            <IconButton
+                                                                size='small'
+                                                                title='View'
+                                                                onClick={() => {
+                                                                    setSelectedInstructor(instructor)
+                                                                    setOpenEditInstructor(true)
+                                                                }}
+                                                            >
+                                                                <VisibilityOutlined fontSize='small' />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size='small'
+                                                                title='Edit'
+                                                                onClick={() => {
+                                                                    setSelectedInstructor(instructor)
+                                                                    setFormData({
+                                                                        firstName: instructor.firstName,
+                                                                        lastName: instructor.lastName,
+                                                                        email: instructor.email,
+                                                                        department: instructor.department,
+                                                                        specialization: instructor.specialization,
+                                                                        status: instructor.status,
+                                                                    })
+                                                                    setOpenEditInstructor(true)
+                                                                }}
+                                                            >
+                                                                <EditOutlined fontSize='small' />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size='small'
+                                                                color='error'
+                                                                title='Delete'
+                                                                onClick={() => {
+                                                                    setSelectedInstructor(instructor)
+                                                                    setOpenDeleteInstructor(true)
+                                                                }}
+                                                            >
+                                                                <DeleteOutlined fontSize='small' />
+                                                            </IconButton>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+
                                     </tbody>
                                 </table>
 
@@ -275,35 +400,64 @@ export default function ActivityLogs() {
 
                 <DialogContent>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2'>
-                        <TextField fullWidth label='First Name' />
-                        <TextField fullWidth label='Last Name' />
-                        <TextField fullWidth label='Instructor ID' placeholder='e.g. INS-005' />
-                        <TextField fullWidth label='Email Address' type='email' />
+                        <TextField
+                            fullWidth
+                            label='First Name'
+                            name='firstName'
+                            value={formData.firstName}
+                            onChange={handleFormChange}
+                        />
+                        <TextField
+                            fullWidth
+                            label='Last Name'
+                            name='lastName'
+                            value={formData.lastName}
+                            onChange={handleFormChange}
+                        />
+
+                        <TextField
+                            fullWidth
+                            label='Email Address'
+                            type='email'
+                            name='email'
+                            value={formData.email}
+                            onChange={handleFormChange}
+                        />
 
                         <TextField
                             select
                             fullWidth
                             label='Department'
-                            defaultValue='Infomation Technology'
+                            name='department'
+                            value={formData.department}
+                            onChange={handleFormChange}
                         >
                             <MenuItem value='Information Technology'>Information Technology</MenuItem>
                             <MenuItem value='Computer Science'>Computer Science</MenuItem>
                             <MenuItem value='Information Systems'>Information Systems</MenuItem>
                         </TextField>
 
-                        <TextField fullWidth label='Specialization' placeholder='e.g. Web Development' />
+                        <TextField
+                            fullWidth
+                            label='Specialization'
+                            placeholder='e.g. Web Development'
+                            name='specialization'
+                            value={formData.specialization}
+                            onChange={handleFormChange}
+                        />
 
                         <TextField
                             select
                             fullWidth
                             label='Status'
-                            defaultValue='Active'
+                            name='status'
+                            value={formData.status}
+                            onChange={handleFormChange}
                         >
-                            <MenuItem value='Active'>Active</MenuItem>
-                            <MenuItem value='Inactive'>Inactive</MenuItem>
+                            <MenuItem value='active'>Active</MenuItem>
+                            <MenuItem value='inactive'>Inactive</MenuItem>
                         </TextField>
 
-                        <TextField fullWidth label='Temporary Password' placeholder='password' />
                     </div>
                 </DialogContent>
 
@@ -317,13 +471,225 @@ export default function ActivityLogs() {
 
                     <Button
                         variant='contained'
-                        onClick={() => setOpenAddInstructor(false)}
+                        onClick={handleAddInstructor}
+                        disabled={saving}
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
-                        Add Instructor
+                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Add Instructor'}
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog
+                open={openViewInstructor}
+                onClose={() => setOpenViewInstructor(false)}
+                fullWidth
+                maxWidth='sm'
+            >
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    Instructor Details
+                </DialogTitle>
+
+                <DialogContent>
+                    {selectedInstructor && (
+                        <div className='space-y-5 pt-2'>
+                            <div className='flex items-center gap-4'>
+                                <Avatar src={selectedInstructor.avatar} alt={selectedInstructor.name} className='!bg-blue-600 !w-14 !h-14'>
+                                    {initials(`${selectedInstructor.firstName} ${selectedInstructor.lastName}`)}
+                                </Avatar>
+
+                                <div>
+                                    <Typography variant='h6' className='!font-semibold !text-slate-800'>
+                                        {selectedInstructor.firstName} {selectedInstructor.lastName}
+                                    </Typography>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        {selectedInstructor.instructorId}
+                                    </Typography>
+                                </div>
+                            </div>
+
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Email
+                                    </Typography>
+                                    <Typography variant='body1' className='!font-medium !text-slate-800'>
+                                        {selectedInstructor.email}
+                                    </Typography>
+                                </div>
+
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Department
+                                    </Typography>
+                                    <Typography variant='body1' className='!font-medium !text-slate-800'>
+                                        {selectedInstructor.department}
+                                    </Typography>
+                                </div>
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Specialization
+                                    </Typography>
+                                    <Typography variant='body1' className='!font-medium !text-slate-800'>
+                                        {selectedInstructor.specialization}
+                                    </Typography>
+                                </div>
+
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Status
+                                    </Typography>
+
+                                    <div className='!mt-1'>
+                                        <Chip
+                                            size='small'
+                                            label={selectedInstructor.status === 'active' ? 'Active' : 'Inactive'}
+                                            className={
+                                                selectedInstructor.status === 'active'
+                                                    ? '!bg-green-50 !text-green-700'
+                                                    : '!bg-slate-100 !text-slate-600'
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent >
+
+                <DialogActions className='!px-6 !pb-5'>
+                    <Button
+                        onClick={() => setOpenViewInstructor(false)}
+                        className='!normal-case !text-slate-600'
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog >
+
+
+            <Dialog
+                open={openEditInstructor}
+                onClose={() => setOpenEditInstructor(false)}
+                fullWidth
+                maxWidth='sm'
+            >
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    Edit Instructor
+                </DialogTitle>
+                <DialogContent>
+
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2'>
+                        <TextField
+                            fullWidth
+                            label='First Name'
+                            name='firstName'
+                            value={formData.firstName}
+                            onChange={handleFormChange}
+                        />
+                        <TextField
+                            fullWidth
+                            label='Last Name'
+                            name='lastName'
+                            value={formData.lastName}
+                            onChange={handleFormChange}
+                        />
+                        <TextField
+                            fullWidth
+                            label='Email Address'
+                            type='email'
+                            name='email'
+                            value={formData.email}
+                            onChange={handleFormChange}
+                        />
+
+                        <TextField
+                            select
+                            fullWidth
+                            label='Department'
+                            name='department'
+                            value={formData.department}
+                            onChange={handleFormChange}
+                        >
+                            <MenuItem value='Information Technology'>Information Technology</MenuItem>
+                            <MenuItem value='Computer Science'>Computer Science</MenuItem>
+                            <MenuItem value='Information Systems'>Information Systems</MenuItem>
+                        </TextField>
+
+                        <TextField
+                            fullWidth
+                            label='Specialization'
+                            placeholder='e.g. Web Development'
+                            name='specialization'
+                            value={formData.specialization}
+                            onChange={handleFormChange}
+                        />
+
+                        <TextField
+                            select
+                            fullWidth
+                            label='Status'
+                            name='status'
+                            value={formData.status}
+                            onChange={handleFormChange}
+                        >
+                            <MenuItem value='active'>Active</MenuItem>
+                            <MenuItem value='inactive'>Inactive</MenuItem>
+                        </TextField>
+
+                    </div>
+                </DialogContent>
+                <DialogActions className='!px-6 !pb-5'>
+                    <Button
+                        onClick={() => setOpenEditInstructor(false)}
+                        className='!normal-case !text-slate-600'
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant='contained'
+                        onClick={handleEditInstructor}
+                        disabled={saving}
+                        className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
+                    >
+                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Save Changes'}
+                    </Button>
+                </DialogActions>
+            </Dialog >
+
+
+            <Dialog
+                open={openDeleteInstructor}
+                onClose={() => setOpenDeleteInstructor(false)}
+                fullWidth
+                maxWidth='xs'
+            >
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    Confirm Delete
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant='body1' className='!text-slate-600'>
+                        Are you sure you want to delete this instructor?
+                    </Typography>
+                </DialogContent>
+                <DialogActions className='!px-6 !pb-5'>
+                    <Button
+                        onClick={() => setOpenDeleteInstructor(false)}
+                        className='!normal-case !text-slate-600'
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant='contained'
+                        color='error'
+                        onClick={handleDeleteInstructor}
+                        disabled={saving}
+                        className='!normal-case !rounded-lg !shadow-none'
+                    >
+                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Delete'}
+                    </Button>
+                </DialogActions>
+            </Dialog >
         </>
     )
 }
