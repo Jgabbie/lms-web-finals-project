@@ -2,9 +2,11 @@ import { Card, CardContent, Typography, Button, Chip, Divider, LinearProgress } 
 import { MenuBook, TrendingUp, ArrowForward, CheckCircle, AccessTime, PersonAdd, AssignmentTurnedIn, Bookmark, PlayCircle, CalendarMonth, AutoStories } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
+import { useNavigate } from 'react-router-dom'
 
 
 export default function DashboardStudent() {
+    const navigate = useNavigate()
     const statistics = [
         {
             title: "Enrolled Courses",
@@ -135,11 +137,11 @@ export default function DashboardStudent() {
                         </div>
 
                         <div className='flex gap-3'>
-                            <Button variant='outlined' startIcon={<Bookmark />} className='!border-slate-300 !text-slate-700 !normal-case !rounded-lg'>
+                            <Button onClick={() => navigate('/student/materials')} variant='outlined' startIcon={<Bookmark />} className='!border-slate-300 !text-slate-700 !normal-case !rounded-lg'>
                                 Saved Materials
                             </Button>
 
-                            <Button variant='contained' startIcon={<PlayCircle />} className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'>
+                            <Button onClick={() => navigate('/student/courses')} variant='contained' startIcon={<PlayCircle />} className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'>
                                 Continue Learning
                             </Button>
                         </div>
@@ -189,7 +191,7 @@ export default function DashboardStudent() {
                                         </Typography>
                                     </div>
 
-                                    <Button endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
+                                    <Button onClick={() => navigate('/student/courses')} endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
                                         View Courses
                                     </Button>
 
@@ -220,7 +222,7 @@ export default function DashboardStudent() {
                                             <LinearProgress variant='determinate' value={course.progress} className='!h-2 !rounded-full' />
                                             <div className='flex justify-between items-center mt-2'>
                                                 <span className='text-xs text-slate-400'>{course.lessons}</span>
-                                                <Button size='small' endIcon={<ArrowForward />} className='!normal-case !text-blue-600'>
+                                                <Button onClick={() => navigate('/student/courses/details')} size='small' endIcon={<ArrowForward />} className='!normal-case !text-blue-600'>
                                                     Continue
                                                 </Button>
                                             </div>
@@ -270,7 +272,7 @@ export default function DashboardStudent() {
                                 </div>
 
                                 <Divider className='!my-4' />
-                                <Button fullWidth endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
+                                <Button onClick={() => navigate('/student/assignments')} fullWidth endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
                                     View Assignment
                                 </Button>
                             </CardContent>
@@ -294,7 +296,7 @@ export default function DashboardStudent() {
                                     </div>
 
                                     <div>
-                                        <Button endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
+                                        <Button onClick={() => navigate('/student/discussions')} endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
                                             View All
                                         </Button>
                                     </div>

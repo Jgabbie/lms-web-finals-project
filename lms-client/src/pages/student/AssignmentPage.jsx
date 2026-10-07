@@ -2,6 +2,7 @@ import { Card, CardContent, Typography, Button, TextField, MenuItem, InputAdornm
 import { Assignment, Search, CalendarToday, AccessTime, CheckCircle, PendingActions, Grade, UploadFile } from '@mui/icons-material'
 import { useMemo, useState } from 'react'
 import Navbar from '../../components/Navbar'
+import Sidebar from '../../components/Sidebar'
 
 
 const assignments = [
@@ -93,8 +94,9 @@ export default function AssignmentPage() {
     return (
         <>
             <Navbar />
+            <Sidebar />
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <main className='ml-0 lg:ml-[260px] transition-all max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7'>
                         <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>

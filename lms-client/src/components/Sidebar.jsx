@@ -1,45 +1,47 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip } from '@mui/material'
-import { Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
+import { Dashboard, MenuBook, Assignment, Menu, ChevronLeft, FolderCopy, Forum, Logout } from '@mui/icons-material'
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function Sidebar() {
-
     const [open, setOpen] = useState(true)
+    const location = useLocation()
+    const navigate = useNavigate()
 
     const mainMenu = [
         {
             label: 'Dashboard',
             icon: <Dashboard />,
-            path: '/admin/dashboard'
+            path: '/student/dashboard'
         },
         {
-            label: 'Users',
-            icon: <People />,
-            path: '/admin/users'
-        },
-        {
-            label: 'Courses',
+            label: 'My Courses',
             icon: <MenuBook />,
-            path: '/admin/courses'
+            path: '/student/courses'
         },
         {
-            label: 'Instructors',
-            icon: <School />,
-            path: '/admin/dashboard'
-        },
-        {
-            label: 'Activity',
+            label: 'Assignments',
             icon: <Assignment />,
-            path: '/admin/logs'
+            path: '/student/assignments'
+        },
+        {
+            label: 'Learning Materials',
+            icon: <FolderCopy />,
+            path: '/student/materials'
+        },
+        {
+            label: 'Discussions',
+            icon: <Forum />,
+            path: '/student/discussions'
         },
     ]
 
     const accountMenu = [
         {
             label: 'Profile',
-            icon: <Person />,
-            path: '/admin/profile'
+            icon: <Avatar sx={{ width: 24, height: 24 }}>S</Avatar>,
+            path: '/student/dashboard'
         },
     ]
 
@@ -97,9 +99,8 @@ export default function Sidebar() {
                                     placement='right'
                                 >
                                     <ListItemButton
-                                        component='a'
-                                        href={item.path}
-                                        selected={item.label === 'Dashboard'}
+                                        onClick={() => navigate(item.path)}
+                                        selected={location.pathname === item.path}
                                         sx={{
                                             borderRadius: '8px',
                                             minHeight: 46,
@@ -120,7 +121,7 @@ export default function Sidebar() {
                                                 minWidth: 40,
                                                 mr: open ? 1 : 0,
                                                 justifyContent: 'center',
-                                                color: item.label === "Dashboard" ? '#2563eb' : "#64748b"
+                                                color: location.pathname === item.path ? '#2563eb' : "#64748b"
                                             }}
                                         >
                                             {item.icon}
@@ -158,9 +159,8 @@ export default function Sidebar() {
                                     placement='right'
                                 >
                                     <ListItemButton
-                                        component='a'
-                                        href={item.path}
-                                        selected={item.label === 'Dashboard'}
+                                        onClick={() => navigate(item.path)}
+                                        selected={location.pathname === item.path}
                                         sx={{
                                             borderRadius: '8px',
                                             minHeight: 46,

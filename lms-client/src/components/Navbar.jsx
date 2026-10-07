@@ -3,30 +3,33 @@ import '../App.css'
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Avatar, Badge, Button } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import { useNavigate } from 'react-router-dom'
 
 
-const pages = ['Dashboard', 'My Courses', 'Assignments', 'Grades']
+const pages = [
+    { label: 'Dashboard', path: '/student/dashboard' },
+    { label: 'My Courses', path: '/student/courses' },
+    { label: 'Assignments', path: '/student/assignments' },
+    { label: 'Learning Materials', path: '/student/materials' },
+    { label: 'Discussions', path: '/student/discussions' },
+]
 
 export default function Navbar() {
+    const navigate = useNavigate()
     const [anchorElNav, setAnchorElNav] = useState(null)
     const [anchorElUser, setAnchorElUser] = useState(null)
-    const [sidebarOpen, setSidebarOpen] = useState(true)
 
     const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget)
     const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget)
     const handleCloseNavMenu = () => setAnchorElNav(null)
     const handleCloseUserMenu = () => setAnchorElUser(null)
+    const navigateTo = (path) => {
+        handleCloseNavMenu()
+        navigate(path)
+    }
 
     return (
         <>
-            <div
-                className="transition-all duration-300"
-                style={{
-                    marginLeft: sidebarOpen ? '260px' : '72px'
-                }}
-            >
-
-            </div>
             <AppBar position="sticky" className="bg-white text-slate-800 shadow-sm border-b border-slate-200">
                 <Toolbar className="flex justify-between items-center px-4 md:px-8">
                     <div className="flex items-center gap-2">
@@ -36,8 +39,8 @@ export default function Navbar() {
                             </IconButton>
                             <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu} className="md:hidden">
                                 {pages.map((page) => (
-                                    <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                        <Typography textAlign="center">{page}</Typography>
+                                    <MenuItem key={page.path} onClick={() => navigateTo(page.path)}>
+                                        <Typography textAlign="center">{page.label}</Typography>
                                     </MenuItem>
                                 ))}
                             </Menu>
@@ -48,8 +51,8 @@ export default function Navbar() {
 
                     <div className="hidden md:flex gap-6 items-center">
                         {pages.map((page) => (
-                            <Button key={page} onClick={handleCloseNavMenu} className="text-slate-600 font-medium hover:text-blue-600 transition-colors duration-200">
-                                {page}
+                            <Button key={page.path} onClick={() => navigateTo(page.path)} className="text-slate-600 font-medium hover:text-blue-600 transition-colors duration-200">
+                                {page.label}
                             </Button>
                         ))}
                     </div>

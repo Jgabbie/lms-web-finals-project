@@ -18,6 +18,7 @@ import AssignmentDetailsPage from './pages/student/AssignmentDetailsPage'
 import CoursePage from './pages/student/CoursePage'
 import CourseDetailsPage from './pages/student/CourseDetailsPage'
 import DiscussionPage from './pages/student/DiscussionPage'
+import LearningMaterialsPage from './pages/student/LearningMaterialsPage'
 
 import Dashboard from './pages/admin/Dashboard'
 import ActivityLogs from './pages/admin/ActivityLogs'
@@ -163,8 +164,13 @@ function App() {
           }
         >
           <Route path='/student/dashboard' element={<DashboardStudent role={role} />} />
+          <Route path='/student/home' element={<HomePage />} />
           <Route path='/student/courses' element={<CoursePage role={role} />} />
           <Route path='/student/assignments' element={<AssignmentPage role={role} />} />
+          <Route path='/student/materials' element={<LearningMaterialsPage />} />
+          <Route path='/student/courses/details' element={<CourseDetailsPage role={role} />} />
+          <Route path='/student/assignments/details' element={<AssignmentDetailsPage role={role} />} />
+          <Route path='/student/discussions' element={<DiscussionPage role={role} />} />
         </Route>
 
         <Route

@@ -1,6 +1,7 @@
 import { Card, CardContent, Typography, Button, TextField, Chip, MenuItem, } from '@mui/material'
 import { DescriptionOutlined, DownloadOutlined, InsertDriveFileOutlined, MenuBookOutlined, PictureAsPdfOutlined, Search, SlideshowOutlined, VideoLibraryOutlined, VisibilityOutlined } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
+import Sidebar from '../../components/Sidebar'
 import { useMemo, useState } from 'react'
 
 
@@ -129,8 +130,9 @@ export default function UploadMaterialsPage() {
     return (
         <>
             <Navbar />
+            <Sidebar />
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <main className='ml-0 lg:ml-[260px] transition-all max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
 
                         <div>
