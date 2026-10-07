@@ -188,6 +188,7 @@ function App() {
             />
           }
         >
+          <Route path='/profile' element={<ProfilePage />} />
           <Route path='/coursedetails' element={<CourseDetailsPage role={role} />} />
           <Route path='/assigndetails' element={<AssignmentDetailsPage role={role} />} />
           <Route path='/discussion' element={<DiscussionPage role={role} />} />
