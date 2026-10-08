@@ -1,7 +1,8 @@
 import { Avatar, Badge, Card, CardContent, Typography, Button, Menu, MenuItem, Chip, TextField, IconButton } from '@mui/material'
 import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import api from '../api/axiosClient'
 
 export default function NotificationsPage() {
 
@@ -9,36 +10,35 @@ export default function NotificationsPage() {
     const [filter, setFilter] = useState('All')
     const [anchorEl, setAnchorEl] = useState(null)
     const [selectedNotifcation, setSelectedNotifcation] = useState(null)
+    const [markingAllRead, setMarkingAllRead] = useState(false)
 
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            type: 'Assignment',
-            title: 'New Assignment Posted',
-            message: 'A new assignment titled',
-            course: 'Web Development',
-            time: '10 minutes ago',
-            unread: true
-        },
-        {
-            id: 2,
-            type: 'Assignment',
-            title: 'New Assignment Posted',
-            message: 'A new assignment titled',
-            course: 'Web Development',
-            time: '10 minutes ago',
-            unread: true
-        },
-        {
-            id: 3,
-            type: 'Assignment',
-            title: 'New Assignment Posted',
-            message: 'A new assignment titled',
-            course: 'Web Development',
-            time: '10 minutes ago',
-            unread: true
-        },
-    ])
+    const [notifications, setNotifications] = useState([])
+
+    useEffect(() => {
+        let active = true
+
+        const fetchNotifications = async () => {
+            try {
+                const response = await api.get('/notifications')
+                if (active) {
+                    setNotifications(response.data.notifications.map(notification => ({
+                        ...notification,
+                        time: new Date(notification.time).toLocaleString()
+                    })))
+                }
+            } catch (error) {
+                console.error('Unable to load notifications:', error)
+            }
+        }
+
+        fetchNotifications()
+        const interval = window.setInterval(fetchNotifications, 30000)
+
+        return () => {
+            active = false
+            window.clearInterval(interval)
+        }
+    }, [])
 
     const unreadCount = notifications.filter(item => item.unread).length
 
@@ -93,26 +93,44 @@ export default function NotificationsPage() {
         }
     }
 
-    const markAllAsRead = () => {
-        setNotifications(prev =>
-            prev.map(item => ({ ...item, unread: false }))
-        )
+    const markAllAsRead = async () => {
+        if (markingAllRead || unreadCount === 0) return
+
+        try {
+            setMarkingAllRead(true)
+            await api.patch('/notifications/read-all')
+            setNotifications(prev => prev.map(item => ({ ...item, unread: false })))
+            window.dispatchEvent(new Event('notifications:updated'))
+        } catch (error) {
+            console.error('Unable to mark notifications as read:', error)
+        } finally {
+            setMarkingAllRead(false)
+        }
     }
 
-    const markAsRead = id => {
-        setNotifications(prev =>
-            prev.map(item =>
+    const markAsRead = async id => {
+        try {
+            await api.patch(`/notifications/${id}/read`)
+            setNotifications(prev => prev.map(item =>
                 item.id === id ? { ...item, unread: false } : item
-            )
-        )
+            ))
+            window.dispatchEvent(new Event('notifications:updated'))
+        } catch (error) {
+            console.error('Unable to mark notification as read:', error)
+        }
     }
 
-    const deleteNotification = id => {
-        setNotifications(prev =>
-            prev.filter(item => item.id !== id)
-        )
-        setAnchorEl(null)
-        setSelectedNotifcation(null)
+    const deleteNotification = async id => {
+        try {
+            await api.delete(`/notifications/${id}`)
+            setNotifications(prev => prev.filter(item => item.id !== id))
+            window.dispatchEvent(new Event('notifications:updated'))
+        } catch (error) {
+            console.error('Unable to delete notification:', error)
+        } finally {
+            setAnchorEl(null)
+            setSelectedNotifcation(null)
+        }
     }
 
     const handleMenuOpen = (e, notification) => {
@@ -155,10 +173,10 @@ export default function NotificationsPage() {
                             variant='outlined'
                             startIcon={<DoneAllOutlined />}
                             onClick={markAllAsRead}
-                            disabled={unreadCount === 0}
+                            disabled={unreadCount === 0 || markingAllRead}
                             className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
                         >
-                            Mark All as read
+                            {markingAllRead ? 'Marking as read...' : 'Mark All as read'}
                         </Button>
                     </div>
 

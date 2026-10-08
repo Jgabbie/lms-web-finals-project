@@ -2,14 +2,14 @@ import { Card, CardContent, Typography, Button, TextField, Chip, MenuItem, } fro
 import { DescriptionOutlined, DownloadOutlined, InsertDriveFileOutlined, MenuBookOutlined, PictureAsPdfOutlined, Search, SlideshowOutlined, VideoLibraryOutlined, VisibilityOutlined } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 
 export default function UploadMaterialsPage() {
 
     const [search, setSearch] = useState('')
-    const [courseFilter, setCourseFilter] = useState('')
-    const [typeFilter, setTypeFilter] = useState('')
+    const [courseFilter, setCourseFilter] = useState('All')
+    const [typeFilter, setTypeFilter] = useState('All')
 
 
     const materials = [
@@ -75,23 +75,21 @@ export default function UploadMaterialsPage() {
         },
     ]
 
-    const filteredMaterials = useMemo(() => {
+    const filteredMaterials = materials.filter(material => {
         const key = search.toLowerCase()
-        return materials.filter(material => {
-            const matchesSearch =
-                material.title.toLowerCase().includes(key) ||
-                material.description.toLowerCase().includes(key) ||
-                material.course.toLowerCase().includes(key) ||
-                material.instructor.toLowerCase().includes(key)
+        const matchesSearch =
+            material.title.toLowerCase().includes(key) ||
+            material.description.toLowerCase().includes(key) ||
+            material.course.toLowerCase().includes(key) ||
+            material.instructor.toLowerCase().includes(key)
 
-            const matchesCourse =
-                courseFilter === 'All' || material.course === courseFilter
-            const matchesType =
-                typeFilter === 'All' || material.type === typeFilter
+        const matchesCourse =
+            courseFilter === 'All' || material.course === courseFilter
+        const matchesType =
+            typeFilter === 'All' || material.type === typeFilter
 
-            return matchesSearch && matchesCourse && matchesType
-        })
-    }, [search, courseFilter, typeFilter])
+        return matchesSearch && matchesCourse && matchesType
+    })
 
 
     const getIcon = type => {
@@ -202,7 +200,7 @@ export default function UploadMaterialsPage() {
                                 >
                                     {types.map(type => (
                                         <MenuItem key={type} value={type}>
-                                            {type === 'All' ? 'All Courses' : type}
+                                            {type === 'All' ? 'All File Types' : type}
                                         </MenuItem>
                                     ))}
                                 </TextField>

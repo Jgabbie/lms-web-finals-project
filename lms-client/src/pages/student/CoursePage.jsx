@@ -1,9 +1,13 @@
 import { Card, CardContent, Typography, Button, TextField, InputAdornment, Chip, IconButton, MenuItem } from '@mui/material'
 import { Search, Add, Edit, Delete, People, MenuBook } from '@mui/icons-material'
+import { useState } from 'react'
+import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 
 
 export default function CoursePage() {
+    const [search, setSearch] = useState('')
+    const [statusFilter, setStatusFilter] = useState('All')
 
     const courses = [
         {
@@ -62,10 +66,22 @@ export default function CoursePage() {
         },
     ]
 
+    const filteredCourses = courses.filter(course => {
+        const query = search.trim().toLowerCase()
 
+        const matchesSearch = !query ||
+            course.title.toLowerCase().includes(query) ||
+            course.description.toLowerCase().includes(query) ||
+            course.instructor.toLowerCase().includes(query) ||
+            course.category.toLowerCase().includes(query)
+        const matchesStatus = statusFilter === 'All' || course.status === statusFilter
+
+        return matchesSearch && matchesStatus
+    })
 
     return (
         <div className='min-h-screen bg-slate-50'>
+            <Navbar />
             <Sidebar />
 
             <main className='ml-0 lg:ml-[260px] transition-all'>
@@ -88,11 +104,19 @@ export default function CoursePage() {
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mb-6'>
                         <CardContent className='!p-4'>
                             <div className='flex flex-col md:flex-row gap-4'>
-                                <TextField fullWidth size='small' placeholder='Search courses...' InputProps={{ startAdornment: (<InputAdornment position='start'><Search className='!text-slate-400' /></InputAdornment>) }} />
+                                <TextField
+                                    fullWidth
+                                    size='small'
+                                    placeholder='Search courses...'
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    InputProps={{ startAdornment: (<InputAdornment position='start'><Search className='!text-slate-400' /></InputAdornment>) }}
+                                />
                                 <TextField
                                     select
                                     size='small'
-                                    defaultValue='All'
+                                    value={statusFilter}
+                                    onChange={e => setStatusFilter(e.target.value)}
                                     className='md:!w-48'
                                 >
                                     <MenuItem value='All'>All Courses</MenuItem>
@@ -111,13 +135,13 @@ export default function CoursePage() {
                             </Typography>
 
                             <span className='text-sm text-slate-400'>
-                                ({courses.length})
+                                ({filteredCourses.length})
                             </span>
                         </div>
                     </div>
 
                     <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5'>
-                        {courses.map((course) => (
+                        {filteredCourses.map((course) => (
                             <Card key={course.id} className='!rounded-xl !border !border-slate-200 !shadow-sm hover:!shadow-md transition-shadow'>
                                 <div className='h-32 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center'>
                                     <MenuBook sx={{ fontSize: 56 }} className='!text-white' />
@@ -169,6 +193,12 @@ export default function CoursePage() {
                             </Card>
                         ))}
                     </div>
+
+                    {filteredCourses.length === 0 && (
+                        <Typography className='!py-10 !text-center !text-slate-500'>
+                            No courses match your search or status filter.
+                        </Typography>
+                    )}
                 </div>
             </main>
         </div>

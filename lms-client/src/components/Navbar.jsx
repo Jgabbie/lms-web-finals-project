@@ -6,6 +6,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications'
 import { useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { getProfileInitials, getStoredProfile } from '../utils/profileStorage'
+import api from '../api/axiosClient'
 
 
 const pages = []
@@ -16,11 +17,39 @@ export default function Navbar() {
     const [anchorElNav, setAnchorElNav] = useState(null)
     const [anchorElUser, setAnchorElUser] = useState(null)
     const [profile, setProfile] = useState(getStoredProfile)
+    const [unreadNotifications, setUnreadNotifications] = useState(0)
 
     useEffect(() => {
         const refreshProfile = () => setProfile(getStoredProfile())
         window.addEventListener('profile:updated', refreshProfile)
         return () => window.removeEventListener('profile:updated', refreshProfile)
+    }, [])
+
+    useEffect(() => {
+        let active = true
+
+        const refreshNotifications = async () => {
+            if (!localStorage.getItem('token')) return
+
+            try {
+                const response = await api.get('/notifications')
+                if (active) {
+                    setUnreadNotifications(response.data.notifications.filter(item => item.unread).length)
+                }
+            } catch (error) {
+                console.error('Unable to load notification count:', error)
+            }
+        }
+
+        refreshNotifications()
+        const interval = window.setInterval(refreshNotifications, 30000)
+        window.addEventListener('notifications:updated', refreshNotifications)
+
+        return () => {
+            active = false
+            window.clearInterval(interval)
+            window.removeEventListener('notifications:updated', refreshNotifications)
+        }
     }, [])
 
     const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget)
@@ -32,12 +61,26 @@ export default function Navbar() {
         handleCloseUserMenu()
         navigate(path)
     }
-    const handleLogout = () => {
+    const handleLogout = async () => {
         handleCloseUserMenu()
-        localStorage.removeItem('token')
-        localStorage.removeItem('role')
-        window.dispatchEvent(new Event('auth:logout'))
-        navigate('/login', { replace: true })
+
+        try {
+            const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+            await api.post('/auth/logout', {
+                firstName: profile.firstName || storedUser.firstName,
+                lastName: profile.lastName || storedUser.lastName,
+                role: profile.role || storedUser.role || localStorage.getItem('role')
+            })
+        } catch (error) {
+            console.error('Unable to record logout:', error)
+        } finally {
+            localStorage.removeItem('token')
+            localStorage.removeItem('role')
+            localStorage.removeItem('user')
+            localStorage.removeItem('user_profile')
+            window.dispatchEvent(new Event('auth:logout'))
+            navigate('/login', { replace: true })
+        }
     }
 
     return (
@@ -71,7 +114,7 @@ export default function Navbar() {
 
                     <div className="flex items-center gap-4">
                         <IconButton onClick={() => navigateTo('/notifications')} color="inherit" className="text-slate-600 hover:bg-slate-100" aria-label="Open notifications">
-                            <Badge badgeContent={3} color="error">
+                            <Badge badgeContent={unreadNotifications} color="error" invisible={unreadNotifications === 0}>
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>

@@ -1,8 +1,8 @@
 const router = require('express').Router()
-const { getInstructors, getInstructorById, addInstructor, updateInstructor, deleteInstructor } = require('../controllers/instructorController')
+const { getInstructors, getInstructor, addInstructor, updateInstructor, deleteInstructor } = require('../controllers/instructorController')
 
 router.get('/instructors', getInstructors)
-router.get('/instructor/:id', getInstructorById)
+router.get('/instructor/:id', getInstructor)
 router.post('/add/instructors', addInstructor)
 router.put('/update/instructors/:id', updateInstructor)
 router.delete('/delete/instructors/:id', deleteInstructor)

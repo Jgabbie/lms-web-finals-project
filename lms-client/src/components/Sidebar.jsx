@@ -4,6 +4,7 @@ import { Dashboard, MenuBook, Assignment, Menu, ChevronLeft, FolderCopy, Forum, 
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getProfileInitials, getStoredProfile } from '../utils/profileStorage'
+import api from '../api/axiosClient'
 
 export default function Sidebar() {
     const [open, setOpen] = useState(true)
@@ -16,6 +17,26 @@ export default function Sidebar() {
         window.addEventListener('profile:updated', refreshProfile)
         return () => window.removeEventListener('profile:updated', refreshProfile)
     }, [])
+
+    const handleLogout = async () => {
+        try {
+            const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+            await api.post('/auth/logout', {
+                firstName: profile.firstName || storedUser.firstName,
+                lastName: profile.lastName || storedUser.lastName,
+                role: profile.role || storedUser.role || localStorage.getItem('role')
+            })
+        } catch (error) {
+            console.error('Unable to record logout:', error)
+        } finally {
+            localStorage.removeItem('token')
+            localStorage.removeItem('role')
+            localStorage.removeItem('user')
+            localStorage.removeItem('user_profile')
+            window.dispatchEvent(new Event('auth:logout'))
+            navigate('/login', { replace: true })
+        }
+    }
 
     const mainMenu = [
         {
@@ -238,6 +259,7 @@ export default function Sidebar() {
                         >
                             <Button
                                 fullWidth
+                                onClick={handleLogout}
                                 startIcon={<Logout />}
                                 className={`!justify-start !normal-case !text-slate-500 hover:!bg-red-50 hover:!text-red-600 !rounded-lg
                                 ${open ? '!justify-start' : '!justify-center'}

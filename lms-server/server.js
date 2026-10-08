@@ -8,6 +8,7 @@ const authRouter = require('./routes/authRouter')
 const logsRouter = require('./routes/logsRouter')
 const profileRouter = require('./routes/profileRouter')
 const userRouter = require('./routes/userRouter')
+const notificationRouter = require('./routes/notificationRouter')
 
 const cors = require('cors')
 
@@ -37,6 +38,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/logs', logsRouter)
 app.use('/api/profile', profileRouter)
 app.use('/api/users', userRouter)
+app.use('/api/notifications', notificationRouter)
 
 
 app.listen(process.env.PORT, () => console.log(`Server on port ${process.env.PORT}`))
