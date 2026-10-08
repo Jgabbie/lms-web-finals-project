@@ -1,6 +1,6 @@
 import { Avatar, Card, CardContent, Typography, Button, Chip, Divider, Dialog, DialogActions, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, DialogContent } from '@mui/material'
 import { Add, ForumOutlined, PersonOutlined, Search, Schedule, SchoolOutlined, ChatBubbleOutlined } from '@mui/icons-material'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 
@@ -50,19 +50,17 @@ export default function DiscussionPage() {
     ]
 
     const courses = ['All', ...new Set(discussions.map(item => item.course))]
-    const filteredDiscussions = useMemo(() => {
-        return discussions.filter(item => {
-            const matchesSearch =
-                item.title.toLowerCase().includes(search.toLowerCase()) ||
-                item.content.toLowerCase().includes(search.toLowerCase()) ||
-                item.author.toLowerCase().includes(search.toLowerCase())
+    const filteredDiscussions = discussions.filter(item => {
+        const matchesSearch =
+            item.title.toLowerCase().includes(search.toLowerCase()) ||
+            item.content.toLowerCase().includes(search.toLowerCase()) ||
+            item.author.toLowerCase().includes(search.toLowerCase())
 
-            const matchesCourse =
-                courseFilter === "All" || item.course === courseFilter
+        const matchesCourse =
+            courseFilter === "All" || item.course === courseFilter
 
-            return matchesSearch && matchesCourse
-        })
-    }, [search, courseFilter])
+        return matchesSearch && matchesCourse
+    })
 
 
     const handleCreateDiscussion = () => {

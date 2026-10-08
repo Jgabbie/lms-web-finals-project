@@ -2,13 +2,21 @@ import { Card, CardContent, Typography, Button, Avatar, Divider, TextField, Aler
 import { Person, Email, Lock, Edit, Save, Close, Visibility, VisibilityOff, PhotoCamera } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import Sidebar from '../components/Sidebar'
 import api from '../api/axiosClient'
 import { getStoredProfile, saveStoredProfile } from '../utils/profileStorage'
 
-const getApiMessage = (error, fallback) => error?.data?.message || error?.message || fallback || 'Something went wrong'
+const getApiMessage = (error, fallback) => (
+    error?.response?.data?.message
+    || error?.data?.message
+    || error?.message
+    || fallback
+    || 'Something went wrong'
+)
 
 export default function ProfilePage() {
 
+    const isStudent = localStorage.getItem('role') === 'student'
     const [profile, setProfile] = useState(getStoredProfile)
     const [draft, setDraft] = useState(getStoredProfile)
     const [saving, setSaving] = useState(false)
@@ -55,7 +63,7 @@ export default function ProfilePage() {
         setProfile(storedProfile)
         setDraft(storedProfile)
         try {
-            const response = await api.get('/profile/user')
+            const response = await api.get('/profile')
             const user = response?.data?.userData || response?.data?.user || {}
             const next = {
                 firstName: user?.firstName || '',
@@ -130,7 +138,7 @@ export default function ProfilePage() {
         try {
             setUploadingImage(true)
 
-            const response = await api.post('/profile/upload-profile-image', formData)
+            const response = await api.post('/profile/upload-image', formData)
 
             const imageUrl = response?.data?.profileImage || ''
 
@@ -153,8 +161,8 @@ export default function ProfilePage() {
 
 
     const handleSaveChanges = async () => {
-        setError('')
-        setMessage('')
+        setError(null)
+        setMessage(null)
 
         const fields = {
             firstName: draft.firstName.trim(),
@@ -174,7 +182,7 @@ export default function ProfilePage() {
 
         try {
             setSaving(true)
-            const response = await api.put('/profile/user/update', fields)
+            const response = await api.put('/profile', fields)
             const user = response?.data?.userData || response?.data?.user || {}
             const next = {
                 firstName: user?.firstName || '',
@@ -199,7 +207,7 @@ export default function ProfilePage() {
     const cancelEdit = () => {
         setDraft(profile)
         setEditing(false)
-        setError('')
+        setError(null)
     }
 
     const [notification, setNotification] = useState({
@@ -403,8 +411,9 @@ export default function ProfilePage() {
     return (
         <>
             <Navbar />
+            {isStudent && <Sidebar />}
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <main className={`${isStudent ? 'ml-0 lg:ml-[260px] transition-all' : ''} max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
                     <div className='mb-6'>
                         <Typography variant='h4' className='!font-bold !text-slate-800'>
                             My Profile
@@ -485,8 +494,8 @@ export default function ProfilePage() {
                                     onClick={() => {
                                         setDraft(profile)
                                         setEditing(true)
-                                        setError('')
-                                        setMessage('')
+                                        setError(null)
+                                        setMessage(null)
                                     }}
                                     className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'>
                                     Edit Profile
@@ -504,6 +513,18 @@ export default function ProfilePage() {
                                     Update your personal account information
                                 </Typography>
                             </div>
+
+                            {error && (
+                                <Alert severity='error' className='!mb-5'>
+                                    {error}
+                                </Alert>
+                            )}
+
+                            {message && (
+                                <Alert severity='success' className='!mb-5'>
+                                    {message}
+                                </Alert>
+                            )}
 
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
                                 <TextField

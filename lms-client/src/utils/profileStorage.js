@@ -8,7 +8,9 @@ export const defaultProfile = {
 
 export const getStoredProfile = () => {
     try {
-        const saved = JSON.parse(localStorage.getItem('user_profile') || '{}')
+        const savedProfile = localStorage.getItem('user_profile')
+        const savedUser = localStorage.getItem('user')
+        const saved = JSON.parse(savedProfile || savedUser || '{}')
         return { ...defaultProfile, ...saved }
     } catch {
         return defaultProfile
