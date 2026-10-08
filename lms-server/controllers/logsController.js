@@ -56,7 +56,7 @@ exports.createLog = (async (req, res) => {
             })
         }
 
-        const log = new Log.create({
+        const log = await Log.create({
             firstName,
             lastName,
             role,
