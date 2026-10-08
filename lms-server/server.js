@@ -2,7 +2,12 @@ require('dotenv').config()
 
 const express = require('express')
 const mongoose = require('mongoose')
+
 const instructorRouter = require('./routes/instructorRouter')
+const authRouter = require('./routes/authRouter')
+const logsRouter = require('./routes/logsRouter')
+const profileRouter = require('./routes/profileRouter')
+const userRouter = require('./routes/userRouter')
 
 const cors = require('cors')
 
@@ -22,13 +27,16 @@ app.get('/', (req, res) => {
     res.send('LMS API is running....')
 })
 
-app.use('/api/auth', require('./routes/authRouter'))
-app.use('/api/user', require('./routes/userRouter'))
-app.use('/api/profile', require('./routes/profileRouter'))
+
 app.use('/api/courses', require('./routes/courseRouter'))
 app.use('/api/materials', require('./routes/materialRouter'))
-app.use('/api/logs', require('./routes/logsRouter'))
+app.use('/api/assignments', require('./routes/assignmentRouter'))
 
 app.use('/api/instructors', instructorRouter)
-app.use('/api/assignments', require('./routes/assignmentRouter'))
+app.use('/api/auth', authRouter)
+app.use('/api/logs', logsRouter)
+app.use('/api/profile', profileRouter)
+app.use('/api/users', userRouter)
+
+
 app.listen(process.env.PORT, () => console.log(`Server on port ${process.env.PORT}`))
