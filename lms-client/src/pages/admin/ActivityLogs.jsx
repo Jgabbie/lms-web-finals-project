@@ -3,6 +3,7 @@ import { AssignmentTurnedInOutlined, DeleteOutlined, EditOutlined, HistoryEduOut
 import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
+import api from '../../api/axiosClient'
 
 export default function ActivityLogs() {
     const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -20,7 +21,7 @@ export default function ActivityLogs() {
             }
             setError('')
 
-            const response = await fetch('http://localhost:5000/api/logs/logs')
+            const response = await api.get('/api/logs/logs')
             const data = await response.json()
 
             if (!response.ok) {

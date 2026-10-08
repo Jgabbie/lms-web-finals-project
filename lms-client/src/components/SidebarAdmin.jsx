@@ -2,7 +2,7 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
 import { Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
 import { useState } from 'react'
-import axios from 'axios'
+import api from '../api/axiosClient'
 
 export default function SidebarAdmin() {
 
@@ -13,7 +13,7 @@ export default function SidebarAdmin() {
         try {
             const user = JSON.parse(localStorage.getItem('user'))
 
-            await axios.post('http://localhost:5000/api/auth/logout', {
+            await api.post('/api/auth/logout', {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 role: user.role

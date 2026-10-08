@@ -24,11 +24,11 @@ import Dashboard from './pages/admin/Dashboard'
 import ActivityLogs from './pages/admin/ActivityLogs'
 import UserManagementPage from './pages/admin/UserManagementPage'
 import InstructorManagement from './pages/admin/InstructorManagement'
+import CoursesManagementPage from './pages/admin/CoursesManagementPage'
 
 import InstructorAssignmentsPage from './pages/instructor/InstructorAssignmentsPage'
 import DashboardInstructor from './pages/instructor/DashboardInstructor'
 import EnrollStudentPage from './pages/instructor/EnrollStudentPage'
-
 
 import CourseManagementPage from './pages/instructor/CourseManagementPage'
 import CreateCoursePage from './pages/instructor/CreateCoursePage'
@@ -144,6 +144,7 @@ function App() {
           <Route path='/admin/users' element={<UserManagementPage />} />
           <Route path='/admin/instructors' element={<InstructorManagement />} />
           <Route path='/admin/logs' element={<ActivityLogs />} />
+          <Route path='/admin/courses' element={<CoursesManagementPage />} />
         </Route>
 
         <Route

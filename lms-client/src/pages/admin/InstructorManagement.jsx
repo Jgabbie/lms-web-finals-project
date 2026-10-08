@@ -1,7 +1,7 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, CircularProgress } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
-import axios from 'axios'
+import api from '../../api/axiosClient'
 import Navbar from '../../components/Navbar'
 
 export default function ActivityLogs() {
@@ -35,7 +35,7 @@ export default function ActivityLogs() {
         try {
             setLoading(true)
             setError('')
-            const response = await axios.get('http://localhost:5000/api/instructors')
+            const response = await api.get('/instructors')
             setInstructors(response.data)
         } catch (error) {
             console.error('Error fetching instructors:', error)
@@ -64,7 +64,7 @@ export default function ActivityLogs() {
             setSaving(true)
             setError('')
 
-            await axios.post('http://localhost:5000/api/add/instructors', formData)
+            await api.post('/add/instructors', formData)
             alert('Instructor added successfully!')
 
             setFormData(emptyForm)
@@ -85,7 +85,7 @@ export default function ActivityLogs() {
             setSaving(true)
             setError('')
 
-            await axios.put(`http://localhost:5000/api/update/instructors/${selectedInstructor._id}`, formData)
+            await api.put(`/update/instructors/${selectedInstructor._id}`, formData)
 
             setOpenEditInstructor(false)
             setSelectedInstructor(null)
@@ -108,7 +108,7 @@ export default function ActivityLogs() {
             setSaving(true)
             setError('')
 
-            await axios.delete(`http://localhost:5000/api/delete/instructors/${selectedInstructor._id}`)
+            await api.delete(`/delete/instructors/${selectedInstructor._id}`)
             setOpenDeleteInstructor(false)
             setSelectedInstructor(null)
 

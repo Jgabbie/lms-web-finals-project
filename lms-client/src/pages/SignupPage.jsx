@@ -1,7 +1,7 @@
 import { TextField, Button, Checkbox, FormControlLabel, Typography, Link, InputAdornment, IconButton, Modal, Snackbar, Alert } from '@mui/material'
 import { VisibilityOff, Visibility } from '@mui/icons-material'
 import { useState } from 'react'
-import axios from 'axios'
+import api from '../api/axiosClient'
 
 
 export default function SignupPage() {
@@ -125,7 +125,7 @@ export default function SignupPage() {
         try {
             setLoading(true)
 
-            const res = await axios.post('http://localhost:5000/api/auth/register/send-otp',
+            const res = await api.post('/auth/register/send-otp',
                 {
                     firstName: firstName.trim(),
                     lastName: lastName.trim(),
@@ -167,7 +167,7 @@ export default function SignupPage() {
             setOtpLoading(true)
             setOtpError('')
 
-            const response = await axios.post('http://localhost:5000/api/auth/register/verify-otp',
+            const response = await api.post('/auth/register/verify-otp',
                 {
                     email: email.trim().toLowerCase(),
                     otp: otp.trim()
@@ -205,7 +205,7 @@ export default function SignupPage() {
             setOtpLoading(true)
             setOtpError('')
 
-            const response = await axios.post('http://localhost:5000/api/auth/register/resend-otp',
+            const response = await api.post('/auth/register/resend-otp',
                 {
                     email: email.trim().toLowerCase(),
                 }

@@ -3,7 +3,7 @@ import { Add, Delete, DeleteOutlined, EditOutlined, KeyboardReturnSharp, PersonO
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
-import axios from 'axios'
+import api from '../../api/axiosClient'
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState([])
@@ -41,7 +41,7 @@ export default function UserManagementPage() {
         try {
             setLoading(true)
             setError('')
-            const response = await axios.get('http://localhost:5000/api/users/accounts', getAuthConfig())
+            const response = await api.get('/users/accounts', getAuthConfig())
             if (Array.isArray(response.data)) {
                 setUsers(response.data)
             } else if (Array.isArray(response.data?.users)) {
@@ -85,7 +85,7 @@ export default function UserManagementPage() {
                 setError('Please complete all required fields')
                 return
             }
-            await axios.post('http://localhost:5000/api/users/account/add', {
+            await api.post('/users/account/add', {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 email: formData.email.trim(),
@@ -105,7 +105,7 @@ export default function UserManagementPage() {
         try {
             setError('')
             if (!id) return
-            const response = await axios.get(`http://localhost:5000/api/users/account/${id}`, getAuthConfig())
+            const response = await api.get(`/users/account/${id}`, getAuthConfig())
             const user = response.data
             setSelectedUser(user)
             setFormData({
@@ -139,7 +139,7 @@ export default function UserManagementPage() {
                 email: formData.email.trim(),
                 role: formData.role.toLowerCase()
             }
-            await axios.put(`http://localhost:5000/api/users/account/update/${id}`, payload, getAuthConfig())
+            await api.put(`/users/account/update/${id}`, payload, getAuthConfig())
             setOpenEditUser(false)
             resetForm()
             setMessage('User updated successfully')
@@ -164,7 +164,7 @@ export default function UserManagementPage() {
     const handleDeleteUser = async (id) => {
         try {
             setError('')
-            await axios.delete(`http://localhost:5000/api/users/account/delete/${id}`, getAuthConfig())
+            await api.delete(`/users/account/delete/${id}`, getAuthConfig())
 
             setUsers(prev => prev.filter(user => user._id !== userToDelete._id))
 
