@@ -25,7 +25,7 @@ export default function SignupPage() {
     const [confirmPassword, setConfirmPassword] = useState('')
 
     const [errors, setErrors] = useState('')
-    const [loading, setLoading] = useState('')
+    const [loading, setLoading] = useState(false)
 
 
     const [notification, setNotification] = useState({
@@ -84,7 +84,7 @@ export default function SignupPage() {
         if (!trimmedEmail) {
             newErrors.email = 'Email Address is required'
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-            newErrors.lastName = 'Enter a valid last name'
+            newErrors.email = 'Enter a valid email address'
         }
 
         if (!password) {
@@ -103,7 +103,7 @@ export default function SignupPage() {
         if (!confirmPassword) {
             newErrors.confirmPassword = 'Please confirm your password'
         } else if (password !== confirmPassword) {
-            newErrors.password = 'Passwords do not match'
+            newErrors.confirmPassword = 'Passwords do not match'
         }
 
         if (!termsAndCondsAccepted) {
@@ -558,7 +558,7 @@ export default function SignupPage() {
                         fullWidth
                         variant='contained'
                         size='large'
-                        disable={
+                        disabled={
                             otpLoading ||
                             otp.length !== 6
                         }

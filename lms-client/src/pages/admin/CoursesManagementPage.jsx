@@ -1,18 +1,16 @@
-import { Card, CardContent, Typography, Button, MenuItem, Chip, TextField, IconButton } from '@mui/material'
-import { Add, DeleteOutlined, PeopleOutlined, Search } from '@mui/icons-material'
+import { Card, CardContent, Typography, MenuItem, Chip, TextField, IconButton } from '@mui/material'
+import { DeleteOutlined, PeopleOutlined, Search } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
-import SidebarInstructor from '../../components/SidebarInstructor'
+import NavbarAdmin from '../../components/NavbarAdmin'
+import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
-export default function CourseManagementPage() {
+export default function CoursesManagementPage() {
     const [search, setSearch] = useState('')
     const [status, setStatus] = useState('All')
     const [courses, setCourses] = useState([])
     const [loading, setLoading] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(true)
-    const navigate = useNavigate()
 
     const fetchCourses = useCallback(async () => {
         try {
@@ -35,7 +33,8 @@ export default function CourseManagementPage() {
         try {
             await api.delete(`/courses/${id}`)
             setCourses(prev => prev.filter(c => c._id !== id))
-        } catch (err) {
+        } catch (error) {
+            console.error('Delete course error:', error)
             alert('Failed to delete course')
         }
     }
@@ -57,8 +56,8 @@ export default function CourseManagementPage() {
 
     return (
         <div className='min-h-screen bg-slate-50'>
-            <Navbar />
-            <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+            <NavbarAdmin />
+            <SidebarAdmin open={sidebarOpen} setOpen={setSidebarOpen} />
             <div
                 className='transition-all duration-300'
                 style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
@@ -73,14 +72,6 @@ export default function CourseManagementPage() {
                                 View, update, and manage your courses.
                             </Typography>
                         </div>
-                        <Button
-                            variant='contained'
-                            startIcon={<Add />}
-                            onClick={() => navigate('/instructor/courses/create')}
-                            className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
-                        >
-                            Create Course
-                        </Button>
                     </div>
 
                     <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>

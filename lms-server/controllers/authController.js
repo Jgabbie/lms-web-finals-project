@@ -38,6 +38,7 @@ exports.sendRegistrationOtp = async (req, res) => {
         } = req.body;
 
         console.log(req.body)
+        console.log('reached sendRegistrationOtp')
 
         if (typeof firstName !== 'string' || !firstName.trim()) {
             return res.status(400).json({
