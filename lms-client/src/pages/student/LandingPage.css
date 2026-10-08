@@ -1,0 +1,850 @@
+.edulanding {
+    --blue:#245de8;
+    --ink:#202321;
+    --muted:#686d68;
+    font-family:Arial,Helvetica,sans-serif;
+    color:var(--ink);
+    background:#fff;
+    padding:0;
+    overflow:clip
+}
+.edulanding * {
+    box-sizing:border-box
+}
+.edulanding h1,.edulanding h2,.edulanding h3,.edulanding p {
+    margin:0
+}
+.edulanding h1,.edulanding h2 {
+    letter-spacing:-.055em;
+    text-wrap:balance
+}
+.edulanding h2 {
+    font-size:clamp(34px,4vw,54px);
+    line-height:1.06;
+    font-weight:700
+}
+.edulanding h3 {
+    font-size:19px;
+    letter-spacing:-.035em;
+    font-weight:700
+}
+.edulanding p {
+    font-size:15px;
+    line-height:1.7;
+    color:var(--muted)
+}
+.edulanding a {
+    text-decoration:none;
+    color:inherit
+}
+.edulanding .MuiButton-root {
+    text-transform:none;
+    border-radius:99px;
+    min-height:44px;
+    font-size:13px;
+    font-weight:600;
+    padding:10px 22px;
+    gap:10px;
+    box-shadow:none;
+    letter-spacing:0
+}
+.edulanding .MuiButton-contained {
+    background:var(--blue);
+    color:#fff
+}
+.edulanding .MuiButton-contained:hover {
+    background:#184bc9;
+    box-shadow:0 5px 18px #245de824
+}
+.edulanding .MuiButton-outlined {
+    border-color:#d8ddd8;
+    color:var(--ink)
+}
+.edulanding a:focus-visible,.edulanding button:focus-visible,.edulanding summary:focus-visible {
+    outline:3px solid #e7b600;
+    outline-offset:5px
+}
+.landing-skip {
+    position:absolute;
+    top:-100px;
+    z-index:5;
+    background:white;
+    padding:12px
+}
+.landing-skip:focus {
+    top:12px
+}
+.landing-announcement {
+    max-width:none;
+    margin:auto;
+    background:var(--blue);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:15px;
+    padding:7px;
+    font-size:11px;
+    letter-spacing:.02em
+}
+.landing-announcement svg {
+    width:14px
+}
+.landing-hero {
+    max-width:none;
+    margin:auto;
+    min-height:690px;
+    position:relative;
+    border-radius:0;
+    background:linear-gradient(180deg,rgba(9,24,65,.12) 0%,rgba(9,24,65,.3) 45%,rgba(9,24,65,.38) 100%),url('../../assets/images/landing-campus.jpg') center 35%/cover;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:150px 24px 95px;
+    color:white
+}
+.landing-nav {
+    position:absolute;
+    top:26px;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(780px,calc(100% - 48px));
+    padding:8px 10px 8px 22px;
+    border-radius:99px;
+    background:#ffffffef;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    color:var(--ink);
+    box-shadow:0 5px 28px #152f2510
+}
+.landing-brand {
+    display:flex;
+    gap:7px;
+    align-items:center;
+    font-weight:800;
+    font-size:20px;
+    letter-spacing:-.04em;
+    white-space:nowrap
+}
+.landing-brand svg {
+    color:var(--blue)
+}
+.brand-dot {
+    color:var(--blue);
+    margin-left:-7px
+}
+.landing-nav-links {
+    display:flex;
+    gap:23px;
+    font-size:12px
+}
+.landing-nav-links a {
+    padding:12px 0
+}
+.landing-nav-links a:hover {
+    color:var(--blue)
+}
+.landing-hero-content {
+    max-width:740px
+}
+.landing-eyebrow {
+    display:block;
+    font-size:10px;
+    letter-spacing:.16em;
+    font-weight:700;
+    margin-bottom:20px
+}
+.landing-hero h1 {
+    font-size:clamp(48px,6.8vw,88px);
+    line-height:1.02;
+    font-weight:700
+}
+.landing-hero-content p {
+    color:#fff;
+    max-width:490px;
+    margin:24px auto 28px;
+    font-size:16px;
+    text-shadow:0 1px 4px #0008
+}
+.landing-hero-actions {
+    display:flex;
+    gap:12px;
+    justify-content:center
+}
+.landing-hero-actions .MuiButton-contained {
+    background:white;
+    color:#252923
+}
+.landing-hero-actions .MuiButton-contained:hover {
+    background:#edf0e9
+}
+.landing-hero-actions .MuiButton-outlined {
+    color:white;
+    border-color:#ffffffb0;
+    background:#ffffff12
+}
+.landing-hero-note {
+    position:absolute;
+    bottom:30px;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    gap:8px
+}
+.landing-status-dot {
+    width:7px;
+    height:7px;
+    background:#e4eb95;
+    border-radius:50%
+}
+.landing-intro {
+    text-align:center;
+    padding:55px 20px 10px
+}
+.landing-intro p {
+    font-size:12px
+}
+.landing-intro>div {
+    display:flex;
+    justify-content:center;
+    gap:70px;
+    flex-wrap:wrap;
+    margin-top:24px;
+    color:#737b73
+}
+.landing-intro span {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:17px;
+    font-weight:600
+}
+.landing-intro svg {
+    width:22px
+}
+.landing-section {
+    max-width:1080px;
+    margin:auto;
+    padding:100px 24px;
+    scroll-margin-top:25px
+}
+.landing-section-heading {
+    text-align:center;
+    max-width:540px;
+    margin:0 auto 55px
+}
+.landing-section-heading p {
+    margin-top:20px
+}
+.landing-section-heading .landing-eyebrow {
+    color:var(--blue)
+}
+.landing-course-grid {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:24px;
+    align-items:center
+}
+.landing-course-card {
+    border:1px solid #e9ece7;
+    border-radius:14px;
+    background:white;
+    overflow:hidden;
+    box-shadow:0 8px 35px #23362206;
+    transition:transform .25s,box-shadow .25s
+}
+.landing-course-card:hover {
+    transform:translateY(-6px);
+    box-shadow:0 14px 38px #23362214
+}
+.landing-course-card.course-1 {
+    transform:rotate(-4deg);
+    box-shadow:0 16px 40px #245de821;
+    border:7px solid white;
+    outline:1px solid #eceeeb
+}
+.landing-course-card.course-1:hover {
+    transform:rotate(-2deg) translateY(-6px)
+}
+.landing-course-art {
+    height:220px;
+    position:relative;
+    overflow:hidden;
+    background:#eff1e9;
+    display:grid;
+    place-items:center
+}
+.course-1 .landing-course-art {
+    background:var(--blue);
+    color:white
+}
+.course-2 .landing-course-art {
+    background:#ecedfb
+}
+.course-art-icon {
+    height:105px;
+    width:105px;
+    border-radius:30px;
+    background:#ffffff85;
+    display:grid;
+    place-items:center;
+    transform:rotate(-12deg);
+    box-shadow:20px 20px 0 #ffffff40
+}
+.course-art-icon svg {
+    width:65px;
+    height:65px;
+    color:var(--blue)
+}
+.course-1 .course-art-icon svg {
+    color:white
+}
+.course-1 .course-art-icon {
+    background:#ffffff22
+}
+.course-orbit {
+    position:absolute;
+    width:300px;
+    height:300px;
+    border:35px solid #ffffff35;
+    border-radius:50%;
+    transform:translate(80px,50px)
+}
+.landing-course-art>span {
+    position:absolute;
+    bottom:15px;
+    left:19px;
+    font-size:11px;
+    letter-spacing:.15em
+}
+.landing-course-body {
+    padding:25px
+}
+.landing-course-level {
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:#516a44;
+    font-weight:700
+}
+.landing-course-body h3 {
+    margin:12px 0
+}
+.landing-course-body p {
+    font-size:13px;
+    min-height:88px;
+    margin-bottom:22px
+}
+.landing-course-caption {
+    text-align:center;
+    margin-top:45px!important;
+    font-size:12px!important
+}
+.landing-tag-band {
+    max-width:1250px;
+    margin:15px auto 0;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    padding:20px 0
+}
+.landing-tag {
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    border-radius:99px;
+    padding:10px 26px;
+    font-size:22px;
+    line-height:1.15;
+    letter-spacing:-.04em;
+    white-space:nowrap
+}
+.landing-tag svg {
+    width:23px
+}
+.tag-0 {
+    background:#f2f3ef;
+    color:#262923
+}
+.tag-1 {
+    background:var(--blue);
+    color:white
+}
+.tag-2 {
+    background:#f5d924;
+    color:#272c14
+}
+.tag-3 {
+    background:#139854;
+    color:white
+}
+.landing-about {
+    padding-top:105px;
+    background:radial-gradient(ellipse at 50% 28%,#f5f6f0,transparent 63%)
+}
+.landing-about-statement {
+    position:relative;
+    max-width:700px;
+    margin:auto;
+    text-align:center;
+    padding:35px 20px 50px
+}
+.landing-about-statement h2 {
+    font-size:clamp(36px,4.6vw,60px)
+}
+.landing-about-statement h2>span {
+    color:var(--blue)
+}
+.floating-tag {
+    position:absolute;
+    font-size:15px;
+    padding:8px 18px
+}
+.tag-top {
+    left:0;
+    top:50px;
+    transform:rotate(-9deg)
+}
+.tag-bottom {
+    right:0;
+    bottom:15px;
+    transform:rotate(8deg)
+}
+.landing-about-copy {
+    max-width:650px;
+    text-align:center;
+    margin:30px auto 50px!important
+}
+.landing-feature-grid {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:18px
+}
+.landing-feature-grid article {
+    border:1px solid #eceee7;
+    background:#fff;
+    padding:28px 24px;
+    border-radius:12px
+}
+.landing-feature-grid svg {
+    color:var(--blue);
+    margin-bottom:32px
+}
+.landing-feature-grid h3 {
+    margin-bottom:12px;
+    font-size:17px
+}
+.landing-feature-grid p {
+    font-size:13px
+}
+.landing-learning-banner {
+    max-width:none;
+    margin:0 auto;
+    border-radius:16px;
+    padding:65px 20px;
+    background:linear-gradient(rgba(38,32,9,.06),rgba(38,32,9,.12)),url('../../assets/images/landing-hallway.jpg') center/cover;
+    min-height:440px;
+    display:grid;
+    place-items:center
+}
+.landing-learning-card {
+    background:white;
+    border-radius:14px;
+    padding:32px 38px;
+    max-width:650px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 15px 35px #10232224
+}
+.landing-learning-card h2 {
+    font-size:38px;
+    max-width:380px
+}
+.landing-learning-card p {
+    max-width:350px;
+    margin-top:18px
+}
+.landing-learning-card img {
+    display:block;
+    width:150px;
+    height:100px;
+    object-fit:contain;
+    margin:20px 0 0 auto
+}
+.landing-contact {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:80px;
+    padding-top:115px;
+    padding-bottom:110px
+}
+.landing-contact>div>p {
+    margin-top:23px
+}
+.landing-contact-details {
+    margin:30px 0 0
+}
+.landing-contact-details>div {
+    position:relative;
+    padding-left:45px;
+    margin-bottom:24px
+}
+.landing-contact-details svg {
+    position:absolute;
+    left:0;
+    top:8px;
+    color:var(--blue)
+}
+.landing-contact-details dt {
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px
+}
+.landing-contact-details dd {
+    margin:0;
+    font-size:14px;
+    overflow-wrap:anywhere
+}
+.landing-contact-form {
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    border:1px solid #e7eae4;
+    border-radius:16px;
+    padding:28px;
+    background:#fff;
+    box-shadow:0 8px 35px #23362206
+}
+.landing-contact-form h3 {
+    margin-bottom:8px
+}
+.landing-contact-form .MuiOutlinedInput-root {
+    border-radius:10px
+}
+.landing-final-cta {
+    text-align:center;
+    position:relative;
+    z-index:1;
+    padding:65px 20px 80px;
+    max-width:none;
+    margin:auto;
+    background:#f8f9f5;
+    border-radius:0 0 50% 50%/0 0 60px 60px
+}
+.landing-final-cta h2 {
+    margin-bottom:26px
+}
+.landing-seal {
+    position:absolute;
+    bottom:-36px;
+    left:50%;
+    transform:translateX(-50%) rotate(-10deg);
+    width:78px;
+    height:78px;
+    background:var(--blue);
+    border-radius:28px;
+    border:6px double #9ebafe;
+    display:grid;
+    place-items:center;
+    box-shadow:0 7px 0 #1349c4;
+    color:white
+}
+.landing-seal svg {
+    width:39px;
+    height:39px
+}
+.landing-footer {
+    max-width:none;
+    margin:-45px auto 0;
+    background:var(--blue);
+    color:#fff;
+    padding:125px 65px 0;
+    overflow:hidden
+}
+.landing-footer-content {
+    display:grid;
+    grid-template-columns:1.5fr .8fr 1fr;
+    gap:60px;
+    max-width:1050px;
+    margin:auto
+}
+.landing-footer .landing-brand svg {
+    color:#fff
+}
+.landing-footer p {
+    color:#e2eaff;
+    font-size:13px;
+    margin-top:16px;
+    max-width:310px
+}
+.landing-footer h3 {
+    font-size:13px;
+    font-weight:500;
+    margin-bottom:20px;
+    color:#d1deff
+}
+.landing-footer-content>div>a:not(.landing-brand) {
+    display:block;
+    margin-bottom:12px;
+    font-size:14px
+}
+.landing-footer a:hover {
+    text-decoration:underline
+}
+.landing-footer .landing-copyright {
+    text-align:center;
+    margin:50px auto 0;
+    font-size:11px
+}
+.landing-footer-wordmark {
+    font-size:clamp(80px,17vw,230px);
+    text-align:center;
+    font-weight:800;
+    line-height:1.1;
+    letter-spacing:-.065em;
+    color:#ffffff12;
+    margin-bottom:-.2em;
+    user-select:none
+}
+@media(min-width:1500px) {
+    .landing-hero {
+    min-height:760px
+}
+
+}
+@media(max-width:900px) {
+    .landing-nav-links {
+    gap:14px
+}
+.landing-course-grid {
+    gap:15px
+}
+.landing-course-body {
+    padding:20px
+}
+.landing-contact {
+    gap:35px
+}
+.landing-footer {
+    padding-left:30px;
+    padding-right:30px
+}
+.landing-footer-content {
+    gap:30px
+}
+.floating-tag {
+    position:static;
+    margin:15px
+}
+.landing-course-card.course-1 {
+    transform:rotate(-2deg)
+}
+
+}
+@media(max-width:650px) {
+    .edulanding {
+    padding:0
+}
+.landing-announcement {
+    font-size:10px;
+    gap:8px
+}
+.landing-announcement svg {
+    display:none
+}
+.landing-hero {
+    min-height:650px;
+    padding:170px 20px 85px
+}
+.landing-nav {
+    width:calc(100% - 24px);
+    top:16px;
+    flex-wrap:wrap;
+    padding:12px 14px;
+    border-radius:24px;
+    gap:6px
+}
+.landing-nav .MuiButton-root {
+    padding:8px 13px;
+    font-size:11px
+}
+.landing-brand {
+    font-size:18px
+}
+.landing-nav-links {
+    order:3;
+    flex-basis:100%;
+    justify-content:center;
+    gap:30px
+}
+.landing-nav-links a {
+    padding:8px 0;
+    font-size:12px
+}
+.landing-hero h1 {
+    font-size:49px
+}
+.landing-hero-content p {
+    font-size:14px
+}
+.landing-hero-actions {
+    flex-wrap:wrap
+}
+.landing-eyebrow {
+    font-size:9px
+}
+.landing-intro {
+    padding:38px 10px 0
+}
+.landing-intro>div {
+    gap:20px
+}
+.landing-intro span {
+    font-size:12px;
+    gap:4px
+}
+.landing-intro svg {
+    width:17px
+}
+.landing-section {
+    padding:65px 15px
+}
+.landing-section-heading {
+    margin-bottom:35px
+}
+.landing-course-grid {
+    grid-template-columns:1fr;
+    gap:24px;
+    max-width:370px;
+    margin:auto
+}
+.landing-course-card.course-1 {
+    transform:none;
+    outline:none;
+    border:1px solid #e9ece7
+}
+.landing-course-card.course-1:hover {
+    transform:translateY(-6px)
+}
+.landing-course-body p {
+    min-height:0
+}
+.landing-course-art {
+    height:190px
+}
+.landing-course-body {
+    padding:24px
+}
+.landing-tag-band {
+    gap:7px
+}
+.landing-tag {
+    font-size:15px;
+    padding:8px 15px
+}
+.landing-tag svg {
+    width:16px
+}
+.landing-about-statement {
+    padding:0
+}
+.landing-about-copy {
+    margin:25px auto 35px!important
+}
+.landing-feature-grid {
+    grid-template-columns:1fr
+}
+.landing-feature-grid svg {
+    margin-bottom:15px
+}
+.landing-learning-banner {
+    min-height:380px;
+    padding:35px 18px
+}
+.landing-learning-card {
+    padding:28px 24px
+}
+.landing-learning-card h2 {
+    font-size:32px
+}
+.landing-contact {
+    grid-template-columns:1fr;
+    gap:30px
+}
+.landing-contact-form {
+    padding:22px 18px
+}
+.landing-final-cta {
+    padding:50px 15px 75px
+}
+.landing-final-cta h2 {
+    font-size:34px
+}
+.landing-footer {
+    padding:115px 25px 0
+}
+.landing-footer-content {
+    grid-template-columns:1fr 1fr;
+    gap:35px 20px
+}
+.landing-footer-content>div:first-child {
+    grid-column:1/-1
+}
+.landing-footer-content>div:last-child p {
+    overflow-wrap:anywhere
+}
+.landing-footer-wordmark {
+    font-size:21vw
+}
+.landing-footer .landing-copyright {
+    margin-top:35px
+}
+
+}
+@media(prefers-reduced-motion:reduce) {
+    .edulanding * {
+    transition:none!important;
+    animation:none!important
+}
+.landing-course-card:hover,.landing-course-card.course-1:hover {
+    transform:none
+}
+
+}
+
+
+.landing-faq {
+    max-width:760px;
+    padding-bottom:20px
+}
+.landing-faq details {
+    border:1px solid #e9ece7;
+    border-radius:10px;
+    margin-bottom:12px;
+    background:#fff;
+    padding:20px 24px;
+    box-shadow:0 4px 18px #23362204
+}
+.landing-faq summary {
+    cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+    min-height:24px
+}
+.landing-faq details[open] summary {
+    color:var(--blue)
+}
+.landing-faq details p {
+    margin-top:14px;
+    font-size:13px
+}
+
+
+
+
+
+

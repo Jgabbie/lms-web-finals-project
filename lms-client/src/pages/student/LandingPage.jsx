@@ -1,351 +1,76 @@
-import { AppBar, Toolbar, Typography, Button, Card, CardContent, TextField, Box } from '@mui/material'
-import { School, MenuBook, Email, Phone, LocationOn } from '@mui/icons-material'
+import { Button, TextField } from '@mui/material'
+import { School, MenuBook, Email, Phone, LocationOn, ArrowForward, AutoAwesome, Groups, Code, Palette, Terminal } from '@mui/icons-material'
+import { useNavigate } from 'react-router-dom'
 import LandingGraphics from '../../assets/graphics/undraw_education_3vwh.svg'
-import { useNavigate } from "react-router-dom"
+import './LandingPage.css'
 
 export default function LandingPage() {
-    //initialize useNavigate
     const navigate = useNavigate()
-
-
-    //temp courses data
     const courses = [
-        {
-            title: "Introduction to React",
-            description: "Learn the fundamentals of React and build modern interactive web applications",
-            level: "Beginner"
-        },
-        {
-            title: "Advanced UI/UX Design",
-            description: "Master modern interface design principles and create engaging user experiences",
-            level: "Intermediate"
-        },
-        {
-            title: "Backend with Node.js",
-            description: "Build powerful server-side applications and APIs using Node.js and Express",
-            level: "Intermediate"
-        },
+        { title: 'Introduction to React', description: 'Learn the fundamentals of React and build modern interactive web applications', level: 'Beginner' },
+        { title: 'Advanced UI/UX Design', description: 'Master modern interface design principles and create engaging user experiences', level: 'Intermediate' },
+        { title: 'Backend with Node.js', description: 'Build powerful server-side applications and APIs using Node.js and Express', level: 'Intermediate' },
     ]
-
-
-    //go to signup page
     const navigateSignup = () => {
-        navigate("/login", { replace: true })
+        navigate('/login', { replace: true })
     }
-
+    const courseIcons = [<Code key='code' />, <Palette key='palette' />, <Terminal key='terminal' />]
 
     return (
-        <div className='min-h-screen bg-slate-50 text-slate-800'>
-            <AppBar position='sticky' elevation={0} className='bg-white border-b border-slate-200'>
-                <Toolbar className='max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8'>
-                    <div className='flex items-center gap-2 flex-1'>
-                        <School className='text-white-600' />
-                        <Typography variant='h6' className='font-bold text-white-800'>
-                            EduLearn
-                        </Typography>
+        <div className='edulanding'>
+            <a className='landing-skip' href='#main-content'>Skip to content</a>
+            <div className='landing-announcement'>A little learning today. A brighter tomorrow. <AutoAwesome fontSize='small' /> Learn at your own pace.</div>
+            <main id='main-content'>
+                <section className='landing-hero'>
+                    <nav className='landing-nav' aria-label='Main navigation'>
+                        <a className='landing-brand' href='#main-content'><School /> EduLearn<span className='brand-dot'>.</span></a>
+                        <div className='landing-nav-links'><a href='#about'>About Us</a><a href='#courses'>Courses</a><a href='#contact'>Contact Us</a></div>
+                        <Button variant='contained' onClick={navigateSignup}>Get Started <ArrowForward fontSize='small' /></Button>
+                    </nav>
+                    <div className='landing-hero-content'>
+                        <span className='landing-eyebrow'>YOUR NEXT CHAPTER STARTS HERE</span>
+                        <h1>Learn today.<br />Build your tomorrow.</h1>
+                        <p>Develop the skills you need to succeed with practical, accessible, and engaging online courses designed for modern learners.</p>
+                        <div className='landing-hero-actions'><Button variant='contained' href='#courses'>Explore Courses <ArrowForward fontSize='small' /></Button><Button variant='outlined' href='#about'>Learn More</Button></div>
                     </div>
-
-                    <div className='hidden md:flex items-center gap-8 mr-6'>
-                        <a href='#about' className='text-white-800 hover:text-blue-600 transition-colors'>
-                            About Us
-                        </a>
-                        <a href='#courses' className='text-white-800 hover:text-blue-600 transition-colors'>
-                            Courses
-                        </a>
-                        <a href='#contact' className='text-white-800 hover:text-blue-600 transition-colors'>
-                            Contact Us
-                        </a>
+                    <div className='landing-hero-note'><span className='landing-status-dot' /> Small steps. Endless possibilities.</div>
+                </section>
+                <div className='landing-intro'><p>A space for every kind of learner</p><div><span><School /> Students</span><span><MenuBook /> Instructors</span><span><Groups /> Learning together</span></div></div>
+                <section id='courses' className='landing-section landing-courses'>
+                    <div className='landing-section-heading'><span className='landing-eyebrow'>FIND YOUR NEXT POSSIBILITY</span><h2>Big ideas.<br />Practical classes.</h2><p>Explore courses designed to help you build technical, creative, and professional skills.</p></div>
+                    <div className='landing-course-grid'>{courses.map((course, index) => <article className={`landing-course-card course-${index}`} key={course.title}>
+                        <div className='landing-course-art' aria-hidden='true'><div className='course-orbit' /><div className='course-art-icon'>{courseIcons[index]}</div><span>0{index + 1}</span></div>
+                        <div className='landing-course-body'><span className='landing-course-level'>{course.level}</span><h3>{course.title}</h3><p>{course.description}</p><Button variant={index === 1 ? 'contained' : 'outlined'} fullWidth>View Course <ArrowForward fontSize='small' /></Button></div>
+                    </article>)}</div>
+                    <p className='landing-course-caption'>Technical thinking. Creative confidence. Real-world skills.</p>
+                </section>
+                <div className='landing-tag-band' aria-hidden='true'>{['Growth oriented', 'Curious', 'Practical skills', 'Calm', 'Motivated', 'Focused sessions', 'Self driven', 'Curious minds', 'Real progress'].map((tag, index) => <span className={`landing-tag tag-${index % 4}`} key={tag}>{index % 3 === 0 && <AutoAwesome />}{tag}</span>)}</div>
+                <section id='about' className='landing-section landing-about'>
+                    <div className='landing-about-statement'><span className='landing-tag tag-0 floating-tag tag-top'>Curious minds</span><span className='landing-eyebrow'>ABOUT EDULEARN</span><h2>From focused sessions<br />to practical skills,<br />make room for<br /><span>your next chapter.</span></h2><span className='landing-tag tag-2 floating-tag tag-bottom'>Real progress <AutoAwesome /></span></div>
+                    <p className='landing-about-copy'>We believe everyone should have access to quality learning opportunities. Our platform provides practical courses that help learners develop valuable skills and turn their knowledge into real-world results.</p>
+                    <div className='landing-feature-grid'>
+                        <article><MenuBook /><h3>Quality Courses</h3><p>Learn from carefully structured courses designed to provide practical and useful knowledge.</p></article>
+                        <article><Groups /><h3>Learn Together</h3><p>Join a growing community of learners and improve your skills at your own pace.</p></article>
+                        <article><AutoAwesome /><h3>Practical Skills</h3><p>Focus on skills that can be applied directly to your projects, studies, and career.</p></article>
                     </div>
-
-                    <Button onClick={navigateSignup} variant='contained' className='bg-blue-600 hover:bg-blue-700 normal-case rounded-lg shadow-none'>
-                        Get Started
-                    </Button>
-                </Toolbar>
-            </AppBar>
-
-
-            <section className='bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white'>
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-                    <div className='min-h-[650px] grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-20'>
-                        <div>
-                            <Typography variant='h1' className='!text-4xl sm:!text-5xl lg:!text-6xl !font-bold !leading-tight mb-6'>
-                                Learn Today.
-                                <br />
-                                Build Tomorrow
-                            </Typography>
-
-                            <Typography variant='h6' className='!font-normal !leading-relaxed text-blue-100 max-w-xl mb-8'>
-                                Develop the skills you need to succeed with practical, accessible, and engaging online courses designed for modern learners
-                            </Typography>
-
-                            <div className='flex flex-col sm:flex-row gap-4 mt-3'>
-                                <Button variant="contained" size='large' href='#courses' className='bg-white hover:bg-slate-100 text-blue-700 normal-case font-semibold rounded-lg px-7 shadow-none'>
-                                    Explore Courses
-                                </Button>
-
-                                <Button variant="outlined" size='large' href='#about' className='!border-white !text-white !hover:border-white !hover:bg-white/10 normal-case rounded-lg px-7'>
-                                    Learn More
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className='hidden lg:flex justify-center'>
-                            <div className='relative w-[440px] h-[380px]'>
-
-                                <div className='absolute inset-8 z-0 bg-white/10 rounded-3xl backdrop-blur-sm border border-white/20' />
-
-                                <div className='absolute top-0 z-0 right-0 w-28 h-28 bg-white/10 rounded-full' />
-
-                                <div className='absolute bottom-0 z-0 left-0 w-36 h-36 bg-indigo-400/20 rounded-full' />
-
-                                <div className='relative z-10 w-full h-full flex items-center justify-center'>
-                                    <Box
-                                        component="img"
-                                        src={LandingGraphics}
-                                        alt='Landing Graphics'
-                                        className='w-full max-w-lg h-auto object-contain'
-                                    />
-                                </div>
-
-                            </div>
-                        </div>
+                </section>
+                <section className='landing-learning-banner'><div className='landing-learning-card'><span className='landing-eyebrow'>EDUCATION MADE SIMPLE</span><h2>A little curiosity<br />can take you a long way.</h2><p>Empowering learners with practical knowledge and skills for a better future.</p><img src={LandingGraphics} alt='Illustration of learning and education' loading='lazy' /></div></section>
+                <section className='landing-section landing-faq' aria-labelledby='landing-faq-title'>
+                    <div className='landing-section-heading'><span className='landing-eyebrow'>A LITTLE MORE CLARITY</span><h2 id='landing-faq-title'>Frequently asked<br />questions.</h2></div>
+                    <details open><summary>Who is EduLearn for?</summary><p>EduLearn brings students, instructors, and administrators together in one learning management system.</p></details>
+                    <details><summary>What courses can I explore?</summary><p>The featured classes introduce React, UI/UX design, and backend development with Node.js.</p></details>
+                    <details><summary>What can I find in the student portal?</summary><p>The student interface includes courses, assignments, learning materials, discussions, and a personal dashboard.</p></details>
+                    <details><summary>How do I get started?</summary><p>Use Get Started to visit the login page. You can also find the signup link there if you need an account.</p></details>
+                </section>
+                <section id='contact' className='landing-section landing-contact'>
+                    <div><span className='landing-eyebrow'>LET’S TALK</span><h2>Good questions.<br />New beginnings.</h2><p>Have a question about our courses or need help getting started? Send us a message and our team will be happy to assist you.</p>
+                        <dl className='landing-contact-details'><div><Email /><dt>Email</dt><dd>contactsupport@EduLearn.com</dd></div><div><Phone /><dt>Phone</dt><dd>+63 912 345 6789</dd></div><div><LocationOn /><dt>Location</dt><dd>Manila, Philippines</dd></div></dl>
                     </div>
-                </div>
-            </section>
-
-            <section id='about' className='py-24 bg-white'>
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-                    <div className='text-center max-w-3xl mx-auto mb-16'>
-                        <Typography variant='overline' className='!text-blue-600 !font-bold !tracking-widest'>
-                            About Us
-                        </Typography>
-                        <Typography variant='h3' className='!font-bold !text-3xl sm:text-4xl text-slate-800 mt-2 mb-5'>
-                            Education Made Simple
-                        </Typography>
-                        <Typography variant='body1' className='text-slate-500 !leading-relaxed'>
-                            We believe everyone should have access to quality learning opportunities. Our platform provides practical courses that help learners develop valuable skills and turn their knowledge into real-world results
-                        </Typography>
-                    </div>
-
-                    <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                        <Card elevation={0} className='border border-slate-200 rounded-2xl'>
-                            <CardContent className='!p-8 text-center'>
-                                <div className='w-14 h-14 mx-auto mb-5 rounded-xl bg-blue-50 flex items-center justify-center'>
-                                    <MenuBook className='text-blue-600' />
-                                </div>
-                                <Typography variant='h6' className='font-bold mb-3'>
-                                    Quality Courses
-                                </Typography>
-                                <Typography variant='body2' className='text-slate-500 leading-relaxed'>
-                                    Learn from carefully structured courses designed to provide practical and useful knowledge.
-                                </Typography>
-                            </CardContent>
-                        </Card>
-
-                        <Card elevation={0} className='border border-slate-200 rounded-2xl'>
-                            <CardContent className='!p-8 text-center'>
-                                <div className='w-14 h-14 mx-auto mb-5 rounded-xl bg-blue-50 flex items-center justify-center'>
-                                    <MenuBook className='text-blue-600' />
-                                </div>
-                                <Typography variant='h6' className='font-bold mb-3'>
-                                    Learn Together
-                                </Typography>
-                                <Typography variant='body2' className='text-slate-500 leading-relaxed'>
-                                    Join a growing community of learners and improve your skills at your own pace.
-                                </Typography>
-                            </CardContent>
-                        </Card>
-
-                        <Card elevation={0} className='border border-slate-200 rounded-2xl'>
-                            <CardContent className='!p-8 text-center'>
-                                <div className='w-14 h-14 mx-auto mb-5 rounded-xl bg-blue-50 flex items-center justify-center'>
-                                    <MenuBook className='text-blue-600' />
-                                </div>
-                                <Typography variant='h6' className='font-bold mb-3'>
-                                    Practical Skills
-                                </Typography>
-                                <Typography variant='body2' className='text-slate-500 leading-relaxed'>
-                                    Focus on skills that can be applied directly to your projects, studies, and career.
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-
-
-            </section>
-
-            <section id='courses' className='py-24 bg-slate-50'>
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-
-                    <div className='mb-12'>
-                        <Typography variant='overline' className='!text-blue-600 !font-bold !tracking-widest'>
-                            Our Courses
-                        </Typography>
-                        <Typography variant='h3' className='!font-bold !text-3xl sm:!text-4xl text-slate-800 mt-2'>
-                            Start Learning
-                        </Typography>
-                        <Typography variant='body1' className='text-slate-500 max-w-md'>
-                            Explore courses designed to help you build technical, creative, and professional skills
-                        </Typography>
-                    </div>
-
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                        {courses.map((course) => (
-                            <Card key={course.title} elevation={0} className='rounded-2xl border border-slate-200 overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all duration-300'>
-                                <div className='h-40 bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center'>
-                                    <MenuBook className='!text-6xl text-white/90' />
-                                </div>
-
-                                <CardContent className='!p-6'>
-                                    <span className='inline-block px-3 py-1 mb-4 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold'>
-                                        {course.level}
-                                    </span>
-                                    <Typography variant='h6' className='font-bold text-slate-800 mb-3'>
-                                        {course.title}
-                                    </Typography>
-                                    <Typography variant='body2' className='text-slate-500 leading-relaxed mb-6'>
-                                        {course.description}
-                                    </Typography>
-                                    <Button variant='outlined' fullWidth className='normal-case rounded-kg border-blue-600 text-blue-600 hover:border-blue-700 hover:bg-blue-50'>
-                                        View Course
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section id='contact' className='py-24 bg-white'>
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-16'>
-                        <div>
-                            <Typography variant='overline' className='!text-blue-600 !font-bold !tracking-widest'>
-                                Contact Us
-                            </Typography>
-                            <Typography variant='h3' className='!font-bold !text-3xl sm:text-4xl text-slate-800 mt-2 mb-5'>
-                                We'd love to hear from you
-                            </Typography>
-                            <Typography variant='body1' className='text-slate-500 leading-relaxed mb-10 max-w-lg'>
-                                Have a question about our courses or need help getting started? Send us a message and our team will be happy to assist you.
-                            </Typography>
-
-                            <div className='space-y-6 mt-3'>
-                                <div className='flex items-center gap-4'>
-                                    <div className='w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center'>
-                                        <Email className='text-blue-600' />
-                                    </div>
-
-                                    <div>
-                                        <Typography variant='caption' className='text-slate-400'>
-                                            Email
-                                        </Typography>
-                                        <Typography className='font-medium text-slate-700'>
-                                            contactsupport@EduLearn.com
-                                        </Typography>
-                                    </div>
-                                </div>
-
-                                <div className='flex items-center gap-4'>
-                                    <div className='w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center '>
-                                        <Phone className='text-blue-600' />
-                                    </div>
-
-                                    <div>
-                                        <Typography variant='caption' className='text-slate-400'>
-                                            Phone
-                                        </Typography>
-                                        <Typography className='font-medium text-slate-700'>
-                                            +63 912 345 6789
-                                        </Typography>
-                                    </div>
-                                </div>
-
-                                <div className='flex items-center gap-4'>
-                                    <div className='w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center '>
-                                        <LocationOn className='text-blue-600' />
-                                    </div>
-
-                                    <div>
-                                        <Typography variant='caption' className='text-slate-400'>
-                                            Location
-                                        </Typography>
-                                        <Typography className='font-medium text-slate-700'>
-                                            Manila, Philippines
-                                        </Typography>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <Card elevation={0} className='border border-slate-200 rounded-2xl'>
-                            <CardContent className='!p-8'>
-                                <Typography variant='h6' className='font-bold text-slate-800 mb-6'>
-                                    Send your inquiry here!
-                                </Typography>
-
-                                <div className='flex flex-col gap-3'>
-                                    <TextField fullWidth label="Full Name" variant='outlined' />
-                                    <TextField fullWidth label="Email Address" type='email' variant='outlined' />
-                                    <TextField fullWidth label="Subject" variant='outlined' />
-                                    <TextField fullWidth label="Message" multiline rows={5} variant='outlined' />
-                                    <Button fullWidth variant='contained' size='large' className='bg-blue-600 hover:bg-blue-700 normal-case rounded-lg shadow-none !py-3'>
-                                        Send Message
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </section>
-
-            <footer className='bg-slate-900 text-white'>
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
-                    <div className='flex flex-col md:flex-row justify-between gap-8'>
-                        <div className='max-w-sm'>
-                            <div className='flex items-center gap-2 mb-4'>
-                                <School className='text-blue-400' />
-                                <Typography variant='h6' className='font-bold'>
-                                    EduLearn
-                                </Typography>
-                            </div>
-
-                            <Typography variant='body2' className='text-slate-400 leading-relaxed'>
-                                Empowering learners with practical knowledge and skills for a better future.
-                            </Typography>
-                        </div>
-
-                        <div>
-                            <Typography className='font-semibold mb-4'>
-                                Navigation
-                            </Typography>
-
-                            <div className='flex flex-col gap-2'>
-                                <a href='#about' className='text-slate-400 hover:text-white text-sm'>
-                                    About Us
-                                </a>
-
-                                <a href='#courses' className='text-slate-400 hover:text-white text-sm'>
-                                    Courses
-                                </a>
-
-                                <a href='#contact' className='text-slate-400 hover:text-white text-sm'>
-                                    Contact Us
-                                </a>
-                            </div>
-
-                            <div className='border-t border-slate-800 mt-10 pt-6'>
-                                <Typography variant='body2' className='text-slate-500 text-center'>
-                                    ©{new Date().getFullYear()} EduLearn. All rights reserved.
-                                </Typography>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-
+                    <div className='landing-contact-form'><h3>Send your inquiry here!</h3><TextField fullWidth label='Full Name' variant='outlined' /><TextField fullWidth label='Email Address' type='email' variant='outlined' /><TextField fullWidth label='Subject' variant='outlined' /><TextField fullWidth label='Message' multiline rows={5} variant='outlined' /><Button fullWidth variant='contained' size='large'>Send Message <ArrowForward fontSize='small' /></Button></div>
+                </section>
+                <section className='landing-final-cta'><span className='landing-eyebrow'>MAKE YOUR NEXT MOVE</span><h2>Start learning in a way<br />that feels right for you.</h2><Button variant='contained' onClick={navigateSignup}>Get Started <ArrowForward fontSize='small' /></Button><div className='landing-seal' aria-hidden='true'><School /></div></section>
+            </main>
+            <footer className='landing-footer'><div className='landing-footer-content'><div><a className='landing-brand' href='#main-content'><School /> EduLearn.</a><p>Empowering learners with practical knowledge and skills for a better future.</p></div><div><h3>Explore</h3><a href='#about'>About Us</a><a href='#courses'>Courses</a><a href='#contact'>Contact Us</a></div><div><h3>Get in touch</h3><p>contactsupport@EduLearn.com</p><p>Manila, Philippines</p></div></div><p className='landing-copyright'>©{new Date().getFullYear()} EduLearn. All rights reserved.</p><div className='landing-footer-wordmark' aria-hidden='true'>EduLearn.</div></footer>
         </div>
     )
 }
