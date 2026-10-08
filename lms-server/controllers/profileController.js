@@ -26,6 +26,8 @@ const upload = multer({
     }
 })
 
+exports.profileImageUpload = upload.single('profileImage')
+
 
 const pendingPasswordResets = new Map()
 

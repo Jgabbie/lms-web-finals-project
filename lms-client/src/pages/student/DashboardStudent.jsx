@@ -3,10 +3,13 @@ import { MenuBook, TrendingUp, ArrowForward, CheckCircle, AccessTime, PersonAdd,
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useNavigate } from 'react-router-dom'
+import { getStoredProfile } from '../../utils/profileStorage'
 
 
 export default function DashboardStudent() {
     const navigate = useNavigate()
+    const profile = getStoredProfile()
+    const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'Student'
     const statistics = [
         {
             title: "Enrolled Courses",
@@ -87,7 +90,7 @@ export default function DashboardStudent() {
     const activity = [
         {
             title: "Lesson completed",
-            description: "Maria Reyes joined EduLearn",
+            description: `${displayName} joined EduLearn`,
             time: "10 minutes ago",
             icon: <PersonAdd />,
             bg: "bg-blue-100",
@@ -95,7 +98,7 @@ export default function DashboardStudent() {
         },
         {
             title: "Lesson completed",
-            description: "Maria Reyes joined EduLearn",
+            description: `${displayName} joined EduLearn`,
             time: "10 minutes ago",
             icon: <PersonAdd />,
             bg: "bg-blue-100",
@@ -103,7 +106,7 @@ export default function DashboardStudent() {
         },
         {
             title: "Lesson completed",
-            description: "Maria Reyes joined EduLearn",
+            description: `${displayName} joined EduLearn`,
             time: "10 minutes ago",
             icon: <PersonAdd />,
             bg: "bg-blue-100",
@@ -111,7 +114,7 @@ export default function DashboardStudent() {
         },
         {
             title: "Lesson completed",
-            description: "Maria Reyes joined EduLearn",
+            description: `${displayName} joined EduLearn`,
             time: "10 minutes ago",
             icon: <PersonAdd />,
             bg: "bg-blue-100",
@@ -132,7 +135,7 @@ export default function DashboardStudent() {
                             </Typography>
 
                             <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                Welcome back, Sudent! Here's what's happening on EduLearn today.
+                                Welcome back, {displayName}! Here's what's happening on EduLearn today.
                             </Typography>
                         </div>
 

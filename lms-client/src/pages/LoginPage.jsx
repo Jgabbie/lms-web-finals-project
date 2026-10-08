@@ -2,6 +2,7 @@ import { TextField, Button, Checkbox, FormControlLabel, Typography, Link, InputA
 import { VisibilityOff, Visibility, AssignmentReturnOutlined } from '@mui/icons-material'
 import { useState } from 'react'
 import axios from 'axios'
+import { saveStoredProfile } from '../utils/profileStorage'
 
 export default function LoginPage({ onLogin }) {
 
@@ -89,12 +90,15 @@ export default function LoginPage({ onLogin }) {
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('role', res.data.role);
 
-            localStorage.setItem('user', JSON.stringify({
+            const loggedInUser = {
                 firstName: res.data.firstName,
                 lastName: res.data.lastName,
                 email: res.data.email,
                 role: res.data.role
-            }));
+            }
+
+            localStorage.setItem('user', JSON.stringify(loggedInUser))
+            saveStoredProfile(loggedInUser)
             onLogin(res.data.role);
         } catch (error) {
             const message = error.response?.data?.message || 'Invalid Email or Password'

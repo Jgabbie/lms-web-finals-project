@@ -1,8 +1,11 @@
 import Navbar from "../../components/Navbar"
 import { Button, Card, CardContent, Typography, LinearProgress } from '@mui/material'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import { getStoredProfile } from '../../utils/profileStorage'
 
 export default function HomePage() {
+    const profile = getStoredProfile()
+    const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'Student'
     const activeCourses = [
         { id: 1, title: "Introduction to React", progress: 75, nextLesson: "React Hooks" },
         { id: 2, title: "Advanced UI/UX Design", progress: 30, nextLesson: "Color Theory" },
@@ -17,7 +20,7 @@ export default function HomePage() {
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
                         <div>
                             <Typography variant="h4" className="font-bold text-slate-800 mb-2">
-                                Welcome back, User!
+                                Welcome back, {displayName}!
                             </Typography>
                             <Typography variant="body2" className="text-slate-500 mb-6">
                                 You are doing well in the course "Introduction to React", keep it up!
@@ -65,4 +68,3 @@ export default function HomePage() {
         </>
     )
 }
-
