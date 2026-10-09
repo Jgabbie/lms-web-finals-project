@@ -2,9 +2,11 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
 import { Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import api from '../api/axiosClient'
 
 export default function SidebarAdmin() {
+    const location = useLocation()
 
     const [open, setOpen] = useState(true)
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
@@ -125,7 +127,7 @@ export default function SidebarAdmin() {
                                     <ListItemButton
                                         component='a'
                                         href={item.path}
-                                        selected={item.label === 'Dashboard'}
+                                        selected={location.pathname === item.path}
                                         sx={{
                                             borderRadius: '8px',
                                             minHeight: 46,
@@ -146,7 +148,7 @@ export default function SidebarAdmin() {
                                                 minWidth: 40,
                                                 mr: open ? 1 : 0,
                                                 justifyContent: 'center',
-                                                color: item.label === "Dashboard" ? '#2563eb' : "#64748b"
+                                                color: location.pathname === item.path ? '#2563eb' : '#64748b'
                                             }}
                                         >
                                             {item.icon}
@@ -186,7 +188,7 @@ export default function SidebarAdmin() {
                                     <ListItemButton
                                         component='a'
                                         href={item.path}
-                                        selected={item.label === 'Dashboard'}
+                                        selected={location.pathname === item.path}
                                         sx={{
                                             borderRadius: '8px',
                                             minHeight: 46,

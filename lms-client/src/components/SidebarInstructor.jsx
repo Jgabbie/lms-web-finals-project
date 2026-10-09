@@ -175,9 +175,8 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
                                 fullWidth
                                 onClick={handleLogout}
                                 startIcon={<Logout />}
-                                className={`!normal-case !text-slate-500 hover:!bg-red-50 hover:!text-red-600 !rounded-lg ${
-                                    open ? '!justify-start' : '!justify-center'
-                                }`}
+                                className={`!normal-case !text-slate-500 hover:!bg-red-50 hover:!text-red-600 !rounded-lg ${open ? '!justify-start' : '!justify-center'
+                                    }`}
                             >
                                 {open && 'Logout'}
                             </Button>

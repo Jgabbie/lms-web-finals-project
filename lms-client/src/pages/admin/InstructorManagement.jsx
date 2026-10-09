@@ -1,8 +1,9 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, CircularProgress } from '@mui/material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import api from '../../api/axiosClient'
-import Navbar from '../../components/Navbar'
+import NavbarAdmin from '../../components/NavbarAdmin'
+import SidebarAdmin from '../../components/SidebarAdmin'
 
 export default function ActivityLogs() {
     const [search, setSearch] = useState('')
@@ -15,9 +16,30 @@ export default function ActivityLogs() {
     const [openViewInstructor, setOpenViewInstructor] = useState(false)
     const [selectedInstructor, setSelectedInstructor] = useState(null)
 
+    const [sidebarOpen, setSidebarOpen] = useState(true)
+
     const [instructors, setInstructors] = useState([])
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    })
+
+    const showNotification = (message, severity = 'success') => {
+        setNotification({
+            open: true,
+            message,
+            severity
+        })
+    }
+
+    const closeNotification = (_, reason) => {
+        if (reason === 'clickaway') {
+            return
+        }
+        setNotification({ ...notification, open: false })
+    }
 
     const emptyForm = {
         firstName: '',
@@ -34,12 +56,15 @@ export default function ActivityLogs() {
     const fetchInstructors = async () => {
         try {
             setLoading(true)
-            setError('')
-            const response = await api.get('/instructors')
+
+            const response = await api.get('/instructors/instructors')
             setInstructors(response.data)
         } catch (error) {
             console.error('Error fetching instructors:', error)
-            setError(error.response?.data?.message || 'Failed to fetch instructors.')
+            showNotification(
+                'Failed to fetch instructors. Please try again later.',
+                'error'
+            )
         } finally {
             setLoading(false)
         }
@@ -56,23 +81,22 @@ export default function ActivityLogs() {
 
     const handleAddInstructor = async () => {
         if (!formData.firstName || !formData.lastName || !formData.email || !formData.department || !formData.specialization) {
-            setError('Please fill in all required fields.')
+            showNotification('Please fill in all required fields.', 'error')
             return
         }
 
         try {
             setSaving(true)
-            setError('')
 
-            await api.post('/add/instructors', formData)
-            alert('Instructor added successfully!')
+            await api.post('/instructors/add/instructors', formData)
+            showNotification('Instructor added successfully!', 'success')
 
             setFormData(emptyForm)
             setOpenAddInstructor(false)
             await fetchInstructors()
         } catch (error) {
             console.error('Error adding instructor:', error)
-            setError(error.response?.data?.message || 'Failed to add instructor.')
+            showNotification(error.response?.data?.message || 'Failed to add instructor.', 'error')
         } finally {
             setSaving(false)
         }
@@ -83,9 +107,8 @@ export default function ActivityLogs() {
 
         try {
             setSaving(true)
-            setError('')
 
-            await api.put(`/update/instructors/${selectedInstructor._id}`, formData)
+            await api.put(`/instructors/update/instructors/${selectedInstructor._id}`, formData)
 
             setOpenEditInstructor(false)
             setSelectedInstructor(null)
@@ -94,7 +117,7 @@ export default function ActivityLogs() {
 
         } catch (error) {
             console.error('Error editing instructor:', error)
-            setError(error.response?.data?.message || 'Failed to edit instructor.')
+            showNotification(error.response?.data?.message || 'Failed to edit instructor.', 'error')
         } finally {
             setSaving(false)
         }
@@ -106,16 +129,15 @@ export default function ActivityLogs() {
 
         try {
             setSaving(true)
-            setError('')
 
-            await api.delete(`/delete/instructors/${selectedInstructor._id}`)
+            await api.delete(`/instructors/delete/instructors/${selectedInstructor._id}`)
             setOpenDeleteInstructor(false)
             setSelectedInstructor(null)
 
             await fetchInstructors()
         } catch (error) {
             console.error('Error deleting instructor:', error)
-            setError(error.response?.data?.message || 'Failed to delete instructor.')
+            showNotification(error.response?.data?.message || 'Failed to delete instructor.', 'error')
         } finally {
             setSaving(false)
         }
@@ -147,243 +169,233 @@ export default function ActivityLogs() {
 
     return (
         <>
-            <Navbar />
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                <NavbarAdmin />
+                <SidebarAdmin
+                    open={sidebarOpen}
+                    setOpen={setSidebarOpen}
+                />
+                <div
+                    className='transition-all duration-300'
+                    style={{
+                        marginLeft: sidebarOpen ? '260px' : '72px'
+                    }}
+                >
+                    <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
 
-                        <div>
-                            <Typography variant='h4' className='!font-bold !text-slate-800'>
-                                Instructor Management
-                            </Typography>
-                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                Monitor instructor accounts, departments, and course assignments.
-                            </Typography>
+                            <div>
+                                <Typography variant='h4' className='!font-bold !text-slate-800'>
+                                    Instructor Management
+                                </Typography>
+                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                    Monitor instructor accounts, departments, and course assignments.
+                                </Typography>
+                            </div>
+
+                            <Button
+                                variant='contained'
+                                startIcon={<Add />}
+                                onClick={() => {
+                                    setFormData(emptyForm)
+                                    setOpenAddInstructor(true)
+                                }}
+                                className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
+                            >
+                                Add Instructor
+                            </Button>
                         </div>
 
-                        {error && (
-                            <Alert
-                                severity='error'
-                                onClose={() => setError('')}
-                                className='!mb-4'
-                            >
-                                {error}
-                            </Alert>
-                        )}
+
+                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                            {[
+                                ['Total Instructors', instructors.length],
+                                ['Active', instructors.filter(instructor => instructor.status?.toLowerCase() === 'active').length,],
+                                ['Inactive', instructors.filter(instructor => instructor.status?.toLowerCase() === 'inactive').length,],
+                                ['Specializations', new Set(instructors.map(instructor => instructor.specialization?.trim()).filter(Boolean)).size],
+                            ].map(([label, value]) => (
+                                <Card key={label} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
+                                    <CardContent className='!p-5'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            {label}
+                                        </Typography>
+                                        <Typography variant='h4' className='!font-bold !text-slate-800 !mt-1'>
+                                            {value}
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
 
 
-                        <Button
-                            variant='contained'
-                            startIcon={<Add />}
-                            onClick={() => {
-                                setFormData(emptyForm)
-                                setError('')
-                                setOpenAddInstructor(true)
-                            }}
-                            className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
-                        >
-                            Add Instructor
-                        </Button>
-                    </div>
+                        <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
+                            <CardContent className='!p-0'>
+                                <div className='grid grid-cols-1 md:grid-cols-[1fr_220px_180px] gap-3 p-5 border-b border-slate-200'>
+                                    <TextField
+                                        size='small'
+                                        placeholder='Search name, email, instructor ID or specialization...'
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        slotProps={{
+                                            startAdornment: <Search className='!text-slate-400 !mr-2' />
+                                        }}
+                                    />
+
+                                    <TextField
+                                        select
+                                        size='small'
+                                        label='Department'
+                                        value={departmentFilter}
+                                        onChange={(e) => setDepartmentFilter(e.target.value)}
+                                    >
+                                        <MenuItem value='All'>All Departments</MenuItem>
+                                        <MenuItem value='Information Technology'>Information Technology</MenuItem>
+                                        <MenuItem value='Computer Science'>Computer Science</MenuItem>
+                                        <MenuItem value='Information Systems'>Information Systems</MenuItem>
+                                    </TextField>
 
 
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
-                        {[
-                            ['Total Instructors', instructors.length],
-                            ['Active', instructors.filter(instructor => instructor.status?.toLowerCase() === 'active').length,],
-                            ['Inactive', instructors.filter(instructor => instructor.status?.toLowerCase() === 'inactive').length,],
-                            ['Assigned Courses', instructors.reduce((sum, instructor) => sum + instructor.courses, 0)],
-                        ].map(([label, value]) => (
-                            <Card key={label} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
-                                <CardContent className='!p-5'>
-                                    <Typography variant='body2' className='!text-slate-500'>
-                                        {label}
-                                    </Typography>
-                                    <Typography variant='h4' className='!font-bold !text-slate-800 !mt-1'>
-                                        {value}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                    <TextField
+                                        select
+                                        size='small'
+                                        label='Status'
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                    >
+                                        <MenuItem value='All'>All Status</MenuItem>
+                                        <MenuItem value='active'>Active</MenuItem>
+                                        <MenuItem value='inactive'>Inactive</MenuItem>
+                                    </TextField>
+                                </div>
 
-
-                    <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
-                        <CardContent className='!p-0'>
-                            <div className='grid grid-cols-1 md:grid-cols-[1fr_220px_180px] gap-3 p-5 border-b border-slate-200'>
-                                <TextField
-                                    size='small'
-                                    placeholder='Search name, email, instructor ID or specialization...'
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    InputProps={{
-                                        startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                    }}
-                                />
-
-                                <TextField
-                                    select
-                                    size='small'
-                                    label='Department'
-                                    value={departmentFilter}
-                                    onChange={(e) => setDepartmentFilter(e.target.value)}
-                                >
-                                    <MenuItem value='All'>All Departments</MenuItem>
-                                    <MenuItem value='Information Technology'>Information Technology</MenuItem>
-                                    <MenuItem value='Computer Science'>Computer Science</MenuItem>
-                                    <MenuItem value='Information Systems'>Information Systems</MenuItem>
-                                </TextField>
-
-
-                                <TextField
-                                    select
-                                    size='small'
-                                    label='Status'
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                >
-                                    <MenuItem value='All'>All Status</MenuItem>
-                                    <MenuItem value='active'>Active</MenuItem>
-                                    <MenuItem value='inactive'>Inactive</MenuItem>
-                                </TextField>
-                            </div>
-
-                            <div className='overflow-x-auto'>
-                                <table className='w-full min-w-[1000px] text-sm'>
-                                    <thead className='bg-slate-50 text-slate-500'>
-                                        <tr>
-                                            <th className='text-left font-semibold px-6 py-4'>Instructor</th>
-                                            <th className='text-left font-semibold px-6 py-4'>Department</th>
-                                            <th className='text-left font-semibold px-6 py-4'>Specialization</th>
-                                            <th className='text-left font-semibold px-6 py-4'>Courses</th>
-                                            <th className='text-left font-semibold px-6 py-4'>Status</th>
-                                            <th className='text-right font-semibold px-6 py-4'>Actions</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody className='divide-y divide-slate-100'>
-                                        {loading ? (
+                                <div className='overflow-x-auto'>
+                                    <table className='w-full min-w-[850px] text-sm'>
+                                        <thead className='bg-slate-50 text-slate-500'>
                                             <tr>
-                                                <td colSpan={6} className='px-6 py-4 text-center'>
-                                                    <CircularProgress size={24} className='!text-blue-600' />
-                                                    <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                        Loading instructors...
-                                                    </Typography>
-                                                </td>
+                                                <th className='text-left font-semibold px-6 py-4'>Instructor</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Department</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Specialization</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Status</th>
+                                                <th className='text-right font-semibold px-6 py-4'>Actions</th>
                                             </tr>
-                                        ) : (
-                                            filteredInstructors.map(instructor => (
-                                                <tr key={instructor.id} className='hover:bg-slate-50'>
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex items-center gap-3'>
-                                                            <Avatar className='!bg-blue-600'>
-                                                                {initials(`${instructor.firstName} ${instructor.lastName}`)}
-                                                            </Avatar>
+                                        </thead>
 
-                                                            <div>
-                                                                <Typography className='!font-semibold !text-slate-800'>
-                                                                    {instructor.firstName} {instructor.lastName}
-                                                                </Typography>
-                                                                <Typography variant='caption' className='!text-slate-500'>
-                                                                    {instructor.email}
-                                                                </Typography>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {instructor.department}
-                                                    </td>
-
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {instructor.specialization}
-                                                    </td>
-
-                                                    <td className='px-6 py-4'>
-                                                        <Chip
-                                                            size='small'
-                                                            label={`${instructor.courses} course${instructor.courses > 1 ? 's' : ''}`}
-                                                            className='!bg-blue-50 !text-blue-700'
-                                                        />
-                                                    </td>
-
-                                                    <td className='px-6 py-4'>
-                                                        <Chip
-                                                            size='small'
-                                                            label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
-                                                            className={
-                                                                instructor.status === 'active'
-                                                                    ? '!bg-green-50 !text-green-700'
-                                                                    : '!bg-slate-100 !text-slate-600'
-                                                            }
-                                                        />
-                                                    </td>
-
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex justify-end gap-1'>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='View'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setOpenEditInstructor(true)
-                                                                }}
-                                                            >
-                                                                <VisibilityOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='Edit'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setFormData({
-                                                                        firstName: instructor.firstName,
-                                                                        lastName: instructor.lastName,
-                                                                        email: instructor.email,
-                                                                        department: instructor.department,
-                                                                        specialization: instructor.specialization,
-                                                                        status: instructor.status,
-                                                                    })
-                                                                    setOpenEditInstructor(true)
-                                                                }}
-                                                            >
-                                                                <EditOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                color='error'
-                                                                title='Delete'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setOpenDeleteInstructor(true)
-                                                                }}
-                                                            >
-                                                                <DeleteOutlined fontSize='small' />
-                                                            </IconButton>
-                                                        </div>
+                                        <tbody className='divide-y divide-slate-100'>
+                                            {loading ? (
+                                                <tr>
+                                                    <td colSpan={5} className='px-6 py-4 text-center'>
+                                                        <CircularProgress size={24} className='!text-blue-600' />
+                                                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                            Loading instructors...
+                                                        </Typography>
                                                     </td>
                                                 </tr>
-                                            ))
-                                        )}
+                                            ) : (
+                                                filteredInstructors.map(instructor => (
+                                                    <tr key={instructor.id} className='hover:bg-slate-50'>
+                                                        <td className='px-6 py-4'>
+                                                            <div className='flex items-center gap-3'>
+                                                                <Avatar className='!bg-blue-600'>
+                                                                    {initials(`${instructor.firstName} ${instructor.lastName}`)}
+                                                                </Avatar>
 
-                                    </tbody>
-                                </table>
+                                                                <div>
+                                                                    <Typography className='!font-semibold !text-slate-800'>
+                                                                        {instructor.firstName} {instructor.lastName}
+                                                                    </Typography>
+                                                                    <Typography variant='caption' className='!text-slate-500'>
+                                                                        {instructor.email}
+                                                                    </Typography>
+                                                                </div>
+                                                            </div>
+                                                        </td>
 
-                                {filteredInstructors.length === 0 && (
-                                    <div className='py-14 text-center'>
-                                        <PersonOutlined className='!text-slate-300 !text-5xl' />
-                                        <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                            No instructors found
-                                        </Typography>
-                                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                            Try changing your search or filters.
-                                        </Typography>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </main >
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {instructor.department}
+                                                        </td>
+
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {instructor.specialization}
+                                                        </td>
+
+                                                        <td className='px-6 py-4'>
+                                                            <Chip
+                                                                size='small'
+                                                                label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
+                                                                className={
+                                                                    instructor.status === 'active'
+                                                                        ? '!bg-green-50 !text-green-700'
+                                                                        : '!bg-slate-100 !text-slate-600'
+                                                                }
+                                                            />
+                                                        </td>
+
+                                                        <td className='px-6 py-4'>
+                                                            <div className='flex justify-end gap-1'>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='View'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setOpenViewInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <VisibilityOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='Edit'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setFormData({
+                                                                            firstName: instructor.firstName,
+                                                                            lastName: instructor.lastName,
+                                                                            email: instructor.email,
+                                                                            department: instructor.department,
+                                                                            specialization: instructor.specialization,
+                                                                            status: instructor.status,
+                                                                        })
+                                                                        setOpenEditInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <EditOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    color='error'
+                                                                    title='Delete'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setOpenDeleteInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <DeleteOutlined fontSize='small' />
+                                                                </IconButton>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+
+                                        </tbody>
+                                    </table>
+
+                                    {filteredInstructors.length === 0 && (
+                                        <div className='py-14 text-center'>
+                                            <PersonOutlined className='!text-slate-300 !text-5xl' />
+                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                No instructors found
+                                            </Typography>
+                                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                Try changing your search or filters.
+                                            </Typography>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </main >
+                </div>
             </div >
 
             <Dialog
@@ -690,6 +702,23 @@ export default function ActivityLogs() {
                     </Button>
                 </DialogActions>
             </Dialog >
+
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={4000}
+                onClose={closeNotification}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={closeNotification}
+                    severity={notification.severity}
+                    variant='filled'
+                    elevation={6}
+                    sx={{ width: '100%' }}
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </>
     )
 }

@@ -21,14 +21,8 @@ export default function ActivityLogs() {
             }
             setError('')
 
-            const response = await api.get('/api/logs/logs')
-            const data = await response.json()
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to fetch logs')
-            }
-
-            console.log('Fetched logs:', data.logs)
+            const response = await api.get('/logs/logs')
+            const data = await response.data
 
             setLogs(data.logs || [])
 

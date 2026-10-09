@@ -41,6 +41,7 @@ exports.addInstructor = async (req, res) => {
             department,
             specialization,
             status,
+            role
         } = req.body;
 
         if (!firstName || !lastName || !email || !department || !specialization) {
@@ -117,6 +118,8 @@ exports.addInstructor = async (req, res) => {
             role: role || 'instructor',
         })
 
+        await instructor.save()
+
         res.status(201).json({
             message: 'Instructor added successfully',
             instructor: {
@@ -159,15 +162,20 @@ exports.updateInstructor = async (req, res) => {
             status,
         } = req.body
 
-        const instructor = await Instructor.findOne({ instructorId: instructorId.trim() })
+        const instructor = await Instructor.findById(req.params.id)
 
         if (!instructor) {
             return res.status(404).json({ message: 'Instructor not found' })
         }
 
         if (instructorId !== undefined) {
+            const normalizedInstructorId = String(instructorId).trim().toUpperCase()
+            if (!normalizedInstructorId) {
+                return res.status(400).json({ message: 'Instructor ID is required' })
+            }
+
             const existing = await Instructor.findOne({
-                instructorId: instructorId.trim(),
+                instructorId: normalizedInstructorId,
                 _id: { $ne: instructor._id }
             })
 
@@ -177,7 +185,7 @@ exports.updateInstructor = async (req, res) => {
                 })
             }
 
-            instructor.instructorId = instructorId.trim()
+            instructor.instructorId = normalizedInstructorId
         }
 
         if (firstName !== undefined) {
