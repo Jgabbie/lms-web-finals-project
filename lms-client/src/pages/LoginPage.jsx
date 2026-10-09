@@ -1,7 +1,7 @@
 import { TextField, Button, Checkbox, FormControlLabel, Typography, Link, InputAdornment, IconButton, Snackbar, Alert } from '@mui/material'
 import { VisibilityOff, Visibility, AssignmentReturnOutlined } from '@mui/icons-material'
 import { useState } from 'react'
-import axios from 'axios'
+import api from '../api/axiosClient'
 import { saveStoredProfile } from '../utils/profileStorage'
 
 export default function LoginPage({ onLogin }) {
@@ -86,7 +86,7 @@ export default function LoginPage({ onLogin }) {
         try {
             setLoading(true)
 
-            const res = await axios.post('http://localhost:5000/api/auth/login', { email: email.trim(), password });
+            const res = await api.post('/auth/login', { email: email.trim(), password });
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('role', res.data.role);
 

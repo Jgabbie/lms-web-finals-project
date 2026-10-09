@@ -1,7 +1,7 @@
 import { TextField, Button, Typography, Link, Snackbar, Alert, Box, Modal, InputAdornment, IconButton } from '@mui/material'
 import { VisibilityOff, Visibility } from '@mui/icons-material'
 import { useState } from 'react'
-import axios from 'axios'
+import api from '../api/axiosClient'
 import ResetPasswordGraphic from "../assets/graphics/undraw_secure-password_9qv4.svg"
 
 //test
@@ -76,7 +76,7 @@ export default function ResetPassword() {
         try {
             setLoading(true)
 
-            const response = await axios.post('http://localhost:5000/api/auth/forgot-password/send-otp',
+            const response = await api.post('/auth/forgot-password/send-otp',
                 {
                     email: email.trim().toLowerCase(),
                 }
@@ -118,7 +118,7 @@ export default function ResetPassword() {
             setOtpLoading(true)
             setOtpError('')
 
-            const response = await axios.post('http://localhost:5000/api/auth/forgot-password/verify-otp',
+            const response = await api.post('/auth/forgot-password/verify-otp',
                 {
                     email: email.trim().toLowerCase(),
                     otp: otp.trim()
@@ -150,7 +150,7 @@ export default function ResetPassword() {
             setResendLoading(true)
             setOtpError('')
 
-            const response = await axios.post('http://localhost:5000/api/auth/forgot-password/resend-otp',
+            const response = await api.post('/auth/forgot-password/resend-otp',
                 {
                     email: email.trim().toLowerCase(),
                 }
@@ -224,7 +224,7 @@ export default function ResetPassword() {
         try {
             setLoading(true)
 
-            const response = await axios.post('http://localhost:5000/api/auth/forgot-password/reset',
+            const response = await api.post('/auth/forgot-password/reset',
                 {
                     email: email.trim().toLowerCase(),
                     password,
