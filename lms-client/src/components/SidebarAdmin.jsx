@@ -1,6 +1,6 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
-import { Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
+import { PeopleOutlined, Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
 import { useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import api from '../api/axiosClient'
@@ -52,6 +52,11 @@ export default function SidebarAdmin() {
             label: 'Courses',
             icon: <MenuBook />,
             path: '/admin/courses'
+        },
+        {
+            label: 'Students',
+            icon: <PeopleOutlined />,
+            path: '/admin/students'
         },
         {
             label: 'Instructors',

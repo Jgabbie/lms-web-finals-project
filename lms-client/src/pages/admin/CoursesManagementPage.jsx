@@ -1,5 +1,5 @@
 import { Card, CardContent, Typography, MenuItem, Chip, TextField, IconButton } from '@mui/material'
-import { DeleteOutlined, PeopleOutlined, Search } from '@mui/icons-material'
+import { DeleteOutlined, PeopleOutlined, Search, MenuBookOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
@@ -166,8 +166,12 @@ export default function CoursesManagementPage() {
                                 </table>
                                 {filteredCourses.length === 0 && (
                                     <div className='py-12 text-center'>
-                                        <Typography className='!font-semibold !text-slate-700'>
+                                        <MenuBookOutlined className='!text-slate-300 !text-5xl' />
+                                        <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
                                             {loading ? 'Loading courses...' : 'No courses found'}
+                                        </Typography>
+                                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                            Try changing your search or course filter.
                                         </Typography>
                                     </div>
                                 )}
