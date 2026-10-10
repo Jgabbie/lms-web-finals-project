@@ -48,8 +48,8 @@ export default function StudentManagement() {
             const response = await api.get('/students', getAuthConfig())
             if (Array.isArray(response.data)) {
                 setStudents(response.data)
-            } else if (Array.isArray(response.data?.users)) {
-                setStudents(response.data.users)
+            } else if (Array.isArray(response.data?.students)) {
+                setStudents(response.data.students)
             } else if (Array.isArray(response.data?.data)) {
                 setStudents(response.data.data)
             } else {
@@ -92,6 +92,7 @@ export default function StudentManagement() {
             }
 
             await api.post('/students', {
+                studentId: formData.studentId.trim(),
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 email: formData.email.trim(),
@@ -375,7 +376,7 @@ export default function StudentManagement() {
                                         <div className='py-14 text-center'>
                                             <PersonOutlined className='!text-slate-300 !text-5xl' />
                                             <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                {loading ? 'Loading users...' : 'No users found'}
+                                                {loading ? 'Loading students...' : 'No students found'}
                                             </Typography>
                                             <Typography variant='body2' className='!text-slate-500 !mt-1'>
                                                 Try changing your search or status filter.

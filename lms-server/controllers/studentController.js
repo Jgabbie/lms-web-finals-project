@@ -45,7 +45,7 @@ exports.addStudent = async (req, res) => {
             status,
         } = req.body;
 
-        if (!studentId || !firstName || !lastName || !email || !course || !yearLevel) {
+        if (!studentId || !firstName || !lastName || !email || !course || !yearLevel || !status) {
             return res.status(400).json({ message: 'All fields are required' })
         }
 
