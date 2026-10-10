@@ -128,7 +128,7 @@ exports.addStudent = async (req, res) => {
             course: course.trim(),
             yearLevel: yearLevel.trim(),
             status: status || 'active',
-            role: role || 'instructor',
+            role: 'student',
         })
 
         await student.save()

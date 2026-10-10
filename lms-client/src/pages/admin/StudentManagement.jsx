@@ -27,6 +27,7 @@ export default function StudentManagement() {
     const [error, setError] = useState('')
 
     const [formData, setFormData] = useState({
+        studentId: '',
         firstName: '',
         lastName: '',
         email: '',
@@ -68,6 +69,7 @@ export default function StudentManagement() {
 
     const resetForm = () => {
         setFormData({
+            studentId: '',
             firstName: '',
             lastName: '',
             email: '',
@@ -86,7 +88,7 @@ export default function StudentManagement() {
     const handleAddStudent = async () => {
         try {
             setError('')
-            if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.course.trim() || !formData.yearLevel.trim()) {
+            if (!formData.studentId.trim() || !formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.course.trim() || !formData.yearLevel.trim()) {
                 setError('Please complete all required fields')
                 return
             }
@@ -123,6 +125,7 @@ export default function StudentManagement() {
                 email: student.email || '',
                 course: student.course || '',
                 yearLevel: student.yearLevel || '',
+                studentId: student.studentId || '',
                 status: student.status || 'Active'
             })
             setOpenEditStudent(true)
