@@ -42,6 +42,7 @@ app.use('/api/students', studentRouter)
 app.use('/api/user', userRouter)
 app.use('/api/users', userRouter)
 app.use('/api/notifications', notificationRouter)
+app.use('/api/discussions', require('./routes/discussionRouter'))
 
 
 app.listen(process.env.PORT, () => console.log(`Server on port ${process.env.PORT}`))
