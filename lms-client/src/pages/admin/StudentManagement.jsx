@@ -91,7 +91,7 @@ export default function StudentManagement() {
                 return
             }
 
-            await api.post('/add/students', {
+            await api.post('/students', {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 email: formData.email.trim(),
@@ -113,7 +113,7 @@ export default function StudentManagement() {
         try {
             setError('')
             if (!id) return
-            const response = await api.get(`/student/${id}`, getAuthConfig())
+            const response = await api.get(`/students/${id}`, getAuthConfig())
             const student = response.data
             setSelectedStudent(student)
             setFormData({
@@ -151,7 +151,7 @@ export default function StudentManagement() {
                 yearLevel: formData.yearLevel.trim(),
                 status: formData.status.toLowerCase()
             }
-            await api.put(`/update/students/${id}`, payload, getAuthConfig())
+            await api.put(`/students/${id}`, payload, getAuthConfig())
             setOpenEditStudent(false)
             resetForm()
             setMessage('Student updated successfully')
@@ -176,7 +176,7 @@ export default function StudentManagement() {
     const handleDeleteStudent = async (id) => {
         try {
             setError('')
-            await api.delete(`/delete/students/${id}`, getAuthConfig())
+            await api.delete(`/students/${id}`, getAuthConfig())
 
             setStudents(prev => prev.filter(student => student._id !== studentToDelete._id))
 
