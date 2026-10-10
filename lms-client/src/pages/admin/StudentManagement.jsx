@@ -141,13 +141,14 @@ export default function StudentManagement() {
             setError('Student ID is missing')
             return
         }
-        if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.course.trim() || !formData.yearLevel.trim()) {
+        if (!formData.studentId.trim() || !formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.course.trim() || !formData.yearLevel.trim()) {
             setError('Please complete all required fields')
             return
         }
         try {
             setError('')
             const payload = {
+                studentId: formData.studentId.trim(),
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 email: formData.email.trim(),

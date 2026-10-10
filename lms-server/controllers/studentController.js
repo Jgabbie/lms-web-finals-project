@@ -236,12 +236,12 @@ exports.updateStudent = async (req, res) => {
             student.email = normalizedEmail
         }
 
-        if (department !== undefined) {
-            student.department = department.trim()
+        if (course !== undefined) {
+            student.course = course.trim()
         }
 
-        if (specialization !== undefined) {
-            student.specialization = specialization.trim()
+        if (yearLevel !== undefined) {
+            student.yearLevel = yearLevel.trim()
         }
 
         if (status !== undefined) {
