@@ -2,10 +2,12 @@ import { Avatar, Badge, Card, CardContent, Typography, Button, Menu, MenuItem, C
 import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import Sidebar from '../components/Sidebar'
 import api from '../api/axiosClient'
 
 export default function NotificationsPage() {
 
+    const isStudent = localStorage.getItem('role') === 'student'
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState('All')
     const [anchorEl, setAnchorEl] = useState(null)
@@ -146,8 +148,9 @@ export default function NotificationsPage() {
     return (
         <>
             <Navbar />
+            {isStudent && <Sidebar />}
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <main className={`${isStudent ? 'ml-0 lg:ml-[260px] transition-all' : ''} max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
                     <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                         <div >
                             <div className='flex items-center gap-3'>

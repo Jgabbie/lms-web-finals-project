@@ -63,7 +63,7 @@ export default function ProfilePage() {
         setProfile(storedProfile)
         setDraft(storedProfile)
         try {
-            const response = await api.get('/profile')
+            const response = await api.get('/profile/user')
             const user = response?.data?.userData || response?.data?.user || {}
             const next = {
                 firstName: user?.firstName || '',
@@ -138,7 +138,7 @@ export default function ProfilePage() {
         try {
             setUploadingImage(true)
 
-            const response = await api.post('/profile/upload-image', formData)
+            const response = await api.post('/profile/profile/upload-image', formData)
 
             const imageUrl = response?.data?.profileImage || ''
 
@@ -182,7 +182,7 @@ export default function ProfilePage() {
 
         try {
             setSaving(true)
-            const response = await api.put('/profile', fields)
+            const response = await api.put('/profile/user/update', fields)
             const user = response?.data?.userData || response?.data?.user || {}
             const next = {
                 firstName: user?.firstName || '',

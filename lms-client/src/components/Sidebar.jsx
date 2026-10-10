@@ -1,6 +1,6 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip } from '@mui/material'
-import { Dashboard, MenuBook, Assignment, Menu, ChevronLeft, FolderCopy, Forum, Logout } from '@mui/icons-material'
+import { Dashboard, MenuBook, Assignment, Menu, ChevronLeft, FolderCopy, Forum, Logout, Person } from '@mui/icons-material'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getProfileInitials, getStoredProfile } from '../utils/profileStorage'
@@ -69,7 +69,7 @@ export default function Sidebar() {
     const accountMenu = [
         {
             label: 'Profile',
-            icon: <Avatar src={profile.profileImage || undefined} sx={{ width: 24, height: 24 }}>{getProfileInitials(profile)}</Avatar>,
+            icon: <Person />,
             path: '/profile'
         },
     ]
@@ -203,7 +203,7 @@ export default function Sidebar() {
                                                 minWidth: open ? 40 : 0,
                                                 mr: open ? 1 : 0,
                                                 justifyContent: 'center',
-                                                color: "#64748b"
+                                                color: location.pathname === item.path ? '#2563eb' : '#64748b'
                                             }}
                                         >
                                             {item.icon}
@@ -212,7 +212,7 @@ export default function Sidebar() {
                                         {open && (
                                             <ListItemText
                                                 primary={item.label}
-                                                primaryTyporgraphyProps={{
+                                                primaryTypographyProps={{
                                                     fontSize: 14,
                                                     fontWeight: 500
                                                 }}

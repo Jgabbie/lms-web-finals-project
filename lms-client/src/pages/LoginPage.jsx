@@ -1,5 +1,5 @@
 import { TextField, Button, Checkbox, FormControlLabel, Typography, Link, InputAdornment, IconButton, Snackbar, Alert } from '@mui/material'
-import { VisibilityOff, Visibility, AssignmentReturnOutlined } from '@mui/icons-material'
+import { VisibilityOff, Visibility } from '@mui/icons-material'
 import { useState } from 'react'
 import api from '../api/axiosClient'
 import { saveStoredProfile } from '../utils/profileStorage'
@@ -82,7 +82,7 @@ export default function LoginPage({ onLogin }) {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (!validateForm()) AssignmentReturnOutlined
+        if (!validateForm()) return
         try {
             setLoading(true)
 
