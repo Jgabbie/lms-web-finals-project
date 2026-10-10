@@ -581,7 +581,7 @@ export default function StudentManagement() {
                         </div>
 
                         <Typography variant='h6' className='!font-bold !text-slate-800'>
-                            Delete User Account?
+                            Delete Student Account?
                         </Typography>
 
                         <Typography variant='body2' className='!text-slate-500 !mt-2 !leading-6'>
