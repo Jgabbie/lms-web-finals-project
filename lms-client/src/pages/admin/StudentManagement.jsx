@@ -167,7 +167,7 @@ export default function StudentManagement() {
     }
 
     const handleOpenDelete = (student) => {
-        setSelectedStudent(student)
+        setStudentToDelete(student)
         setOpenDeleteDialog(true)
     }
 
@@ -178,8 +178,15 @@ export default function StudentManagement() {
         setStudentToDelete(null)
     }
 
-    const handleDeleteStudent = async (id) => {
+    const handleDeleteStudent = async () => {
+        const id = studentToDelete?._id || studentToDelete?.id
+        if (!id) {
+            setError('Student ID is missing')
+            return
+        }
+
         try {
+            setDeleteLoading(true)
             setError('')
             await api.delete(`/students/${id}`, getAuthConfig())
 
@@ -187,9 +194,12 @@ export default function StudentManagement() {
 
             setOpenDeleteDialog(false)
             setStudentToDelete(null)
+
             setMessage('Student deleted successfully')
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to delete student')
+        } finally {
+            setDeleteLoading(false)
         }
     }
 
