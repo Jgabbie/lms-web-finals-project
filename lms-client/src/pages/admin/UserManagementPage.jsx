@@ -507,17 +507,29 @@ export default function UserManagementPage() {
                                         </tbody>
                                     </table>
 
-                                    {filteredUsers.length === 0 && (
-                                        <div className='py-14 text-center'>
-                                            <PersonOutlined className='!text-slate-300 !text-5xl' />
-                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                {loading ? 'Loading users...' : 'No users found'}
-                                            </Typography>
-                                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                Try changing your search or role filter.
-                                            </Typography>
-                                        </div>
-                                    )}
+                                    {(activeTab === 'active'
+                                        ? filteredUsers
+                                        : archivedUsers.filter(
+                                            user => {
+                                                const matchesSearch =
+                                                    `${user.firstName || ''} ${user.lastName || ''} `.toLowerCase().includes(search.toLowerCase()) ||
+                                                    (user.email || '').toLowerCase().includes(search.toLowerCase())
+                                                const matchesRole =
+                                                    roleFilter === 'All' ||
+                                                    user.role?.toLowerCase() === roleFilter.toLowerCase()
+                                                return matchesSearch && matchesRole
+                                            }
+                                        )).length === 0 && (
+                                            <div className='py-14 text-center'>
+                                                <PersonOutlined className='!text-slate-300 !text-5xl' />
+                                                <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                    {loading ? 'Loading users...' : 'No users found'}
+                                                </Typography>
+                                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                    Try changing your search or role filter.
+                                                </Typography>
+                                            </div>
+                                        )}
                                 </div>
                             </CardContent>
                         </Card>
