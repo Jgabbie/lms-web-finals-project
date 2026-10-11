@@ -1,4 +1,4 @@
-import { Avatar, Card, CardContent, Typography, IconButton, MenuItem, Chip, TextField, Tooltip, } from '@mui/material'
+import { Avatar, Card, CardContent, Typography, IconButton, MenuItem, Chip, TextField, Tooltip, Pagination } from '@mui/material'
 import { AssignmentTurnedInOutlined, DeleteOutlined, EditOutlined, HistoryEduOutlined, HistoryOutlined, LoginOutlined, LogoutOutlined, PersonAddAltOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
@@ -6,6 +6,9 @@ import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function ActivityLogs() {
+    const [currentPage, setCurrentPage] = useState(1)
+    const logsPerPage = 10
+
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [search, setSearch] = useState('')
     const [actionFilter, setActionFilter] = useState('All')
@@ -30,6 +33,16 @@ export default function ActivityLogs() {
     useEffect(() => {
         fetchLogs()
     }, [fetchLogs])
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [search, actionFilter, roleFilter])
+
+    const indexOfLastLog = currentPage * logsPerPage
+    const indexOfFirstLog = indexOfLastLog - logsPerPage
+    const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog)
+
+    const totalPages = Math.ceil(filteredLogs.length / logsPerPage)
 
     const filteredLogs = useMemo(() => {
         const key = search.toLowerCase()
@@ -264,7 +277,7 @@ export default function ActivityLogs() {
                                         </tbody>
                                     </table>
 
-                                    {filteredLogs.length === 0 && (
+                                    {currentLogs.length === 0 && (
                                         <div className='py-14 text-center'>
                                             <HistoryOutlined className='!text-slate-300 !text-5xl' />
                                             <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
@@ -276,6 +289,21 @@ export default function ActivityLogs() {
                                         </div>
                                     )}
                                 </div>
+                                {filteredLogs.length > 0 && (
+                                    <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Showing {indexOfFirstLog + 1} -
+                                            {Math.min(indexOfLastLog, filteredLogs.length)} of {filteredLogs.length} logs
+                                        </Typography>
+                                        <Pagination
+                                            count={totalPages}
+                                            page={currentPage}
+                                            onChange={(event, page) => setCurrentPage(page)}
+                                            color='primary'
+                                            shape='rounded'
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </main >

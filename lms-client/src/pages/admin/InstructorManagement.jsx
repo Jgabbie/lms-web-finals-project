@@ -1,11 +1,17 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import api from '../../api/axiosClient'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
+import api from '../../api/axiosClient'
 
 export default function ActivityLogs() {
+    const [currentPage, setCurrentPage] = useState(1)
+    const usersPerPage = 10
+
+    const [activeTab, setActiveTab] = useState('active')
+    const [archivedUsers, setArchivedUsers] = useState([])
+
     const [instructors, setInstructors] = useState([])
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -60,6 +66,27 @@ export default function ActivityLogs() {
         }
     })
 
+    const fetchArchivedUsers = useCallback(() => {
+        return api.get('/instructors/archived/instructors', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+            .then(response => setArchivedUsers(response.data))
+            .catch(error => {
+                console.error('Error fetching archived users:', error)
+                showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+            })
+    }, [showNotification])
+
+    const restoreUser = async (id) => {
+        try {
+            await api.post(`/instructors/restore/instructors/${id}`, {}, getAuthConfig())
+            showNotification('User restored successfully', 'success')
+            await fetchInstructors()
+            await fetchArchivedUsers()
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to restore user', 'error')
+        }
+    }
+
+
     const requestFetchInstructors = useCallback(() => {
         return api.get('/instructors/instructors', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setInstructors(response.data)
@@ -82,10 +109,12 @@ export default function ActivityLogs() {
 
     useEffect(() => {
         requestFetchInstructors()
-    }, [requestFetchInstructors])
+        fetchArchivedUsers()
+    }, [requestFetchInstructors, fetchArchivedUsers])
 
     const validateInstructorForm = () => {
         const errors = {}
+
         const firstName = formData.firstName?.trim() || ''
         const lastName = formData.lastName?.trim() || ''
         const email = formData.email?.trim() || ''
@@ -269,6 +298,34 @@ export default function ActivityLogs() {
         })
     }, [instructors, search, statusFilter, departmentFilter])
 
+    const filteredArchivedInstructors = useMemo(() => {
+        const key = search.toLowerCase()
+        return archivedUsers.filter(instructor => {
+            const fullName = `${instructor.firstName} ${instructor.lastName}`.toLowerCase()
+
+            const matchesSearch =
+                fullName.includes(key) ||
+                instructor.email.toLowerCase().includes(key) ||
+                instructor.instructorId.toLowerCase().includes(key) ||
+                instructor.specialization.toLowerCase().includes(key)
+
+            const matchesDepartment =
+                departmentFilter === 'All' || instructor.department === departmentFilter
+            const matchesStatus =
+                statusFilter === 'All' || instructor.status?.toLowerCase() === statusFilter.toLowerCase()
+
+            return matchesSearch && matchesDepartment && matchesStatus
+        })
+    }, [archivedUsers, search, statusFilter, departmentFilter])
+
+    const displayedUsers = activeTab === 'active' ? filteredInstructors : filteredArchivedInstructors
+
+    const indexOfLastUser = currentPage * usersPerPage
+    const indexOfFirstUser = indexOfLastUser - usersPerPage
+    const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
+    const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
+
+
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
@@ -339,6 +396,20 @@ export default function ActivityLogs() {
                             ))}
                         </div>
 
+                        <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
+                            <button
+                                onClick={() => { setActiveTab('active'); setCurrentPage(1) }}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Active Users
+                            </button>
+                            <button
+                                onClick={() => { setActiveTab('archived'); setCurrentPage(1) }}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Archived Users ({archivedUsers.length})
+                            </button>
+                        </div>
 
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-0'>
@@ -347,7 +418,7 @@ export default function ActivityLogs() {
                                         size='small'
                                         placeholder='Search name, email, instructor ID or specialization...'
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
                                         slotProps={{
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
                                         }}
@@ -372,7 +443,7 @@ export default function ActivityLogs() {
                                         size='small'
                                         label='Status'
                                         value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                        onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1) }}
                                     >
                                         <MenuItem value='All'>All Status</MenuItem>
                                         <MenuItem value='active'>Active</MenuItem>
@@ -394,7 +465,7 @@ export default function ActivityLogs() {
 
                                         <tbody className='divide-y divide-slate-100'>
 
-                                            {filteredInstructors.map(instructor =>
+                                            {currentUsers.map((instructor) =>
                                                 <tr key={instructor.id} className='hover:bg-slate-50'>
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center gap-3'>
@@ -433,66 +504,102 @@ export default function ActivityLogs() {
                                                         />
                                                     </td>
 
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex justify-end gap-1'>
+                                                    <td className='px-6 py-4 text-right'>
+                                                        {activeTab === 'archived' ? (
                                                             <IconButton
                                                                 size='small'
-                                                                title='View'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setOpenViewInstructor(true)
-                                                                }}
+                                                                title='Restore'
+                                                                variant='outlined'
+                                                                onClick={() => restoreUser(instructor._id || instructor.id)}
                                                             >
-                                                                <VisibilityOutlined fontSize='small' />
+                                                                <RestoreFromTrash fontSize='small' />
                                                             </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='Edit'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setFormData({
-                                                                        firstName: instructor.firstName,
-                                                                        lastName: instructor.lastName,
-                                                                        email: instructor.email,
-                                                                        department: instructor.department,
-                                                                        specialization: instructor.specialization,
-                                                                        status: instructor.status,
-                                                                    })
-                                                                    setOpenEditInstructor(true)
-                                                                }}
-                                                            >
-                                                                <EditOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                color='error'
-                                                                title='Delete'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setOpenDeleteInstructor(true)
-                                                                }}
-                                                            >
-                                                                <DeleteOutlined fontSize='small' />
-                                                            </IconButton>
-                                                        </div>
+                                                        ) : (
+                                                            <div>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='View'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setOpenViewInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <VisibilityOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='Edit'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setFormData({
+                                                                            firstName: instructor.firstName,
+                                                                            lastName: instructor.lastName,
+                                                                            email: instructor.email,
+                                                                            role: instructor.role,
+                                                                            department: instructor.department,
+                                                                            specialization: instructor.specialization,
+                                                                            status: instructor.status,
+                                                                        })
+                                                                        setOpenEditInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <EditOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    color='error'
+                                                                    title='Delete'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setOpenDeleteInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <DeleteOutlined fontSize='small' />
+                                                                </IconButton>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             )}
                                         </tbody>
                                     </table>
 
-                                    {filteredInstructors.length === 0 && (
-                                        <div className='py-14 text-center'>
-                                            <PersonOutlined className='!text-slate-300 !text-5xl' />
-                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                {loading ? 'Loading instructors...' : 'No instructors found'}
-                                            </Typography>
-                                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                Try changing your search or filters.
-                                            </Typography>
-                                        </div>
-                                    )}
+                                    {(activeTab === 'active'
+                                        ? filteredInstructors
+                                        : archivedUsers.filter(
+                                            user => {
+                                                const matchesSearch =
+                                                    `${user.firstName || ''} ${user.lastName || ''} `.toLowerCase().includes(search.toLowerCase()) ||
+                                                    (user.email || '').toLowerCase().includes(search.toLowerCase())
+                                                return matchesSearch
+                                            }
+                                        )).length === 0 && (
+                                            <div className='py-14 text-center'>
+                                                <PersonOutlined className='!text-slate-300 !text-5xl' />
+                                                <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                    {loading ? 'Loading instructors...' : 'No instructors found'}
+                                                </Typography>
+                                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                    Try changing your search or filters.
+                                                </Typography>
+                                            </div>
+                                        )}
                                 </div>
+
+                                {displayedUsers.length > 0 && (
+                                    <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Showing {indexOfFirstUser + 1} - {Math.min(indexOfLastUser, filteredInstructors.length)} of {filteredInstructors.length} instructors
+                                        </Typography>
+                                        <Pagination
+                                            count={totalPages}
+                                            page={currentPage}
+                                            onChange={(event, page) => setCurrentPage(page)}
+                                            color='primary'
+                                            shape='rounded'
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </main >

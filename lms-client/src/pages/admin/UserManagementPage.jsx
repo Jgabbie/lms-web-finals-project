@@ -1,11 +1,17 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined } from '@mui/icons-material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function UserManagementPage() {
+    const [currentPage, setCurrentPage] = useState(1)
+    const usersPerPage = 10
+
+    const [activeTab, setActiveTab] = useState('active')
+    const [archivedUsers, setArchivedUsers] = useState([])
+
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -58,6 +64,26 @@ export default function UserManagementPage() {
         }
     })
 
+    const fetchArchivedUsers = useCallback(() => {
+        return api.get('/users/accounts/archived', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+            .then(response => setArchivedUsers(response.data))
+            .catch(error => {
+                console.error('Error fetching archived users:', error)
+                showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+            })
+    }, [showNotification])
+
+    const restoreUser = async (id) => {
+        try {
+            await api.post(`/users/account/restore/${id}`, {}, getAuthConfig())
+            showNotification('User restored successfully', 'success')
+            await fetchUsers()
+            await fetchArchivedUsers()
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to restore user', 'error')
+        }
+    }
+
     const requestFetchUsers = useCallback(() => {
         return api.get('/users/accounts', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setUsers(response.data)
@@ -77,7 +103,8 @@ export default function UserManagementPage() {
 
     useEffect(() => {
         requestFetchUsers()
-    }, [requestFetchUsers])
+        fetchArchivedUsers()
+    }, [requestFetchUsers, fetchArchivedUsers])
 
     const validateInstructorForm = () => {
         const errors = {}
@@ -245,6 +272,33 @@ export default function UserManagementPage() {
         })
     }, [users, search, roleFilter])
 
+    const filteredArchivedUsers = useMemo(() => {
+        const key = search.toLowerCase()
+        return archivedUsers.filter(user => {
+            const firstName = user.firstName || ''
+            const lastName = user.lastName || ''
+            const email = user.email || ''
+
+            const matchesSearch =
+                firstName.toLowerCase().includes(key) ||
+                lastName.toLowerCase().includes(key) ||
+                email.toLowerCase().includes(key)
+
+            const matchesRole =
+                roleFilter === 'All' || user.role?.toLowerCase() === roleFilter.toLowerCase()
+
+            return matchesSearch && matchesRole
+        })
+    }, [archivedUsers, search, roleFilter])
+
+    const displayedUsers = activeTab === 'active' ? filteredUsers : filteredArchivedUsers
+
+    const indexOfLastUser = currentPage * usersPerPage
+    const indexOfFirstUser = indexOfLastUser - usersPerPage
+    const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
+    const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
+
+
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
@@ -312,6 +366,21 @@ export default function UserManagementPage() {
                             ))}
                         </div>
 
+                        <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
+                            <button
+                                onClick={() => { setActiveTab('active'); setCurrentPage(1) }}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Active Users
+                            </button>
+                            <button
+                                onClick={() => { setActiveTab('archived'); setCurrentPage(1) }}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Archived Users ({archivedUsers.length})
+                            </button>
+                        </div>
+
                         {/* Filter Bar */}
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-0'>
@@ -320,7 +389,7 @@ export default function UserManagementPage() {
                                         size='small'
                                         placeholder='Search by name or email...'
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
                                         InputProps={{
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
                                         }}
@@ -330,7 +399,7 @@ export default function UserManagementPage() {
                                         size='small'
                                         label='Role'
                                         value={roleFilter}
-                                        onChange={(e) => setRoleFilter(e.target.value)}
+                                        onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1) }}
                                     >
                                         <MenuItem value='All'>All Roles</MenuItem>
                                         <MenuItem value='admin'>Administrator</MenuItem>
@@ -352,8 +421,8 @@ export default function UserManagementPage() {
                                             </tr>
                                         </thead>
                                         <tbody className='divide-y divide-slate-100'>
-                                            {filteredUsers.map((user, idx) => (
-                                                <tr key={user._id || user.id || idx} className='hover:bg-slate-50'>
+                                            {currentUsers.map((user) => (
+                                                <tr key={user._id || user.id} className='hover:bg-slate-50'>
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center gap-3'>
                                                             <Avatar className='!bg-blue-600 !text-sm'>
@@ -398,44 +467,60 @@ export default function UserManagementPage() {
                                                     </td>
                                                     <td className='px-6 py-4'>
                                                         <div className='flex justify-end gap-1'>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='View'
-                                                                onClick={() => {
-                                                                    setSelectedUser(user)
-                                                                    setOpenViewUser(true)
-                                                                }}
-                                                            >
-                                                                <VisibilityOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='Edit'
-                                                                onClick={() => {
-                                                                    setSelectedUser(user)
-                                                                    setFormData({
-                                                                        firstName: user.firstName,
-                                                                        lastName: user.lastName,
-                                                                        email: user.email,
-                                                                        role: user.role,
-                                                                        status: user.status,
-                                                                    })
-                                                                    setOpenEditUser(true)
-                                                                }}
-                                                            >
-                                                                <EditOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                color='error'
-                                                                title='Delete'
-                                                                onClick={() => {
-                                                                    setSelectedUser(user)
-                                                                    setOpenDeleteUser(true)
-                                                                }}
-                                                            >
-                                                                <DeleteOutlined fontSize='small' />
-                                                            </IconButton>
+
+                                                            <td className='px-6 py-4 text-right'>
+                                                                {activeTab === 'archived' ? (
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        title='Restore'
+                                                                        variant='outlined'
+                                                                        onClick={() => restoreUser(user._id || user.id)}
+                                                                    >
+                                                                        <RestoreFromTrash fontSize='small' />
+                                                                    </IconButton>
+                                                                ) : (
+                                                                    <div>
+                                                                        <IconButton
+                                                                            size='small'
+                                                                            title='View'
+                                                                            onClick={() => {
+                                                                                setSelectedUser(user)
+                                                                                setOpenViewUser(true)
+                                                                            }}
+                                                                        >
+                                                                            <VisibilityOutlined fontSize='small' />
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            size='small'
+                                                                            title='Edit'
+                                                                            onClick={() => {
+                                                                                setSelectedUser(user)
+                                                                                setFormData({
+                                                                                    firstName: user.firstName,
+                                                                                    lastName: user.lastName,
+                                                                                    email: user.email,
+                                                                                    role: user.role,
+                                                                                    status: user.status,
+                                                                                })
+                                                                                setOpenEditUser(true)
+                                                                            }}
+                                                                        >
+                                                                            <EditOutlined fontSize='small' />
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            size='small'
+                                                                            color='error'
+                                                                            title='Delete'
+                                                                            onClick={() => {
+                                                                                setSelectedUser(user)
+                                                                                setOpenDeleteUser(true)
+                                                                            }}
+                                                                        >
+                                                                            <DeleteOutlined fontSize='small' />
+                                                                        </IconButton>
+                                                                    </div>
+                                                                )}
+                                                            </td>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -443,18 +528,45 @@ export default function UserManagementPage() {
                                         </tbody>
                                     </table>
 
-                                    {filteredUsers.length === 0 && (
-                                        <div className='py-14 text-center'>
-                                            <PersonOutlined className='!text-slate-300 !text-5xl' />
-                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                {loading ? 'Loading users...' : 'No users found'}
-                                            </Typography>
-                                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                Try changing your search or role filter.
-                                            </Typography>
-                                        </div>
-                                    )}
+                                    {(activeTab === 'active'
+                                        ? filteredUsers
+                                        : archivedUsers.filter(
+                                            user => {
+                                                const matchesSearch =
+                                                    `${user.firstName || ''} ${user.lastName || ''} `.toLowerCase().includes(search.toLowerCase()) ||
+                                                    (user.email || '').toLowerCase().includes(search.toLowerCase())
+                                                const matchesRole =
+                                                    roleFilter === 'All' ||
+                                                    user.role?.toLowerCase() === roleFilter.toLowerCase()
+                                                return matchesSearch && matchesRole
+                                            }
+                                        )).length === 0 && (
+                                            <div className='py-14 text-center'>
+                                                <PersonOutlined className='!text-slate-300 !text-5xl' />
+                                                <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                    {loading ? 'Loading users...' : 'No users found'}
+                                                </Typography>
+                                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                    Try changing your search or role filter.
+                                                </Typography>
+                                            </div>
+                                        )}
                                 </div>
+
+                                {displayedUsers.length > 0 && (
+                                    <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Showing {indexOfFirstUser + 1} - {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+                                        </Typography>
+                                        <Pagination
+                                            count={totalPages}
+                                            page={currentPage}
+                                            onChange={(event, page) => setCurrentPage(page)}
+                                            color='primary'
+                                            shape='rounded'
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </main>

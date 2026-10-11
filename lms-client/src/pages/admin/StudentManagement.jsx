@@ -1,11 +1,17 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, } from '@mui/icons-material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function StudentManagement() {
+    const [currentPage, setCurrentPage] = useState(1)
+    const usersPerPage = 10
+
+    const [activeTab, setActiveTab] = useState('active')
+    const [archivedUsers, setArchivedUsers] = useState([])
+
     const [students, setStudents] = useState([])
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -60,6 +66,26 @@ export default function StudentManagement() {
         }
     })
 
+    const fetchArchivedUsers = useCallback(() => {
+        return api.get('/students/archived', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+            .then(response => setArchivedUsers(response.data))
+            .catch(error => {
+                console.error('Error fetching archived users:', error)
+                showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+            })
+    }, [showNotification])
+
+    const restoreUser = async (id) => {
+        try {
+            await api.post(`/students/restore/${id}`, {}, getAuthConfig())
+            showNotification('User restored successfully', 'success')
+            await fetchStudents()
+            await fetchArchivedUsers()
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to restore user', 'error')
+        }
+    }
+
     const requestFetchStudents = useCallback(() => {
         return api.get('/students', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setStudents(response.data)
@@ -79,7 +105,8 @@ export default function StudentManagement() {
 
     useEffect(() => {
         requestFetchStudents()
-    }, [requestFetchStudents])
+        fetchArchivedUsers()
+    }, [requestFetchStudents, fetchArchivedUsers])
 
     const validateStudentForm = () => {
         const errors = {}
@@ -282,6 +309,37 @@ export default function StudentManagement() {
         })
     }, [students, search, statusFilter])
 
+    const filteredArchivedStudents = useMemo(() => {
+        const key = search.toLowerCase()
+        return archivedUsers.filter(student => {
+            const firstName = student.firstName || ''
+            const lastName = student.lastName || ''
+            const email = student.email || ''
+            const course = student.course || ''
+            const yearLevel = student.yearLevel || ''
+
+            const matchesSearch =
+                firstName.toLowerCase().includes(key) ||
+                lastName.toLowerCase().includes(key) ||
+                email.toLowerCase().includes(key) ||
+                course.toLowerCase().includes(key) ||
+                yearLevel.toLowerCase().includes(key)
+            const matchesStatus =
+                statusFilter === 'All' || student.status?.toLowerCase() === statusFilter.toLowerCase()
+
+            return matchesSearch && matchesStatus
+        })
+    }, [archivedUsers, search, statusFilter])
+
+
+    const displayedUsers = activeTab === 'active' ? filteredStudents : filteredArchivedStudents
+
+    const indexOfLastUser = currentPage * usersPerPage
+    const indexOfFirstUser = indexOfLastUser - usersPerPage
+    const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
+    const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
+
+
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
@@ -342,6 +400,21 @@ export default function StudentManagement() {
                             ))}
                         </div>
 
+                        <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
+                            <button
+                                onClick={() => { setActiveTab('active'); setCurrentPage(1) }}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Active Users
+                            </button>
+                            <button
+                                onClick={() => { setActiveTab('archived'); setCurrentPage(1) }}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Archived Users ({archivedUsers.length})
+                            </button>
+                        </div>
+
                         {/* Filter Bar */}
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-0'>
@@ -350,7 +423,7 @@ export default function StudentManagement() {
                                         size='small'
                                         placeholder='Search by name or email...'
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
                                         InputProps={{
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
                                         }}
@@ -360,7 +433,7 @@ export default function StudentManagement() {
                                         size='small'
                                         label='Status'
                                         value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                        onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1) }}
                                     >
                                         <MenuItem value='All'>All Status</MenuItem>
                                         <MenuItem value='active'>Active</MenuItem>
@@ -383,8 +456,8 @@ export default function StudentManagement() {
                                             </tr>
                                         </thead>
                                         <tbody className='divide-y divide-slate-100'>
-                                            {filteredStudents.map((student, idx) => (
-                                                <tr key={student._id || student.id || idx} className='hover:bg-slate-50'>
+                                            {currentUsers.map((student) => (
+                                                <tr key={student._id || student.id} className='hover:bg-slate-50'>
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center gap-3'>
                                                             <Avatar className='!bg-blue-600 !text-sm'>
@@ -422,66 +495,102 @@ export default function StudentManagement() {
                                                             }
                                                         />
                                                     </td>
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex justify-end gap-1'>
+                                                    <td className='px-6 py-4 text-right'>
+                                                        {activeTab === 'archived' ? (
                                                             <IconButton
                                                                 size='small'
-                                                                title='View'
-                                                                onClick={() => {
-                                                                    setSelectedStudent(student)
-                                                                    setOpenViewStudent(true)
-                                                                }}
+                                                                title='Restore'
+                                                                variant='outlined'
+                                                                onClick={() => restoreUser(student._id || student.id)}
                                                             >
-                                                                <VisibilityOutlined fontSize='small' />
+                                                                <RestoreFromTrash fontSize='small' />
                                                             </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='Edit'
-                                                                onClick={() => {
-                                                                    setSelectedStudent(student)
-                                                                    setFormData({
-                                                                        firstName: student.firstName,
-                                                                        lastName: student.lastName,
-                                                                        email: student.email,
-                                                                        department: student.department,
-                                                                        specialization: student.specialization,
-                                                                        status: student.status,
-                                                                    })
-                                                                    setOpenEditStudent(true)
-                                                                }}
-                                                            >
-                                                                <EditOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                color='error'
-                                                                title='Delete'
-                                                                onClick={() => {
-                                                                    setSelectedStudent(student)
-                                                                    setOpenDeleteStudent(true)
-                                                                }}
-                                                            >
-                                                                <DeleteOutlined fontSize='small' />
-                                                            </IconButton>
-                                                        </div>
+                                                        ) : (
+                                                            <div>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='View'
+                                                                    onClick={() => {
+                                                                        setSelectedStudent(student)
+                                                                        setOpenViewStudent(true)
+                                                                    }}
+                                                                >
+                                                                    <VisibilityOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='Edit'
+                                                                    onClick={() => {
+                                                                        setSelectedStudent(student)
+                                                                        setFormData({
+                                                                            firstName: student.firstName,
+                                                                            lastName: student.lastName,
+                                                                            email: student.email,
+                                                                            role: student.role,
+                                                                            course: student.course,
+                                                                            yearLevel: student.yearLevel,
+                                                                            status: student.status,
+                                                                        })
+                                                                        setOpenEditStudent(true)
+                                                                    }}
+                                                                >
+                                                                    <EditOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    color='error'
+                                                                    title='Delete'
+                                                                    onClick={() => {
+                                                                        setSelectedStudent(student)
+                                                                        setOpenDeleteStudent(true)
+                                                                    }}
+                                                                >
+                                                                    <DeleteOutlined fontSize='small' />
+                                                                </IconButton>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
 
-                                    {filteredStudents.length === 0 && (
-                                        <div className='py-14 text-center'>
-                                            <PersonOutlined className='!text-slate-300 !text-5xl' />
-                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                {loading ? 'Loading students...' : 'No students found'}
-                                            </Typography>
-                                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                Try changing your search or status filter.
-                                            </Typography>
-                                        </div>
-                                    )}
+                                    {(activeTab === 'active'
+                                        ? filteredStudents
+                                        : archivedUsers.filter(
+                                            user => {
+                                                const matchesSearch =
+                                                    `${user.firstName || ''} ${user.lastName || ''} `.toLowerCase().includes(search.toLowerCase()) ||
+                                                    (user.email || '').toLowerCase().includes(search.toLowerCase())
+                                                return matchesSearch
+                                            }
+                                        )).length === 0 && (
+                                            <div className='py-14 text-center'>
+                                                <PersonOutlined className='!text-slate-300 !text-5xl' />
+                                                <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                    {loading ? 'Loading students...' : 'No students found'}
+                                                </Typography>
+                                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                    Try changing your search or status filter.
+                                                </Typography>
+                                            </div>
+                                        )}
                                 </div>
+
+                                {displayedUsers.length > 0 && (
+                                    <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Showing {indexOfFirstUser + 1} - {Math.min(indexOfLastUser, filteredStudents.length)} of {filteredStudents.length} students
+                                        </Typography>
+                                        <Pagination
+                                            count={totalPages}
+                                            page={currentPage}
+                                            onChange={(event, page) => setCurrentPage(page)}
+                                            color='primary'
+                                            shape='rounded'
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </main>
