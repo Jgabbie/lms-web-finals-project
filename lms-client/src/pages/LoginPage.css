@@ -93,4 +93,6 @@
 @media (prefers-reduced-motion: reduce) { .edulogin * { transition: none !important; animation: none !important; } }
 
 .edulogin .login-signup .MuiLink-root { color: var(--login-blue); }
+@media (min-width: 901px) { .login-story { height: max(680px, calc(100svh - 36px)); align-self: start; } }
+@media (max-width: 900px) and (min-width: 651px) { .login-story { height: max(620px, calc(100svh - 24px)); align-self: start; } }
 
