@@ -169,9 +169,9 @@ export default function UserManagementPage() {
     const handleAddUser = async () => {
         setFieldErrors({})
         if (!validateInstructorForm()) return
-        try {
-            setSaving(true)
 
+        setSaving(true)
+        try {
             await api.post('/users/account/add', {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
@@ -182,7 +182,8 @@ export default function UserManagementPage() {
             setOpenAddUser(false)
             resetForm()
             showNotification('User added successfully!', 'success')
-            await fetchUsers()
+
+            fetchUsers()
         } catch (error) {
             console.error('Error adding user:', error)
             showNotification(error.response?.data?.message || 'Failed to add user', 'error')
