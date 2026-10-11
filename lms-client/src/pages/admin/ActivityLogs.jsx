@@ -45,10 +45,17 @@ export default function ActivityLogs() {
                 log.user.toLowerCase().includes(key) ||
                 log.description.toLowerCase().includes(key)
 
+            const roleAliases = {
+                Administrator: 'admin',
+                Instructor: 'instructor',
+                Student: 'student',
+            }
+
+
             const matchesAction =
                 actionFilter === 'All' || log.action === actionFilter
             const matchesRole =
-                roleFilter === 'All' || log.role?.toLowerCase() === roleFilter.toLowerCase()
+                roleFilter === 'All' || log.role?.toLowerCase() === (roleAliases[roleFilter] || roleFilter.toLowerCase())
 
             return matchesSearch && matchesAction && matchesRole
         })

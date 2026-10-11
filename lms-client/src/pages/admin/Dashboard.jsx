@@ -2,45 +2,61 @@ import { Card, CardContent, Typography, Button, Chip, Divider } from '@mui/mater
 import { People, School, MenuBook, TrendingUp, ArrowForward, MoreVert, CheckCircle, AccessTime, PersonAdd, Assignment, } from '@mui/icons-material'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import api from '../../api/axiosClient'
 
 export default function Dashboard() {
 
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [dashboardData, setDashboardData] = useState(null)
+    const [loadingStats, setLoadingStats] = useState(true)
+    const [statsError, setStatsError] = useState(null)
+
+    useEffect(() => {
+        const fetchDashboardStats = async () => {
+            try {
+                setLoadingStats(true)
+                setStatsError(null)
+                const response = await api.get('/admin/dashboard-stats')
+                setDashboardData(response.data)
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error)
+                setStatsError('Failed to fetch dashboard statistics.')
+            } finally {
+                setLoadingStats(false)
+            }
+        }
+
+        fetchDashboardStats()
+    }, [])
+
+    const stats = dashboardData?.statistics
 
     const statistics = [
         {
             title: "Total Students",
-            value: "1,267",
-            change: "+14.2%",
-            description: "from last month",
+            value: stats?.totalStudents ?? "0",
             icon: <People />,
             iconBg: "bg-blue-100",
             iconColor: "text-blue-600"
         },
         {
             title: "Total Instructors",
-            value: "25",
-            change: "+2.2%",
-            description: "from last month",
+            value: stats?.totalInstructors ?? "0",
             icon: <School />,
             iconBg: "bg-purple-100",
             iconColor: "text-purple-600"
         },
         {
             title: "Total Courses",
-            value: "65",
-            change: "+7.2%",
-            description: "from last month",
+            value: stats?.totalCourses ?? "0",
             icon: <MenuBook />,
             iconBg: "bg-green-100",
             iconColor: "text-green-600"
         },
         {
-            title: "Completion Rate",
-            value: "68.3%",
-            change: "+7.2%",
-            description: "from last month",
+            title: "Active Students",
+            value: stats?.activeStudents ?? "0",
             icon: <CheckCircle />,
             iconBg: "bg-green-100",
             iconColor: "text-green-600"
@@ -48,59 +64,19 @@ export default function Dashboard() {
     ]
 
 
-    const recentStudents = [
-        {
-            name: "Maria Reyes",
-            value: "maria@example.com",
-            course: "Introduction to React",
-            date: "Today, 9:30 AM",
-            status: "Active"
-        },
-        {
-            name: "Maria Reyes",
-            value: "maria@example.com",
-            course: "Introduction to React",
-            date: "Today, 9:30 AM",
-            status: "Active"
-        },
-        {
-            name: "Maria Reyes",
-            value: "maria@example.com",
-            course: "Introduction to React",
-            date: "Today, 9:30 AM",
-            status: "Active"
-        },
-        {
-            name: "Maria Reyes",
-            value: "maria@example.com",
-            course: "Introduction to React",
-            date: "Today, 9:30 AM",
-            status: "Active"
-        },
-    ]
+    const recentStudents = (dashboardData?.recentStudents || []).map(student => ({
+        name: `${student.firstName} ${student.lastName}`,
+        email: student.email,
+        course: student.courseName || "N/A",
+        date: new Date(student.createdAt).toLocaleDateString(),
+        status: student.status === 'active' ? 'Active' : 'Inactive',
+    }))
 
-    const popularCourses = [
-        {
-            name: "Introduction to React",
-            students: 234,
-            progress: 67
-        },
-        {
-            name: "Introduction to React",
-            students: 234,
-            progress: 67
-        },
-        {
-            name: "Introduction to React",
-            students: 234,
-            progress: 67
-        },
-        {
-            name: "Introduction to React",
-            students: 234,
-            progress: 67
-        },
-    ]
+    const popularCourses = (dashboardData?.popularCourses || []).map(course => ({
+        name: course.courseName,
+        students: course.enrollmentCount,
+        progress: Math.min((course.enrollmentCount / 100) * 100, 100),
+    }))
 
     const activity = [
         {
