@@ -17,7 +17,7 @@ export default function SignupPage() {
     const [otpError, setOtpError] = useState('')
 
     const [otpLoading, setOtpLoading] = useState(false)
-    const [resendLoading, setResendLoading] = useState(false)
+    const [resendLoading] = useState(false)
 
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')

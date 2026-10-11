@@ -1,6 +1,6 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
@@ -13,9 +13,9 @@ export default function UserManagementPage() {
     const [archivedUsers, setArchivedUsers] = useState([])
 
     const [users, setUsers] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [deleteLoading, setDeleteLoading] = useState(false)
+    const [deleteLoading] = useState(false)
 
     const [openAddUser, setOpenAddUser] = useState(false)
     const [openEditUser, setOpenEditUser] = useState(false)
@@ -34,13 +34,13 @@ export default function UserManagementPage() {
         severity: 'success'
     })
 
-    const showNotification = (message, severity = 'success') => {
+    const showNotification = useCallback((message, severity = 'success') => {
         setNotification({
             open: true,
             message,
             severity
         })
-    }
+    }, [])
 
     const closeNotification = (_, reason) => {
         if (reason === 'clickaway') {
@@ -64,14 +64,14 @@ export default function UserManagementPage() {
         }
     })
 
-    const fetchArchivedUsers = async () => {
-        try {
-            const response = await api.get('/users/accounts/archived', getAuthConfig())
-            setArchivedUsers(response.data)
-        } catch (error) {
-            showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
-        }
-    }
+    const fetchArchivedUsers = useCallback(() => {
+        return api.get('/users/accounts/archived', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+            .then(response => setArchivedUsers(response.data))
+            .catch(error => {
+                console.error('Error fetching archived users:', error)
+                showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+            })
+    }, [showNotification])
 
     const restoreUser = async (id) => {
         try {
@@ -84,23 +84,27 @@ export default function UserManagementPage() {
         }
     }
 
-    const fetchUsers = async () => {
-        try {
-            setLoading(true)
-            const response = await api.get('/users/accounts', getAuthConfig())
+    const requestFetchUsers = useCallback(() => {
+        return api.get('/users/accounts', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setUsers(response.data)
-        } catch (error) {
+
+        }).catch((error) => {
             console.error('Error fetching users:', error)
             showNotification(error.response?.data?.message || 'Failed to retrieve users', 'error')
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
+    }, [showNotification])
+
+    const fetchUsers = async () => {
+        setLoading(true)
+        await requestFetchUsers()
     }
 
     useEffect(() => {
-        fetchUsers()
+        requestFetchUsers()
         fetchArchivedUsers()
-    }, [])
+    }, [requestFetchUsers, fetchArchivedUsers])
 
     const validateInstructorForm = () => {
         const errors = {}
@@ -285,7 +289,7 @@ export default function UserManagementPage() {
 
             return matchesSearch && matchesRole
         })
-    }, [users, search, roleFilter])
+    }, [archivedUsers, search, roleFilter])
 
     const displayedUsers = activeTab === 'active' ? filteredUsers : filteredArchivedUsers
 
@@ -294,9 +298,6 @@ export default function UserManagementPage() {
     const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
     const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
 
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [search, roleFilter, activeTab])
 
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
@@ -367,13 +368,13 @@ export default function UserManagementPage() {
 
                         <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
                             <button
-                                onClick={() => setActiveTab('active')}
+                                onClick={() => { setActiveTab('active'); setCurrentPage(1) }}
                                 className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
                             >
                                 Active Users
                             </button>
                             <button
-                                onClick={() => setActiveTab('archived')}
+                                onClick={() => { setActiveTab('archived'); setCurrentPage(1) }}
                                 className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
                             >
                                 Archived Users ({archivedUsers.length})
@@ -388,7 +389,7 @@ export default function UserManagementPage() {
                                         size='small'
                                         placeholder='Search by name or email...'
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
                                         InputProps={{
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
                                         }}
@@ -398,7 +399,7 @@ export default function UserManagementPage() {
                                         size='small'
                                         label='Role'
                                         value={roleFilter}
-                                        onChange={(e) => setRoleFilter(e.target.value)}
+                                        onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1) }}
                                     >
                                         <MenuItem value='All'>All Roles</MenuItem>
                                         <MenuItem value='admin'>Administrator</MenuItem>

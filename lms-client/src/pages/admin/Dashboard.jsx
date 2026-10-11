@@ -12,8 +12,8 @@ export default function Dashboard() {
     const [loadingActivity, setLoadingActivity] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [dashboardData, setDashboardData] = useState(null)
-    const [loadingStats, setLoadingStats] = useState(true)
-    const [statsError, setStatsError] = useState(null)
+    const [, setLoadingStats] = useState(true)
+    const [, setStatsError] = useState(null)
 
     const navigate = useNavigate()
     useEffect(() => {

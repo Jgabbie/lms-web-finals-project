@@ -1,13 +1,12 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
-import { PeopleOutlined, Dashboard, People, MenuBook, School, Assignment, Person, Settings, Logout, Menu, ChevronLeft } from '@mui/icons-material'
+import { PeopleOutlined, Dashboard, People, MenuBook, School, Assignment, Person, Logout, Menu, ChevronLeft } from '@mui/icons-material'
 import { useState } from 'react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import api from '../api/axiosClient'
 
 export default function SidebarAdmin() {
     const location = useLocation()
-    const navigate = useNavigate()
 
     const [open, setOpen] = useState(true)
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
@@ -237,7 +236,7 @@ export default function SidebarAdmin() {
                     <Divider />
 
                     <div className={`${open ? 'p-4' : 'p-2'}`}>
-                        <div className={`flex items-center 
+                        <div className={`flex items-center
                             ${open
                                 ? 'gap-3 mb-3'
                                 : 'justify-center mb-3'

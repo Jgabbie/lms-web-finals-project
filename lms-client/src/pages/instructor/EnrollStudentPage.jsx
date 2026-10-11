@@ -33,12 +33,11 @@ export default function EnrollStudentPage() {
     const [selectedStudents, setSelectedStudents] = useState([])
     const [students, setStudents] = useState([])
     const [sidebarOpen, setSidebarOpen] = useState(true)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
 
-    const loadData = useCallback(async () => {
-        try {
-            setLoading(true)
+    const requestLoadData = useCallback(() => {
+        const request = async () => {
             let loadedCourses = []
             try {
                 const coursesRes = await api.get('/courses')
@@ -55,22 +54,31 @@ export default function EnrollStudentPage() {
                 loadedCourses = [...storedCourses, ...DEFAULT_COURSES]
             }
 
+
+            return loadedCourses
+        }
+        return request().then((loadedCourses) => {
             setCourses(loadedCourses)
             setSelectedCourseId(prev => prev || loadedCourses[0]?._id || loadedCourses[0]?.courseCode || '')
-
-            const usersRes = await api.get('/user/accounts')
+            return api.get('/user/accounts')
+        }).then((usersRes) => {
             const allUsers = Array.isArray(usersRes.data) ? usersRes.data : []
             setStudents(allUsers.filter(u => u.role?.toLowerCase() === 'student'))
-        } catch (err) {
+        }).catch((err) => {
             console.error('Error loading enrollment data:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [])
 
+    const loadData = async () => {
+        setLoading(true)
+        await requestLoadData()
+    }
+
     useEffect(() => {
-        loadData()
-    }, [loadData])
+        requestLoadData()
+    }, [requestLoadData])
 
     // Find the currently selected course object
     const currentCourse = useMemo(() => {

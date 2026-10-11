@@ -11,16 +11,15 @@ export default function CoursePage() {
     const [courses, setCourses] = useState([])
     const [loading, setLoading] = useState(true)
 
-    const fetchMyCourses = useCallback(async () => {
-        try {
-            setLoading(true)
-            const res = await api.get('/courses/my-courses')
+    const fetchMyCourses = useCallback(() => {
+        return api.get('/courses/my-courses').then(async (res) => {
             setCourses(Array.isArray(res.data) ? res.data : [])
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Failed to fetch enrolled courses:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [])
 
     useEffect(() => {

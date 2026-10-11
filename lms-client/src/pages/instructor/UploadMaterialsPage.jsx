@@ -35,12 +35,13 @@ import api from '../../api/axiosClient'
 import { getStoredProfile } from '../../utils/profileStorage'
 
 export default function UploadMaterialsPage() {
+    const [fallbackDate] = useState(() => Date.now())
     const [search, setSearch] = useState('')
     const [courseFilter, setCourseFilter] = useState('All')
     const [typeFilter, setTypeFilter] = useState('All')
     const [openUpload, setOpenUpload] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(true)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [materials, setMaterials] = useState([])
     const [courses, setCourses] = useState([])
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
@@ -73,29 +74,33 @@ export default function UploadMaterialsPage() {
     const [selectedDeleteMaterial, setSelectedDeleteMaterial] = useState(null)
     const [deleting, setDeleting] = useState(false)
 
-    const fetchMaterials = useCallback(async () => {
-        try {
-            setLoading(true)
-            const [matRes, courseRes] = await Promise.all([
+    const requestFetchMaterials = useCallback(() => {
+        return Promise.all([
                 api.get('/materials'),
                 api.get('/courses')
-            ])
+            ]).then(async ([matRes, courseRes]) => {
             setMaterials(Array.isArray(matRes.data) ? matRes.data : [])
             const loadedCourses = Array.isArray(courseRes.data) ? courseRes.data : []
             setCourses(loadedCourses)
             if (loadedCourses.length > 0 && !form.course) {
                 setForm(prev => ({ ...prev, course: loadedCourses[0].courseName }))
             }
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Fetch materials error:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [form.course])
 
+    const fetchMaterials = async () => {
+        setLoading(true)
+        await requestFetchMaterials()
+    }
+
     useEffect(() => {
-        fetchMaterials()
-    }, [fetchMaterials])
+        requestFetchMaterials()
+    }, [requestFetchMaterials])
 
     const handleFormChange = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }))
@@ -369,7 +374,7 @@ export default function UploadMaterialsPage() {
                                                     <Chip size='small' label={material.type} variant='outlined' />
                                                 </td>
                                                 <td className='px-6 py-4 text-slate-600'>
-                                                    {new Date(material.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                                                    {new Date(material.createdAt || fallbackDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
                                                 </td>
                                                 <td className='px-6 py-4 text-slate-600'>{material.fileSize}</td>
                                                 <td className='px-6 py-4 text-right'>

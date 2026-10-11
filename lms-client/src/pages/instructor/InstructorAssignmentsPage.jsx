@@ -16,7 +16,6 @@ import {
     Tab
 } from '@mui/material'
 import {
-    AssignmentOutlined,
     RateReviewOutlined,
     CheckCircleOutlined,
     Search,
@@ -35,7 +34,7 @@ export default function InstructorAssignmentsPage() {
     const [statusFilter, setStatusFilter] = useState('All')
     const [courseFilter, setCourseFilter] = useState('All')
     const [courses, setCourses] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [, setLoading] = useState(false)
 
     // MongoDB records
     const [assignments, setAssignments] = useState([])
@@ -58,15 +57,12 @@ export default function InstructorAssignmentsPage() {
     const [gradeFeedback, setGradeFeedback] = useState('')
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
 
-    const fetchData = useCallback(async () => {
-        try {
-            setLoading(true)
-            const [coursesRes, assignRes, subsRes] = await Promise.all([
+    const requestFetchData = useCallback(() => {
+        return Promise.all([
                 api.get('/courses'),
                 api.get('/assignments'),
                 api.get('/assignments/submissions')
-            ])
-
+            ]).then(async ([coursesRes, assignRes, subsRes]) => {
             const loadedCourses = Array.isArray(coursesRes.data) ? coursesRes.data : []
             setCourses(loadedCourses)
             setAssignments(Array.isArray(assignRes.data) ? assignRes.data : [])
@@ -75,16 +71,22 @@ export default function InstructorAssignmentsPage() {
             if (loadedCourses.length > 0 && !assignmentForm.course) {
                 setAssignmentForm(prev => ({ ...prev, course: loadedCourses[0].courseName }))
             }
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Failed to load database records:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [assignmentForm.course])
 
+    const fetchData = async () => {
+        setLoading(true)
+        await requestFetchData()
+    }
+
     useEffect(() => {
-        fetchData()
-    }, [fetchData])
+        requestFetchData()
+    }, [requestFetchData])
 
     const courseOptions = ['All', ...new Set([...courses.map(c => c.courseName), ...assignments.map(a => a.course)])]
 

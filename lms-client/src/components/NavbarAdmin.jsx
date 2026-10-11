@@ -10,7 +10,7 @@ const pages = ['Dashboard', 'My Courses', 'Assignments', 'Grades']
 export default function NavbarAdmin() {
     const [anchorElNav, setAnchorElNav] = useState(null)
     const [anchorElUser, setAnchorElUser] = useState(null)
-    const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [sidebarOpen] = useState(true)
 
     const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget)
     const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget)

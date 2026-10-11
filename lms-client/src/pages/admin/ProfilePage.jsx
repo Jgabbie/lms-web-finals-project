@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography, Button, Avatar, Divider, TextField, Alert, CircularProgress, Snackbar, InputAdornment, IconButton, Modal } from '@mui/material'
 import { Person, Email, Lock, Edit, Save, Close, Visibility, VisibilityOff, PhotoCamera } from '@mui/icons-material'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import SidebarInstructor from '../../components/SidebarInstructor'
@@ -37,8 +37,8 @@ export default function ProfilePage() {
     const [passwordError, setPasswordError] = useState('')
     const [confirmPasswordError, setConfirmPasswordError] = useState('')
     const [otpError, setOtpError] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [otpLoading, setOtpLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [otpLoading] = useState(false)
     const [resendLoading, setResendLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -55,14 +55,8 @@ export default function ProfilePage() {
         return [profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'User'
     }, [profile])
 
-    const loadProfile = async () => {
-        setLoading(true)
-        setError(null)
-        const storedProfile = getStoredProfile()
-        setProfile(storedProfile)
-        setDraft(storedProfile)
-        try {
-            const response = await api.get('/profile/user')
+    const loadProfile = useCallback(() => {
+        return api.get('/profile/user').then(async (response) => {
             const user = response?.data?.userData || response?.data?.user || {}
             const next = {
                 firstName: user?.firstName || '',
@@ -74,17 +68,18 @@ export default function ProfilePage() {
             saveStoredProfile(next)
             setProfile(next)
             setDraft(next)
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Error loading profile:', err)
             setError(getApiMessage(err, 'Failed to load profile'))
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
-    }
+        })
+    }, [])
 
     useEffect(() => {
         loadProfile()
-    }, [])
+    }, [loadProfile])
 
     const updateDraft = (field) => (event) => {
         setDraft((prev) => ({ ...prev, [field]: event.target.value }))

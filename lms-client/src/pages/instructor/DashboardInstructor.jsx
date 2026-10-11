@@ -15,25 +15,24 @@ export default function DashboardInstructor() {
     const [submissions, setSubmissions] = useState([])
     const navigate = useNavigate()
 
-    const fetchDashboardData = useCallback(async () => {
-        try {
-            setLoading(true)
-            const [coursesRes, usersRes, assignRes, subsRes] = await Promise.all([
+    const fetchDashboardData = useCallback(() => {
+        return Promise.all([
                 api.get('/courses'),
                 api.get('/user/accounts'),
                 api.get('/assignments'),
                 api.get('/assignments/submissions')
-            ])
+            ]).then(async ([coursesRes, usersRes, assignRes, subsRes]) => {
             setCourses(Array.isArray(coursesRes.data) ? coursesRes.data : [])
             const allUsers = Array.isArray(usersRes.data) ? usersRes.data : []
             setStudents(allUsers.filter(u => u.role?.toLowerCase() === 'student'))
             setAssignments(Array.isArray(assignRes.data) ? assignRes.data : [])
             setSubmissions(Array.isArray(subsRes.data) ? subsRes.data : [])
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Error loading dashboard data:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [])
 
     useEffect(() => {

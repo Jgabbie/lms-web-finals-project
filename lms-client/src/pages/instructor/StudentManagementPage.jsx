@@ -12,7 +12,7 @@ import {
     DialogActions,
     Divider
 } from '@mui/material'
-import { Search, SchoolOutlined, MenuBookOutlined, EmailOutlined } from '@mui/icons-material'
+import { Search, MenuBookOutlined, EmailOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
@@ -22,28 +22,27 @@ export default function StudentManagementPage() {
     const [search, setSearch] = useState('')
     const [students, setStudents] = useState([])
     const [courses, setCourses] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(true)
 
     // Modal state for student course details
     const [selectedStudent, setSelectedStudent] = useState(null)
     const [detailsModalOpen, setDetailsModalOpen] = useState(false)
 
-    const fetchData = useCallback(async () => {
-        try {
-            setLoading(true)
-            const [usersRes, coursesRes] = await Promise.all([
+    const fetchData = useCallback(() => {
+        return Promise.all([
                 api.get('/user/accounts'),
                 api.get('/courses')
-            ])
+            ]).then(async ([usersRes, coursesRes]) => {
             const allUsers = Array.isArray(usersRes.data) ? usersRes.data : []
             setStudents(allUsers.filter(u => u.role?.toLowerCase() === 'student'))
             setCourses(Array.isArray(coursesRes.data) ? coursesRes.data : [])
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Failed to fetch students or courses:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [])
 
     useEffect(() => {

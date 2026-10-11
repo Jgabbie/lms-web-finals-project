@@ -16,22 +16,22 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import api from '../../api/axiosClient'
 
 export default function LearningMaterialsPage() {
+    const [fallbackDate] = useState(() => Date.now())
     const [search, setSearch] = useState('')
     const [courseFilter, setCourseFilter] = useState('All')
     const [typeFilter, setTypeFilter] = useState('All')
     const [materials, setMaterials] = useState([])
     const [loading, setLoading] = useState(true)
 
-    const fetchMaterials = useCallback(async () => {
-        try {
-            setLoading(true)
-            const res = await api.get('/materials')
+    const fetchMaterials = useCallback(() => {
+        return api.get('/materials').then(async (res) => {
             setMaterials(Array.isArray(res.data) ? res.data : [])
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Failed to fetch materials:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [])
 
     useEffect(() => {
@@ -181,7 +181,7 @@ export default function LearningMaterialsPage() {
                                             </Typography>
                                             <div className='flex items-center justify-between mt-1'>
                                                 <Typography variant='caption' className='!text-slate-400'>
-                                                    {new Date(material.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                                                    {new Date(material.createdAt || fallbackDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
                                                 </Typography>
                                                 <Typography variant='caption' className='!text-slate-400'>
                                                     {material.fileSize}

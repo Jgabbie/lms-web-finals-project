@@ -1,6 +1,6 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
@@ -35,13 +35,13 @@ export default function ActivityLogs() {
         severity: 'success'
     })
 
-    const showNotification = (message, severity = 'success') => {
+    const showNotification = useCallback((message, severity = 'success') => {
         setNotification({
             open: true,
             message,
             severity
         })
-    }
+    }, [])
 
     const closeNotification = (_, reason) => {
         if (reason === 'clickaway') {
@@ -66,15 +66,14 @@ export default function ActivityLogs() {
         }
     })
 
-    const fetchArchivedUsers = async () => {
-        try {
-            const response = await api.get('/instructors/archived/instructors', getAuthConfig())
-            setArchivedUsers(response.data)
-        } catch (error) {
-            console.error('Error fetching archived users:', error)
-            showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
-        }
-    }
+    const fetchArchivedUsers = useCallback(() => {
+        return api.get('/instructors/archived/instructors', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+            .then(response => setArchivedUsers(response.data))
+            .catch(error => {
+                console.error('Error fetching archived users:', error)
+                showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+            })
+    }, [showNotification])
 
     const restoreUser = async (id) => {
         try {
@@ -88,26 +87,30 @@ export default function ActivityLogs() {
     }
 
 
-    const fetchInstructors = async () => {
-        try {
-            setLoading(true)
-            const response = await api.get('/instructors/instructors', getAuthConfig())
+    const requestFetchInstructors = useCallback(() => {
+        return api.get('/instructors/instructors', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setInstructors(response.data)
-        } catch (error) {
+
+        }).catch((error) => {
             console.error('Error fetching instructors:', error)
             showNotification(
                 'Failed to fetch instructors. Please try again later.',
                 'error'
             )
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
+    }, [showNotification])
+
+    const fetchInstructors = async () => {
+        setLoading(true)
+        await requestFetchInstructors()
     }
 
     useEffect(() => {
-        fetchInstructors()
+        requestFetchInstructors()
         fetchArchivedUsers()
-    }, [])
+    }, [requestFetchInstructors, fetchArchivedUsers])
 
     const validateInstructorForm = () => {
         const errors = {}
@@ -322,9 +325,6 @@ export default function ActivityLogs() {
     const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
     const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
 
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [search, statusFilter, activeTab])
 
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
@@ -398,13 +398,13 @@ export default function ActivityLogs() {
 
                         <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
                             <button
-                                onClick={() => setActiveTab('active')}
+                                onClick={() => { setActiveTab('active'); setCurrentPage(1) }}
                                 className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
                             >
                                 Active Users
                             </button>
                             <button
-                                onClick={() => setActiveTab('archived')}
+                                onClick={() => { setActiveTab('archived'); setCurrentPage(1) }}
                                 className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
                             >
                                 Archived Users ({archivedUsers.length})
@@ -418,7 +418,7 @@ export default function ActivityLogs() {
                                         size='small'
                                         placeholder='Search name, email, instructor ID or specialization...'
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
                                         slotProps={{
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
                                         }}
@@ -443,7 +443,7 @@ export default function ActivityLogs() {
                                         size='small'
                                         label='Status'
                                         value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                        onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1) }}
                                     >
                                         <MenuItem value='All'>All Status</MenuItem>
                                         <MenuItem value='active'>Active</MenuItem>
