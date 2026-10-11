@@ -138,3 +138,13 @@
 .edu-dashboard:has(.MuiDrawer-paper > .justify-center) .MuiDrawer-paper > div:first-child .MuiTypography-root { display:none!important; }
 .edu-dashboard:has(.MuiDrawer-paper > .justify-center) > .MuiIconButton-root { left:14px!important; top:20px!important; width:44px; height:44px; background:transparent!important; border-color:#ffffff25!important; box-shadow:none!important; }
 }
+
+@layer utilities {
+ .edu-dashboard .dashboard-welcome { container-type:inline-size; }
+ .edu-dashboard .dashboard-welcome::before {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background-image:linear-gradient(90deg,#052b3870,#052b3830),url('../../assets/images/student-header-photos.png');
+  background-repeat:no-repeat; background-size:100% 100%,auto max(350%,78cqw); background-position:center,.4% 6%;
+ }
+ .edu-dashboard .dashboard-welcome-art { display:none; }
+}

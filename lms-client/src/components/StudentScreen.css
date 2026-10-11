@@ -209,3 +209,21 @@
   .edu-role-instructor .MuiIconButton-root[class*="!fixed"] { color:#073342!important; }
  }
 }
+
+/* Approved photo sheet: crop each scene in CSS without changing page content. */
+@layer utilities {
+ .edu-role-student:is(.student-courses,.student-assignments,.student-materials,.student-discussions,.student-profile) .student-page-heading { container-type:inline-size; }
+ .edu-role-student:is(.student-courses,.student-assignments,.student-materials,.student-discussions,.student-profile) .student-page-heading::before {
+  content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background-image:linear-gradient(90deg,#052b3870,#052b3820),url('../assets/images/student-header-photos.png');
+  background-repeat:no-repeat;
+  background-size:100% 100%,auto max(350%,78cqw);
+  background-position:center,var(--header-photo-position);
+ }
+ .edu-role-student.student-courses { --header-photo-position:99.6% 6%; }
+ .edu-role-student.student-assignments { --header-photo-position:.4% 53%; }
+ .edu-role-student.student-materials { --header-photo-position:99.6% 53%; }
+ .edu-role-student.student-discussions { --header-photo-position:.4% 99.6%; }
+ .edu-role-student.student-profile { --header-photo-position:99.6% 99.6%; }
+ .edu-role-student:is(.student-courses,.student-assignments,.student-materials,.student-discussions,.student-profile) .student-page-heading::after { display:none; }
+}
