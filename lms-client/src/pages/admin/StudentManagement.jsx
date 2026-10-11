@@ -23,9 +23,28 @@ export default function StudentManagement() {
     const [search, setSearch] = useState('')
 
 
-    const [message, setMessage] = useState('')
-    const [error, setError] = useState('')
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    })
 
+    const showNotification = (message, severity = 'success') => {
+        setNotification({
+            open: true,
+            message,
+            severity
+        })
+    }
+
+    const closeNotification = (_, reason) => {
+        if (reason === 'clickaway') {
+            return
+        }
+        setNotification({ ...notification, open: false })
+    }
+
+    const [fieldErrors, setFieldErrors] = useState({})
     const [formData, setFormData] = useState({
         studentId: '',
         firstName: '',
@@ -45,7 +64,6 @@ export default function StudentManagement() {
     const fetchStudents = useCallback(async () => {
         try {
             setLoading(true)
-            setError('')
             const response = await api.get('/students', getAuthConfig())
             if (Array.isArray(response.data)) {
                 setStudents(response.data)
@@ -57,7 +75,7 @@ export default function StudentManagement() {
                 setStudents([])
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to retrieve students')
+            showNotification(err.response?.data?.message || 'Failed to retrieve students', 'error')
         } finally {
             setLoading(false)
         }
@@ -66,6 +84,76 @@ export default function StudentManagement() {
     useEffect(() => {
         fetchStudents()
     }, [fetchStudents])
+
+    const validateStudentForm = () => {
+        const errors = {}
+
+        const studentId = formData.studentId?.trim()
+        const firstName = formData.firstName?.trim()
+        const lastName = formData.lastName?.trim()
+        const email = formData.email?.trim()
+        const course = formData.course?.trim()
+        const yearLevel = formData.yearLevel?.trim()
+
+        if (!studentId) {
+            errors.studentId = 'Student ID is required'
+        } else if (!/^\d{4}-\d{6}$/.test(studentId)) {
+            errors.studentId = 'Format must be YYYY-NNNNNN (e.g., 2023-123456)'
+        }
+
+        const namePattern = /^[\p{L}]+(?:['\u{2019}]?[\p{L}]+)*$/u
+
+        if (!firstName) {
+            errors.firstName = 'First Name is required'
+        } else if (firstName.length < 2) {
+            errors.firstName = 'First Name must be at least 2 characters long'
+        } else if (firstName.length > 50) {
+            errors.firstName = 'First Name must not exceed 50 characters'
+        } else if (!namePattern.test(firstName)) {
+            errors.firstName = 'Please enter a valid first name'
+        }
+
+        if (!lastName) {
+            errors.lastName = 'Last Name is required'
+        } else if (lastName.length < 2) {
+            errors.lastName = 'Last Name must be at least 2 characters long'
+        } else if (lastName.length > 50) {
+            errors.lastName = 'Last Name must not exceed 50 characters'
+        } else if (!namePattern.test(lastName)) {
+            errors.lastName = 'Please enter a valid last name'
+        }
+
+        if (!email) {
+            errors.email = 'Email is required'
+        } else if (email.length < 6) {
+            errors.email = 'Email must be at least 6 characters'
+        } else if (email.length > 100) {
+            errors.email = 'Email must not exceed 100 characters'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.email = 'Please enter a valid email address'
+        }
+
+        if (!course) {
+            errors.course = 'Course is required'
+        } else if (course.length < 2) {
+            errors.course = 'Course must be at least 2 characters'
+        } else if (course.length > 100) {
+            errors.course = 'Course must not exceed 100 characters'
+        }
+
+        if (!yearLevel) {
+            errors.yearLevel = 'Year Level is required'
+        } else if (yearLevel.length < 1) {
+            errors.yearLevel = 'Year Level must be at least 1 character'
+        } else if (yearLevel.length > 10) {
+            errors.yearLevel = 'Year Level must not exceed 10 characters'
+        }
+
+        setFieldErrors(errors)
+
+        return Object.keys(errors).length === 0
+    }
+
 
     const resetForm = () => {
         setFormData({
@@ -83,15 +171,18 @@ export default function StudentManagement() {
     const handleFormChange = (e) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
+        setFieldErrors(prev => ({ ...prev, [name]: '' }))
+        setNotification({ ...notification, open: false })
     }
 
     const handleAddStudent = async () => {
+        setFieldErrors({})
+        if (!validateStudentForm()) {
+            return
+        }
+
         try {
-            setError('')
-            if (!formData.studentId.trim() || !formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.course.trim() || !formData.yearLevel.trim()) {
-                setError('Please complete all required fields')
-                return
-            }
+            setSaving(true)
 
             await api.post('/students', {
                 studentId: formData.studentId.trim(),
@@ -105,16 +196,16 @@ export default function StudentManagement() {
 
             setOpenAddStudent(false)
             resetForm()
-            setMessage('Student added successfully')
+            showNotification('Student added successfully', 'success')
             await fetchStudents()
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to add student')
+        } catch (error) {
+            console.error('Add student error:', error)
+            showNotification(error.response?.data?.message || 'Failed to add student', 'error')
         }
     }
 
     const handleOpenEdit = async (id) => {
         try {
-            setError('')
             if (!id) return
             const response = await api.get(`/students/${id}`, getAuthConfig())
             const student = response.data
@@ -129,8 +220,8 @@ export default function StudentManagement() {
                 status: student.status || 'Active'
             })
             setOpenEditStudent(true)
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to retrieve student')
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to retrieve student', 'error')
         }
     }
 
@@ -138,15 +229,10 @@ export default function StudentManagement() {
     const handleUpdateStudent = async () => {
         const id = selectedStudent?._id || selectedStudent?.id
         if (!id) {
-            setError('Student ID is missing')
-            return
-        }
-        if (!formData.studentId.trim() || !formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() || !formData.course.trim() || !formData.yearLevel.trim()) {
-            setError('Please complete all required fields')
+            showNotification('Student ID is missing', 'error')
             return
         }
         try {
-            setError('')
             const payload = {
                 studentId: formData.studentId.trim(),
                 firstName: formData.firstName.trim(),
@@ -159,10 +245,10 @@ export default function StudentManagement() {
             await api.put(`/students/${id}`, payload, getAuthConfig())
             setOpenEditStudent(false)
             resetForm()
-            setMessage('Student updated successfully')
+            showNotification('Student updated successfully', 'success')
             await fetchStudents()
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update student')
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to update student', 'error')
         }
     }
 
@@ -181,13 +267,12 @@ export default function StudentManagement() {
     const handleDeleteStudent = async () => {
         const id = studentToDelete?._id || studentToDelete?.id
         if (!id) {
-            setError('Student ID is missing')
+            showNotification('Student ID is missing', 'error')
             return
         }
 
         try {
             setDeleteLoading(true)
-            setError('')
             await api.delete(`/students/${id}`, getAuthConfig())
 
             setStudents(prev => prev.filter(student => student._id !== studentToDelete._id))
@@ -195,9 +280,9 @@ export default function StudentManagement() {
             setOpenDeleteDialog(false)
             setStudentToDelete(null)
 
-            setMessage('Student deleted successfully')
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to delete student')
+            showNotification('Student deleted successfully', 'success')
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to delete student', 'error')
         } finally {
             setDeleteLoading(false)
         }
@@ -419,10 +504,14 @@ export default function StudentManagement() {
 
                         <TextField
                             fullWidth
+                            required
                             label='Student Number'
                             name='studentId'
                             value={formData.studentId}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.studentId)}
+                            helperText={fieldErrors.studentId}
+                            inputProps={{ maxLength: 11 }}
                         />
                         <TextField
                             fullWidth
@@ -430,6 +519,9 @@ export default function StudentManagement() {
                             name='firstName'
                             value={formData.firstName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.firstName)}
+                            helperText={fieldErrors.firstName}
+                            inputProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -437,6 +529,9 @@ export default function StudentManagement() {
                             name='lastName'
                             value={formData.lastName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.lastName)}
+                            helperText={fieldErrors.lastName}
+                            inputProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -445,6 +540,9 @@ export default function StudentManagement() {
                             name='email'
                             value={formData.email}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.email)}
+                            helperText={fieldErrors.email}
+                            inputProps={{ maxLength: 100 }}
                         />
                         <TextField
                             fullWidth
@@ -453,6 +551,9 @@ export default function StudentManagement() {
                             name='course'
                             value={formData.course}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.course)}
+                            helperText={fieldErrors.course}
+                            inputProps={{ maxLength: 100 }}
                         />
                         <TextField
                             fullWidth
@@ -461,6 +562,9 @@ export default function StudentManagement() {
                             name='yearLevel'
                             value={formData.yearLevel}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.yearLevel)}
+                            helperText={fieldErrors.yearLevel}
+                            inputProps={{ maxLength: 10 }}
                         />
                         <TextField
                             select
@@ -507,6 +611,9 @@ export default function StudentManagement() {
                             name='studentId'
                             value={formData.studentId}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.studentId)}
+                            helperText={fieldErrors.studentId}
+                            inputProps={{ maxLength: 20 }}
                         />
                         <TextField
                             fullWidth
@@ -514,6 +621,9 @@ export default function StudentManagement() {
                             name='firstName'
                             value={formData.firstName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.firstName)}
+                            helperText={fieldErrors.firstName}
+                            inputProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -521,6 +631,9 @@ export default function StudentManagement() {
                             name='lastName'
                             value={formData.lastName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.lastName)}
+                            helperText={fieldErrors.lastName}
+                            inputProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -529,6 +642,9 @@ export default function StudentManagement() {
                             name='email'
                             value={formData.email}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.email)}
+                            helperText={fieldErrors.email}
+                            inputProps={{ maxLength: 100 }}
                         />
                         <TextField
                             fullWidth
@@ -537,6 +653,9 @@ export default function StudentManagement() {
                             name='course'
                             value={formData.course}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.course)}
+                            helperText={fieldErrors.course}
+                            inputProps={{ maxLength: 100 }}
                         />
                         <TextField
                             fullWidth
@@ -545,6 +664,9 @@ export default function StudentManagement() {
                             name='yearLevel'
                             value={formData.yearLevel}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.yearLevel)}
+                            helperText={fieldErrors.yearLevel}
+                            inputProps={{ maxLength: 10 }}
                         />
                         <TextField
                             select
@@ -641,24 +763,19 @@ export default function StudentManagement() {
 
             {/* Notifications */}
             <Snackbar
-                open={Boolean(message)}
-                autoHideDuration={3000}
-                onClose={() => setMessage('')}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert onClose={() => setMessage('')} severity='success' variant='filled'>
-                    {message}
-                </Alert>
-            </Snackbar>
-
-            <Snackbar
-                open={Boolean(error)}
+                open={notification.open}
                 autoHideDuration={4000}
-                onClose={() => setError('')}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                onClose={closeNotification}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
-                <Alert onClose={() => setError('')} severity='error' variant='filled'>
-                    {error}
+                <Alert
+                    onClose={closeNotification}
+                    severity={notification.severity}
+                    variant='filled'
+                    elevation={6}
+                    sx={{ width: '100%' }}
+                >
+                    {notification.message}
                 </Alert>
             </Snackbar>
         </>

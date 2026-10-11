@@ -1,5 +1,5 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar } from '@mui/material'
-import { Add, Delete, DeleteOutlined, EditOutlined, KeyboardReturnSharp, PersonOutlined, Search, VisibilityOutlined, WarningAmber } from '@mui/icons-material'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
@@ -23,6 +23,7 @@ export default function UserManagementPage() {
     const [search, setSearch] = useState('')
     const [error, setError] = useState('')
 
+    const [fieldErrors, setFieldErrors] = useState({})
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -62,6 +63,49 @@ export default function UserManagementPage() {
         fetchUsers()
     }, [fetchUsers])
 
+    const validateInstructorForm = () => {
+        const errors = {}
+        const firstName = formData.firstName?.trim() || ''
+        const lastName = formData.lastName?.trim() || ''
+        const email = formData.email?.trim() || ''
+
+        const namePattern = /^[\p{L}]+(?:['\u{2019}]?[\p{L}]+)*$/u
+
+        if (!firstName) {
+            errors.firstName = 'First Name is required'
+        } else if (firstName.length < 2) {
+            errors.firstName = 'First Name must be at least 2 characters long'
+        } else if (firstName.length > 50) {
+            errors.firstName = 'First Name must not exceed 50 characters'
+        } else if (!namePattern.test(firstName)) {
+            errors.firstName = 'Please enter a valid first name'
+        }
+
+        if (!lastName) {
+            errors.lastName = 'Last Name is required'
+        } else if (lastName.length < 2) {
+            errors.lastName = 'Last Name must be at least 2 characters long'
+        } else if (lastName.length > 50) {
+            errors.lastName = 'Last Name must not exceed 50 characters'
+        } else if (!namePattern.test(lastName)) {
+            errors.lastName = 'Please enter a valid last name'
+        }
+
+        if (!email) {
+            errors.email = 'Email is required'
+        } else if (email.length < 6) {
+            errors.email = 'Email must be at least 6 characters'
+        } else if (email.length > 100) {
+            errors.email = 'Email must not exceed 100 characters'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.email = 'Please enter a valid email address'
+        }
+
+        setFieldErrors(errors)
+
+        return Object.keys(errors).length === 0
+    }
+
     const resetForm = () => {
         setFormData({
             firstName: '',
@@ -76,15 +120,13 @@ export default function UserManagementPage() {
     const handleFormChange = (e) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
+        setFieldErrors(prev => ({ ...prev, [name]: '' }))
     }
 
     const handleAddUser = async () => {
+        setError('')
+        if (!validateInstructorForm()) return
         try {
-            setError('')
-            if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim()) {
-                setError('Please complete all required fields')
-                return
-            }
             await api.post('/users/account/add', {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
@@ -127,10 +169,9 @@ export default function UserManagementPage() {
             setError('User ID is missing')
             return
         }
-        if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim()) {
-            setError('Please complete all required fields')
-            return
-        }
+
+        setError('')
+        if (!validateInstructorForm()) return
         try {
             setError('')
             const payload = {
@@ -161,8 +202,15 @@ export default function UserManagementPage() {
         setUserToDelete(null)
     }
 
-    const handleDeleteUser = async (id) => {
+    const handleDeleteUser = async () => {
+        const id = userToDelete?._id || userToDelete?.id
+        if (!id) {
+            setError('User ID is missing')
+            return
+        }
+
         try {
+            setDeleteLoading(true)
             setError('')
             await api.delete(`/users/account/delete/${id}`, getAuthConfig())
 
@@ -173,6 +221,8 @@ export default function UserManagementPage() {
             setMessage('User deleted successfully')
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to delete user')
+        } finally {
+            setDeleteLoading(false)
         }
     }
 
@@ -412,6 +462,9 @@ export default function UserManagementPage() {
                             name='firstName'
                             value={formData.firstName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.firstName)}
+                            helperText={fieldErrors.firstName}
+                            slotProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -419,6 +472,9 @@ export default function UserManagementPage() {
                             name='lastName'
                             value={formData.lastName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.lastName)}
+                            helperText={fieldErrors.lastName}
+                            slotProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -427,6 +483,9 @@ export default function UserManagementPage() {
                             name='email'
                             value={formData.email}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.email)}
+                            helperText={fieldErrors.email}
+                            slotProps={{ maxLength: 100 }}
                         />
                         <TextField
                             select
@@ -435,6 +494,8 @@ export default function UserManagementPage() {
                             name='role'
                             value={formData.role}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.role)}
+                            helperText={fieldErrors.role}
                         >
                             <MenuItem value='student'>Student</MenuItem>
                             <MenuItem value='instructor'>Instructor</MenuItem>
@@ -474,6 +535,9 @@ export default function UserManagementPage() {
                             name='firstName'
                             value={formData.firstName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.firstName)}
+                            helperText={fieldErrors.firstName}
+                            slotProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -481,6 +545,9 @@ export default function UserManagementPage() {
                             name='lastName'
                             value={formData.lastName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.lastName)}
+                            helperText={fieldErrors.lastName}
+                            slotProps={{ maxLength: 50 }}
                         />
                         <TextField
                             fullWidth
@@ -489,6 +556,9 @@ export default function UserManagementPage() {
                             name='email'
                             value={formData.email}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.email)}
+                            helperText={fieldErrors.email}
+                            slotProps={{ maxLength: 100 }}
                         />
                         <TextField
                             select
@@ -497,6 +567,8 @@ export default function UserManagementPage() {
                             name='role'
                             value={formData.role}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.role)}
+                            helperText={fieldErrors.role}
                         >
                             <MenuItem value='student'>Student</MenuItem>
                             <MenuItem value='instructor'>Instructor</MenuItem>

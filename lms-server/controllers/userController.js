@@ -41,53 +41,68 @@ exports.addUser = async (req, res) => {
             role,
         } = req.body;
 
-        if (typeof firstName !== 'string' || !firstName.trim()) {
+        const normalizedFirstName = String(firstName).trim()
+        const normalizedLastName = String(lastName).trim()
+        const normalizedEmail = String(email).trim().toLowerCase()
+        const normalizedRole = String(role).toLowerCase()
+
+        const namePattern = /^[\p{L}]+(?:['\u{2019}]?[\p{L}]+)*$/u
+
+        if (normalizedFirstName.length < 2) {
             return res.status(400).json({
-                message: 'First name is required'
+                message: 'First name must be at least 2 characters long'
             })
         }
 
-        const cleanFirstName = firstName.trim()
-
-        if (!/^[\p{L}\p{M}][\p{L}\p{M}\s'-]*$/u.test(cleanFirstName)) {
+        if (normalizedFirstName.length > 50) {
             return res.status(400).json({
-                message: 'Please enter a valid first name'
+                message: 'First name must not exceed 50 characters'
             })
         }
 
-
-        if (typeof lastName !== 'string' || !lastName.trim()) {
+        if (!namePattern.test(normalizedFirstName)) {
             return res.status(400).json({
-                message: 'Last name is required'
+                message: 'First name contains invalid characters'
             })
         }
 
-        const cleanLastName = lastName.trim()
-
-        if (!/^[\p{L}\p{M}][\p{L}\p{M}\s'-]*$/u.test(cleanLastName)) {
+        if (normalizedLastName.length < 2) {
             return res.status(400).json({
-                message: 'Please enter a valid last name'
+                message: 'Last name must be at least 2 characters long'
             })
         }
 
-
-        if (typeof email !== 'string' || !email.trim()) {
+        if (normalizedLastName.length > 50) {
             return res.status(400).json({
-                message: 'Email is required'
+                message: 'Last name must not exceed 50 characters'
             })
         }
 
-        const cleanEmail = email.trim()
-        const normalizedEmail = email.trim().toLowerCase()
+        if (!namePattern.test(normalizedLastName)) {
+            return res.status(400).json({
+                message: 'Last name contains invalid characters'
+            })
+        }
 
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        if (normalizedEmail.length < 6) {
+            return res.status(400).json({
+                message: 'Email must be at least 6 characters long'
+            })
+        }
+
+        if (normalizedEmail.length > 100) {
+            return res.status(400).json({
+                message: 'Email must not exceed 100 characters'
+            })
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
             return res.status(400).json({
                 message: 'Please enter a valid email address'
             })
         }
 
         const allowedRoles = ['admin', 'instructor', 'student']
-        const normalizedRole = String(role || 'student').toLowerCase()
 
         if (!allowedRoles.includes(normalizedRole)) {
             return res.status(400).json({ message: 'Invalid role' })
@@ -108,8 +123,8 @@ exports.addUser = async (req, res) => {
 
 
         await User.create({
-            firstName: cleanFirstName,
-            lastName: cleanLastName,
+            firstName: normalizedFirstName,
+            lastName: normalizedLastName,
             email: normalizedEmail,
             password: hashedPassword,
             role: normalizedRole
@@ -136,52 +151,99 @@ exports.addUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
 
     try {
-        const { firstName, lastName, email, role } = req.body;
+        const {
+            firstName,
+            lastName,
+            email,
+            role
+        } = req.body;
+
         const user = await User.findById(req.params.id);
 
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        if (firstName !== undefined) {
-            if (typeof firstName !== 'string' || !firstName.trim()) {
-                return res.status(400).json({ message: 'First Name is required' })
-            }
-            user.firstName = firstName.trim()
-        }
+        const normalizedFirstName = String(firstName).trim()
+        const normalizedLastName = String(lastName).trim()
+        const normalizedEmail = String(email).trim().toLowerCase()
+        const normalizedRole = String(role).toLowerCase()
 
-        if (lastName !== undefined) {
-            if (typeof lastName !== 'string' || !lastName.trim()) {
-                return res.status(400).json({ message: 'Last Name is required' })
-            }
-            user.lastName = lastName.trim()
-        }
+        const namePattern = /^[\p{L}]+(?:['\u{2019}]?[\p{L}]+)*$/u
 
-        if (email !== undefined) {
-            if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-                return res.status(400).json({ message: 'Please enter a valid email' })
-            }
-
-            const normalizedEmail = email.trim().toLowerCase()
-            const existingUser = await User.findOne({
-                email: normalizedEmail,
-                _id: { $ne: user._id }
+        if (normalizedFirstName.length < 2) {
+            return res.status(400).json({
+                message: 'First name must be at least 2 characters long'
             })
-
-            if (existingUser) {
-                return res.status(409).json({
-                    message: 'An account with this email already exists'
-                })
-            }
-
-            user.email = normalizedEmail
         }
 
-        if (role !== undefined) {
-            const normalizedRole = String(role).toLowerCase()
-            if (!['admin', 'instructor', 'student'].includes(normalizedRole)) {
-                return res.status(400).json({ message: 'Invalid role' })
-            }
-            user.role = normalizedRole
+        if (normalizedFirstName.length > 50) {
+            return res.status(400).json({
+                message: 'First name must not exceed 50 characters'
+            })
         }
+
+        if (!namePattern.test(normalizedFirstName)) {
+            return res.status(400).json({
+                message: 'First name contains invalid characters'
+            })
+        }
+
+        if (normalizedLastName.length < 2) {
+            return res.status(400).json({
+                message: 'Last name must be at least 2 characters long'
+            })
+        }
+
+        if (normalizedLastName.length > 50) {
+            return res.status(400).json({
+                message: 'Last name must not exceed 50 characters'
+            })
+        }
+
+        if (!namePattern.test(normalizedLastName)) {
+            return res.status(400).json({
+                message: 'Last name contains invalid characters'
+            })
+        }
+
+        if (normalizedEmail.length < 6) {
+            return res.status(400).json({
+                message: 'Email must be at least 6 characters long'
+            })
+        }
+
+        if (normalizedEmail.length > 100) {
+            return res.status(400).json({
+                message: 'Email must not exceed 100 characters'
+            })
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+            return res.status(400).json({
+                message: 'Please enter a valid email address'
+            })
+        }
+
+        const allowedRoles = ['admin', 'instructor', 'student']
+
+        if (!allowedRoles.includes(normalizedRole)) {
+            return res.status(400).json({ message: 'Invalid role' })
+        }
+
+        const existingUser = await User.findOne({
+            email: normalizedEmail,
+            _id: { $ne: user._id }
+        })
+
+        if (existingUser) {
+            return res.status(409).json({
+                message: 'An account with this email already exists'
+            })
+        }
+
+        user.firstName = normalizedFirstName
+        user.lastName = normalizedLastName
+        user.email = normalizedEmail
+        user.role = normalizedRole
 
         await user.save()
 

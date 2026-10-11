@@ -6,20 +6,26 @@ import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 
 export default function ActivityLogs() {
-    const [search, setSearch] = useState('')
-    const [departmentFilter, setDepartmentFilter] = useState('All')
-    const [statusFilter, setStatusFilter] = useState('All')
+    const [instructors, setInstructors] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
+
+
 
     const [openAddInstructor, setOpenAddInstructor] = useState(false)
     const [openEditInstructor, setOpenEditInstructor] = useState(false)
     const [openDeleteInstructor, setOpenDeleteInstructor] = useState(false)
     const [openViewInstructor, setOpenViewInstructor] = useState(false)
+
+    const [instructorToDelete, setInstructorToDelete] = useState(null)
     const [selectedInstructor, setSelectedInstructor] = useState(null)
 
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [search, setSearch] = useState('')
+    const [departmentFilter, setDepartmentFilter] = useState('All')
+    const [statusFilter, setStatusFilter] = useState('All')
 
-    const [instructors, setInstructors] = useState([])
-    const [loading, setLoading] = useState(true)
     const [notification, setNotification] = useState({
         open: false,
         message: '',
@@ -41,17 +47,21 @@ export default function ActivityLogs() {
         setNotification({ ...notification, open: false })
     }
 
-    const emptyForm = {
+    const [fieldErrors, setFieldErrors] = useState({})
+    const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         department: '',
         specialization: '',
         status: 'active',
-    }
+    })
 
-    const [formData, setFormData] = useState(emptyForm)
-    const [saving, setSaving] = useState(false)
+    const getAuthConfig = () => ({
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+    })
 
     const fetchInstructors = async () => {
         try {
@@ -74,25 +84,105 @@ export default function ActivityLogs() {
         fetchInstructors()
     }, [])
 
+    const validateInstructorForm = () => {
+        const errors = {}
+        const firstName = formData.firstName?.trim() || ''
+        const lastName = formData.lastName?.trim() || ''
+        const email = formData.email?.trim() || ''
+        const department = formData.department?.trim() || ''
+        const specialization = formData.specialization?.trim() || ''
+
+        const namePattern = /^[\p{L}]+(?:['\u{2019}]?[\p{L}]+)*$/u
+
+        if (!firstName) {
+            errors.firstName = 'First Name is required'
+        } else if (firstName.length < 2) {
+            errors.firstName = 'First Name must be at least 2 characters long'
+        } else if (firstName.length > 50) {
+            errors.firstName = 'First Name must not exceed 50 characters'
+        } else if (!namePattern.test(firstName)) {
+            errors.firstName = 'Please enter a valid first name'
+        }
+
+        if (!lastName) {
+            errors.lastName = 'Last Name is required'
+        } else if (lastName.length < 2) {
+            errors.lastName = 'Last Name must be at least 2 characters long'
+        } else if (lastName.length > 50) {
+            errors.lastName = 'Last Name must not exceed 50 characters'
+        } else if (!namePattern.test(lastName)) {
+            errors.lastName = 'Please enter a valid last name'
+        }
+
+        if (!email) {
+            errors.email = 'Email is required'
+        } else if (email.length < 6) {
+            errors.email = 'Email must be at least 6 characters'
+        } else if (email.length > 100) {
+            errors.email = 'Email must not exceed 100 characters'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.email = 'Please enter a valid email address'
+        }
+
+        if (!specialization) {
+            errors.specialization = 'Specialization is required'
+        } else if (specialization.length < 2) {
+            errors.specialization = 'Specialization must be at least 2 characters'
+        } else if (specialization.length > 100) {
+            errors.specialization = 'Specialization must not exceed 100 characters'
+        }
+
+        if (!department) {
+            errors.department = 'Department is required'
+        } else if (department.length < 2) {
+            errors.department = 'Department must be at least 2 characters'
+        } else if (department.length > 100) {
+            errors.department = 'Department must not exceed 100 characters'
+        }
+
+        setFieldErrors(errors)
+
+        return Object.keys(errors).length === 0
+    }
+
+    const resetForm = () => {
+        setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            department: '',
+            specialization: '',
+            status: 'active',
+        })
+        setSelectedInstructor(null)
+    }
+
     const handleFormChange = (e) => {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
+        setFieldErrors(prev => ({ ...prev, [name]: '' }))
     }
 
     const handleAddInstructor = async () => {
-        if (!formData.firstName || !formData.lastName || !formData.email || !formData.department || !formData.specialization) {
-            showNotification('Please fill in all required fields.', 'error')
+        setFieldErrors({})
+        if (!validateInstructorForm()) {
             return
         }
-
         try {
             setSaving(true)
 
-            await api.post('/instructors/add/instructors', formData)
-            showNotification('Instructor added successfully!', 'success')
+            await api.post('/instructors/add/instructors', {
+                firstName: formData.firstName.trim(),
+                lastName: formData.lastName.trim(),
+                email: formData.email.trim().toLowerCase(),
+                department: formData.department.trim(),
+                specialization: formData.specialization.trim(),
+                status: formData.status
+            })
 
-            setFormData(emptyForm)
             setOpenAddInstructor(false)
+            resetForm()
+            showNotification('Instructor added successfully!', 'success')
             await fetchInstructors()
         } catch (error) {
             console.error('Error adding instructor:', error)
@@ -102,17 +192,49 @@ export default function ActivityLogs() {
         }
     }
 
-    const handleEditInstructor = async () => {
-        if (!selectedInstructor) return
+    const handleOpenEdit = async (id) => {
+        try {
+            if (!id) return
+            const response = await api.get(`/instructors/instructors/${id}`)
+            const instructor = response.data
+            setSelectedInstructor(instructor)
+            setFormData({
+                firstName: instructor.firstName || '',
+                lastName: instructor.lastName || '',
+                email: instructor.email || '',
+                department: instructor.department || '',
+                specialization: instructor.specialization || '',
+                status: instructor.status || 'Active'
+            })
+            setOpenEditInstructor(true)
+        } catch (error) {
+            console.error('Error fetching instructor details:', error)
+            showNotification(error.response?.data?.message || 'Failed to retrieve instructor details.', 'error')
+        }
+    }
+
+    const handleUpdateInstructor = async () => {
+        const id = selectedInstructor?._id || selectedInstructor?.id
+        if (!id) {
+            showNotification('No instructor selected for update.', 'error')
+            return
+        }
 
         try {
             setSaving(true)
 
-            await api.put(`/instructors/update/instructors/${selectedInstructor._id}`, formData)
-
+            const payload = {
+                firstName: formData.firstName.trim(),
+                lastName: formData.lastName.trim(),
+                email: formData.email.trim().toLowerCase(),
+                department: formData.department.trim(),
+                specialization: formData.specialization.trim(),
+                status: formData.status
+            }
+            await api.put(`/instructors/update/instructors/${selectedInstructor._id}`, payload)
             setOpenEditInstructor(false)
-            setSelectedInstructor(null)
-
+            resetForm()
+            showNotification('Instructor updated successfully', 'success')
             await fetchInstructors()
 
         } catch (error) {
@@ -125,12 +247,17 @@ export default function ActivityLogs() {
 
 
     const handleDeleteInstructor = async () => {
-        if (!selectedInstructor?._id) return
+        const id = selectedInstructor?._id || selectedInstructor?.id
+        if (!id) {
+            showNotification('No instructor selected for deletion.', 'error')
+            return
+        }
 
         try {
             setSaving(true)
 
-            await api.delete(`/instructors/delete/instructors/${selectedInstructor._id}`)
+            await api.delete(`/instructors/delete/instructors/${id}`)
+
             setOpenDeleteInstructor(false)
             setSelectedInstructor(null)
 
@@ -197,7 +324,14 @@ export default function ActivityLogs() {
                                 variant='contained'
                                 startIcon={<Add />}
                                 onClick={() => {
-                                    setFormData(emptyForm)
+                                    setFormData({
+                                        firstName: '',
+                                        lastName: '',
+                                        email: '',
+                                        department: '',
+                                        specialization: '',
+                                        status: 'active',
+                                    })
                                     setOpenAddInstructor(true)
                                 }}
                                 className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'

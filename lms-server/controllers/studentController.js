@@ -45,64 +45,97 @@ exports.addStudent = async (req, res) => {
             status,
         } = req.body;
 
-        if (!studentId || !firstName || !lastName || !email || !course || !yearLevel || !status) {
-            return res.status(400).json({ message: 'All fields are required' })
-        }
+        const normalizedStudentId = String(studentId).trim().toUpperCase()
+        const normalizedFirstName = String(firstName).trim()
+        const normalizedLastName = String(lastName).trim()
+        const normalizedEmail = String(email).trim().toLowerCase()
+        const normalizedCourse = String(course).trim()
+        const normalizedYearLevel = String(yearLevel).trim()
 
-        if (!studentId.trim()) {
+        const namePattern = /^[\p{L}]+(?:['\u{2019}]?[\p{L}]+)*$/u
+
+        if (!/^\d{4}-\d{6}$/.test(normalizedStudentId)) {
             return res.status(400).json({
-                message: 'Student ID is required'
+                message: 'Student Number must be in the format YYYY-NNNNNN (e.g., 2023-123456)'
             })
         }
 
-        const studentIdPattern = /^[A-Za-z0-9]+$/
-        if (!studentIdPattern.test(studentId)) {
+        if (normalizedFirstName.length < 2) {
             return res.status(400).json({
-                message: 'Student ID can only contain letters and numbers'
+                message: 'First name must be at least 2 characters long'
+            })
+        }
+
+        if (normalizedFirstName.length > 50) {
+            return res.status(400).json({
+                message: 'First name must not exceed 50 characters'
+            })
+        }
+
+        if (!namePattern.test(normalizedFirstName)) {
+            return res.status(400).json({
+                message: 'First name contains invalid characters'
+            })
+        }
+
+        if (normalizedLastName.length < 2) {
+            return res.status(400).json({
+                message: 'Last name must be at least 2 characters long'
+            })
+        }
+
+        if (normalizedLastName.length > 50) {
+            return res.status(400).json({
+                message: 'Last name must not exceed 50 characters'
+            })
+        }
+
+        if (!namePattern.test(normalizedLastName)) {
+            return res.status(400).json({
+                message: 'Last name contains invalid characters'
+            })
+        }
+
+        if (normalizedEmail.length < 6) {
+            return res.status(400).json({
+                message: 'Email must be at least 6 characters long'
+            })
+        }
+
+        if (normalizedEmail.length > 100) {
+            return res.status(400).json({
+                message: 'Email must not exceed 100 characters'
+            })
+        }
+
+        if (normalizedCourse.length < 2) {
+            return res.status(400).json({
+                message: 'Course must be at least 2 characters long'
+            })
+        }
+
+        if (normalizedCourse.length > 100) {
+            return res.status(400).json({
+                message: 'Course must not exceed 100 characters'
+            })
+        }
+
+        if (normalizedYearLevel.length < 1) {
+            return res.status(400).json({
+                message: 'Year level must be at least 1 character long'
+            })
+        }
+
+        if (normalizedYearLevel.length > 10) {
+            return res.status(400).json({
+                message: 'Year level must not exceed 10 characters'
             })
         }
 
         const existingStudentId = await Student.findOne({ studentId: studentId.trim() })
         if (existingStudentId) {
             return res.status(400).json({
-                message: 'A student with this ID already exists'
-            })
-        }
-
-
-        if (!firstName.trim()) {
-            return res.status(400).json({
-                message: 'First name is required'
-            })
-        }
-
-        if (!lastName.trim()) {
-            return res.status(400).json({
-                message: 'Last name is required'
-            })
-        }
-
-        if (!email.trim()) {
-            return res.status(400).json({
-                message: 'Email is required'
-            })
-        }
-
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return res.status(400).json({
-                message: 'Please enter a valid email address'
-            })
-        }
-
-        if (!course.trim()) {
-            return res.status(400).json({
-                message: 'Course is required'
-            })
-        }
-
-        if (!yearLevel.trim()) {
-            return res.status(400).json({
-                message: 'Year level is required'
+                message: 'A student with this Student Number already exists'
             })
         }
 
@@ -120,13 +153,13 @@ exports.addStudent = async (req, res) => {
         const hashedPassword = await bcrypt.hash(temporaryPassword, 10)
 
         const student = new Student({
-            studentId: studentId.trim(),
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-            email: email.toLowerCase().trim(),
+            studentId: normalizedStudentId,
+            firstName: normalizedFirstName,
+            lastName: normalizedLastName,
+            email: normalizedEmail,
             password: hashedPassword,
-            course: course.trim(),
-            yearLevel: yearLevel.trim(),
+            course: normalizedCourse,
+            yearLevel: normalizedYearLevel,
             status: status || 'active',
             role: 'student',
         })
@@ -182,70 +215,98 @@ exports.updateStudent = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' })
         }
 
-        if (studentId !== undefined) {
-            const normalizedStudentId = String(studentId).trim().toUpperCase()
-            if (!normalizedStudentId) {
-                return res.status(400).json({ message: 'Student ID is required' })
-            }
+        const normalizedStudentId = String(studentId).trim().toUpperCase()
+        const normalizedFirstName = String(firstName).trim()
+        const normalizedLastName = String(lastName).trim()
+        const normalizedEmail = String(email).trim().toLowerCase()
+        const normalizedCourse = String(course).trim()
+        const normalizedYearLevel = String(yearLevel).trim()
 
-            const existing = await Student.findOne({
-                studentId: normalizedStudentId,
-                _id: { $ne: student._id }
+        const namePattern = /^[\p{L}]+(?:['\u{2019}]?[\p{L}]+)*$/u
+
+        if (!/^\d{4}-\d{6}$/.test(normalizedStudentId)) {
+            return res.status(400).json({
+                message: 'Student Number must be in the format YYYY-NNNNNN (e.g., 2023-123456)'
             })
-
-            if (existing) {
-                return res.status(409).json({
-                    message: 'A student with this ID already exists'
-                })
-            }
-
-            student.studentId = normalizedStudentId
         }
 
-        if (firstName !== undefined) {
-            if (!firstName.trim()) {
-                return res.status(400).json({ message: 'First Name is required' })
-            }
-            student.firstName = firstName.trim()
-        }
-
-        if (lastName !== undefined) {
-            if (!lastName.trim()) {
-                return res.status(400).json({ message: 'Last Name is required' })
-            }
-            student.lastName = lastName.trim()
-        }
-
-        if (email !== undefined) {
-            const normalizedEmail = email.trim().toLowerCase()
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-                return res.status(400).json({ message: 'Please enter a valid email' })
-            }
-
-            const existing = await Student.findOne({
-                email: normalizedEmail,
-                _id: { $ne: student._id }
+        if (normalizedFirstName.length < 2) {
+            return res.status(400).json({
+                message: 'First name must be at least 2 characters long'
             })
-
-            if (existing) {
-                return res.status(409).json({
-                    message: 'A student with this email already exists'
-                })
-            }
-
-            student.email = normalizedEmail
         }
 
-        if (course !== undefined) {
-            student.course = course.trim()
+        if (normalizedFirstName.length > 50) {
+            return res.status(400).json({
+                message: 'First name must not exceed 50 characters'
+            })
         }
 
-        if (yearLevel !== undefined) {
-            student.yearLevel = yearLevel.trim()
+        if (!namePattern.test(normalizedFirstName)) {
+            return res.status(400).json({
+                message: 'First name contains invalid characters'
+            })
         }
 
-        if (status !== undefined) {
-            student.status = status.toLowerCase()
+        if (normalizedLastName.length < 2) {
+            return res.status(400).json({
+                message: 'Last name must be at least 2 characters long'
+            })
+        }
+
+        if (normalizedLastName.length > 50) {
+            return res.status(400).json({
+                message: 'Last name must not exceed 50 characters'
+            })
+        }
+
+        if (!namePattern.test(normalizedLastName)) {
+            return res.status(400).json({
+                message: 'Last name contains invalid characters'
+            })
+        }
+
+        if (normalizedEmail.length < 6) {
+            return res.status(400).json({
+                message: 'Email must be at least 6 characters long'
+            })
+        }
+
+        if (normalizedEmail.length > 100) {
+            return res.status(400).json({
+                message: 'Email must not exceed 100 characters'
+            })
+        }
+
+        if (normalizedCourse.length < 2) {
+            return res.status(400).json({
+                message: 'Course must be at least 2 characters long'
+            })
+        }
+
+        if (normalizedCourse.length > 100) {
+            return res.status(400).json({
+                message: 'Course must not exceed 100 characters'
+            })
+        }
+
+        if (normalizedYearLevel.length < 1) {
+            return res.status(400).json({
+                message: 'Year level must be at least 1 character long'
+            })
+        }
+
+        if (normalizedYearLevel.length > 10) {
+            return res.status(400).json({
+                message: 'Year level must not exceed 10 characters'
+            })
+        }
+
+        const existingStudentId = await Student.findOne({ studentId: studentId.trim() })
+        if (existingStudentId) {
+            return res.status(400).json({
+                message: 'A student with this Student Number already exists'
+            })
         }
 
         await student.save()
