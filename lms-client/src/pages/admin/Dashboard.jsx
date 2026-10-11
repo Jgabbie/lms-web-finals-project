@@ -7,6 +7,8 @@ import api from '../../api/axiosClient'
 
 export default function Dashboard() {
 
+    const [activityLogs, setActivityLogs] = useState([])
+    const [loadingActivity, setLoadingActivity] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [dashboardData, setDashboardData] = useState(null)
     const [loadingStats, setLoadingStats] = useState(true)
@@ -16,14 +18,25 @@ export default function Dashboard() {
         const fetchDashboardStats = async () => {
             try {
                 setLoadingStats(true)
+                setLoadingActivity(true)
                 setStatsError(null)
-                const response = await api.get('/admin/dashboard-stats')
-                setDashboardData(response.data)
+
+                const [statsResponse, activityResponse] = await Promise.all([
+                    api.get('/admin/dashboard-stats'),
+                    api.get('/admin/recent-activity-logs')
+                ])
+
+                setDashboardData(statsResponse.data)
+
+                const logs = Array.isArray(activityResponse.data) ? activityResponse.data : []
+                setActivityLogs(Array.isArray(logs) ? logs : [])
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error)
                 setStatsError('Failed to fetch dashboard statistics.')
+                setActivityLogs([])
             } finally {
                 setLoadingStats(false)
+                setLoadingActivity(false)
             }
         }
 
@@ -63,6 +76,47 @@ export default function Dashboard() {
         },
     ]
 
+    const getActivityStyle = (action) => {
+        switch (action) {
+            case 'Login':
+                return {
+                    icon: <People />,
+                    bg: 'bg-blue-100',
+                    color: 'text-blue-600'
+                }
+            case 'Logout':
+                return {
+                    icon: <AccessTime />,
+                    bg: 'bg-slate-100',
+                    color: 'text-slate-600'
+                }
+            case 'Create':
+                return {
+                    icon: <PersonAdd />,
+                    bg: 'bg-green-100',
+                    color: 'text-green-600'
+                }
+            case 'Update':
+                return {
+                    icon: <Assignment />,
+                    bg: 'bg-green-100',
+                    color: 'text-green-600'
+                }
+            case 'Delete':
+                return {
+                    icon: <MenuBook />,
+                    bg: 'bg-green-100',
+                    color: 'text-green-600'
+                }
+            default:
+                return {
+                    icon: <TrendingUp />,
+                    bg: 'bg-slate-100',
+                    color: 'text-slate-600'
+                }
+        }
+    }
+
 
     const recentStudents = (dashboardData?.recentStudents || []).map(student => ({
         name: `${student.firstName} ${student.lastName}`,
@@ -77,41 +131,6 @@ export default function Dashboard() {
         students: course.enrollmentCount,
         progress: Math.min((course.enrollmentCount / 100) * 100, 100),
     }))
-
-    const activity = [
-        {
-            title: "New student Registered",
-            description: "Maria Reyes joined EduLearn",
-            time: "10 minutes ago",
-            icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-        {
-            title: "New student Registered",
-            description: "Maria Reyes joined EduLearn",
-            time: "10 minutes ago",
-            icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-        {
-            title: "New student Registered",
-            description: "Maria Reyes joined EduLearn",
-            time: "10 minutes ago",
-            icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-        {
-            title: "New student Registered",
-            description: "Maria Reyes joined EduLearn",
-            time: "10 minutes ago",
-            icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-    ]
 
     return (
         <>
@@ -201,10 +220,6 @@ export default function Dashboard() {
                                                 Student enrollment throughout the year
                                             </Typography>
                                         </div>
-
-                                        <Button endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
-                                            View Details
-                                        </Button>
 
                                         <div className='h-64 flex items-end gap-3 sm:gap-5 border-b border-slate-200 px-2'>
                                             {[
@@ -479,36 +494,54 @@ export default function Dashboard() {
                                         </Typography>
                                     </div>
 
-                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8'>
-                                        {activity.map((item, index) => (
-                                            <div key={index}>
-                                                <div className='flex items-center gap-4 py-4'>
-                                                    <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${item.bg} ${item.color}`}>
-                                                        {item.icon}
+                                    {loadingActivity ? (
+                                        <Typography variant='body2' className='!text-slate-500 mt-4'>
+                                            Loading recent activity logs...
+                                        </Typography>
+                                    ) : activityLogs.length === 0 ? (
+                                        <Typography variant='body2' className='!text-slate-500 mt-4'>
+                                            No recent activity logs found.
+                                        </Typography>
+                                    ) : (
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8'>
+                                            {activityLogs.map((item, index) => {
+                                                const style = getActivityStyle(item.action)
+                                                return (
+                                                    <div key={index}>
+                                                        <div className='flex items-center gap-4 py-4'>
+                                                            <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${item.bg} ${item.color}`}>
+                                                                {style.icon}
+                                                            </div>
+
+                                                            <div className='flex-1 min-w-0'>
+                                                                <Typography variant='body2' className='!font-semibold !text-slate-800'>
+                                                                    {item.action}
+                                                                    {item.user ? ` - ${item.user}` : ''}
+                                                                </Typography>
+
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {item.description}
+                                                                </Typography>
+
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {item.role} - {item.status}
+                                                                </Typography>
+                                                            </div>
+
+                                                            <div className='flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap'>
+                                                                <AccessTime className='!text-sm' />
+                                                                {item.date} at {item.time}
+                                                            </div>
+                                                        </div>
+
+                                                        {index < activityLogs.length - 1 && (
+                                                            <Divider />
+                                                        )}
                                                     </div>
-
-                                                    <div className='flex-1 min-w-0'>
-                                                        <Typography variant='body2' className='!font-semibold !text-slate-800'>
-                                                            {item.title}
-                                                        </Typography>
-
-                                                        <Typography variant='caption' className='!text-slate-500'>
-                                                            {item.description}
-                                                        </Typography>
-                                                    </div>
-
-                                                    <div className='flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap'>
-                                                        <AccessTime className='!text-sm' />
-                                                        {item.time}
-                                                    </div>
-                                                </div>
-
-                                                {index < activity.length - 1 && (
-                                                    <Divider />
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
