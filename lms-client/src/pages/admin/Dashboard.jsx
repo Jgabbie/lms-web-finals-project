@@ -28,7 +28,7 @@ export default function Dashboard() {
 
                 setDashboardData(statsResponse.data)
 
-                const logs = Array.isArray(activityResponse.data) ? activityResponse.data : []
+                const logs = activityResponse.data.logs
                 setActivityLogs(Array.isArray(logs) ? logs : [])
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error)
@@ -507,7 +507,7 @@ export default function Dashboard() {
                                             {activityLogs.map((item, index) => {
                                                 const style = getActivityStyle(item.action)
                                                 return (
-                                                    <div key={index}>
+                                                    <div key={item.id}>
                                                         <div className='flex items-center gap-4 py-4'>
                                                             <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${item.bg} ${item.color}`}>
                                                                 {style.icon}
