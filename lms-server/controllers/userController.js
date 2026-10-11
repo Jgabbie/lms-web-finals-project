@@ -484,17 +484,6 @@ exports.deleteUser = async (req, res) => {
         }
 
         const user = await User.findById(id)
-        const userInformation = await User.findById(id).select()
-
-        if (userInformation) {
-            await ArchivedUser.create({
-                _id: userInformation._id,
-                firstName: userInformation.firstName,
-                lastName: userInformation.lastName,
-                email: userInformation.email,
-                role: userInformation.role
-            })
-        }
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' })
@@ -507,6 +496,18 @@ exports.deleteUser = async (req, res) => {
         ) {
             return res.status(400).json({
                 message: 'You cannot delete your own account'
+            })
+        }
+
+        const userInformation = await User.findById(id).select()
+
+        if (userInformation) {
+            await ArchivedUser.create({
+                _id: userInformation._id,
+                firstName: userInformation.firstName,
+                lastName: userInformation.lastName,
+                email: userInformation.email,
+                role: userInformation.role
             })
         }
 
