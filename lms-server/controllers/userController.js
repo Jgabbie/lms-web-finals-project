@@ -539,6 +539,8 @@ exports.deleteUser = async (req, res) => {
             await Student.findOneAndDelete({
                 email: userInformation.email
             })
+
+            res.status(200).json({ message: 'User deleted successfully' })
         }
 
         if (userInformation.role === 'instructor') {
@@ -566,6 +568,8 @@ exports.deleteUser = async (req, res) => {
             await Instructor.findOneAndDelete({
                 email: userInformation.email
             })
+
+            res.status(200).json({ message: 'User deleted successfully' })
         }
 
         await User.findByIdAndDelete(id)
