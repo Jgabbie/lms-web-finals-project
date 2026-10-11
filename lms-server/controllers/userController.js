@@ -146,7 +146,7 @@ exports.addUser = async (req, res) => {
 
             let nextIdNumber = 1
 
-            if (!lastInstructor && lastInstructor.instructorId) {
+            if (lastInstructor && lastInstructor.instructorId) {
                 const lastIdNumber = parseInt(lastInstructor.instructorId.replace('INST', ''))
                 const nextIdNumber = lastIdNumber + 1
             }
