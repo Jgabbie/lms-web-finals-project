@@ -4,16 +4,56 @@ import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useNavigate } from 'react-router-dom'
 import { getStoredProfile } from '../../utils/profileStorage'
+import { useState, useEffect, useMemo } from 'react'
+import api from '../../api/axiosClient'
 
 
 export default function DashboardStudent() {
     const navigate = useNavigate()
     const profile = getStoredProfile()
     const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'Student'
+    const [courses, setCourses] = useState([])
+    const [assignments, setAssignments] = useState([])
+    const [submissions, setSubmissions] = useState([])
+    const [discussions, setDiscussions] = useState([])
+
+    useEffect(() => {
+        const loadDashboard = async () => {
+            try {
+                const [coursesResponse, assignmentsResponse, submissionsResponse, discussionsResponse] = await Promise.all([
+                    api.get('/courses/my-courses'),
+                    api.get('/assignments'),
+                    api.get('/assignments/submissions'),
+                    api.get('/discussions')
+                ])
+                setCourses(Array.isArray(coursesResponse.data) ? coursesResponse.data : [])
+                setAssignments(Array.isArray(assignmentsResponse.data) ? assignmentsResponse.data : [])
+                setSubmissions(Array.isArray(submissionsResponse.data) ? submissionsResponse.data : [])
+                setDiscussions(Array.isArray(discussionsResponse.data) ? discussionsResponse.data : [])
+            } catch (err) {
+                console.error('Failed to load student dashboard:', err)
+            }
+        }
+
+        loadDashboard()
+    }, [])
+
+    const submittedAssignmentIds = useMemo(
+        () => new Set(submissions.map(submission => String(submission.assignmentId))),
+        [submissions]
+    )
+    const pendingAssignments = useMemo(
+        () => assignments.filter(assignment => !submittedAssignmentIds.has(String(assignment._id))),
+        [assignments, submittedAssignmentIds]
+    )
+    const completedAssignments = assignments.length - pendingAssignments.length
+    const overallProgress = assignments.length
+        ? Math.round((completedAssignments / assignments.length) * 100)
+        : 0
     const statistics = [
         {
             title: "Enrolled Courses",
-            value: "5",
+            value: courses.length,
             detail: "Currently learning",
             icon: <MenuBook />,
             iconBg: "bg-blue-100",
@@ -21,7 +61,7 @@ export default function DashboardStudent() {
         },
         {
             title: "Completed Courses",
-            value: "2",
+            value: 0,
             detail: "Great Progress",
             icon: <CheckCircle />,
             iconBg: "bg-green-100",
@@ -29,15 +69,15 @@ export default function DashboardStudent() {
         },
         {
             title: "Assignments",
-            value: "8",
-            detail: "2 Pending Submission",
+            value: assignments.length,
+            detail: `${pendingAssignments.length} Pending Submission`,
             icon: <AssignmentTurnedIn />,
             iconBg: "bg-purple-100",
             iconColor: "text-purple-600"
         },
         {
             title: "Overall Progress",
-            value: "68%",
+            value: `${overallProgress}%`,
             detail: "Across your courses",
             icon: <TrendingUp />,
             iconBg: "bg-amber-100",
@@ -45,82 +85,39 @@ export default function DashboardStudent() {
         },
     ]
 
-    const courses = [
-        {
-            name: "Introduction to React",
-            students: 'Aaaaa',
-            progress: 67,
-            lessons: '9 of 12 lessons',
-            color: 'bg-blue-500'
-        },
-        {
-            name: "Introduction to React",
-            students: 'Aaaaa',
-            progress: 67,
-            lessons: '9 of 12 lessons',
-            color: 'bg-blue-500'
-        },
-        {
-            name: "Introduction to React",
-            students: 'Aaaaa',
-            progress: 67,
-            lessons: '9 of 12 lessons',
-            color: 'bg-blue-500'
-        },
-        {
-            name: "Introduction to React",
-            students: 'Aaaaa',
-            progress: 67,
-            lessons: '9 of 12 lessons',
-            color: 'bg-blue-500'
-        },
-    ]
+    const studentCourses = courses.map(course => ({
+        ...course,
+        name: course.courseName,
+        instructor: course.instructor,
+        progress: 0,
+        lessons: 'No lesson progress recorded',
+        color: 'bg-blue-500'
+    }))
 
-
-    const assignments = [
-        {
-            title: 'React Components Activity',
-            course: 'Introduction to React',
-            due: 'Today, 11:59 PM',
-            status: 'Due Soon'
-        }
-    ]
-
+    const upcomingAssignments = assignments.slice(0, 4).map(assignment => ({
+        ...assignment,
+        due: assignment.dueDate || 'No Due Date',
+        status: submittedAssignmentIds.has(String(assignment._id)) ? 'Submitted' : 'Pending'
+    }))
 
     const activity = [
-        {
-            title: "Lesson completed",
-            description: `${displayName} joined EduLearn`,
-            time: "10 minutes ago",
+        ...submissions.slice(0, 3).map(submission => ({
+            title: 'Assignment submitted',
+            description: `${submission.assignmentTitle} for ${submission.course}`,
+            time: submission.createdAt || submission.submittedAt,
+            icon: <AssignmentTurnedIn />,
+            bg: 'bg-purple-100',
+            color: 'text-purple-600'
+        })),
+        ...discussions.slice(0, 3).map(discussion => ({
+            title: 'Discussion posted',
+            description: discussion.title,
+            time: discussion.createdAt,
             icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-        {
-            title: "Lesson completed",
-            description: `${displayName} joined EduLearn`,
-            time: "10 minutes ago",
-            icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-        {
-            title: "Lesson completed",
-            description: `${displayName} joined EduLearn`,
-            time: "10 minutes ago",
-            icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-        {
-            title: "Lesson completed",
-            description: `${displayName} joined EduLearn`,
-            time: "10 minutes ago",
-            icon: <PersonAdd />,
-            bg: "bg-blue-100",
-            color: "text-blue-600"
-        },
-    ]
+            bg: 'bg-blue-100',
+            color: 'text-blue-600'
+        }))
+    ].slice(0, 5)
 
     return (
         <>
@@ -202,7 +199,7 @@ export default function DashboardStudent() {
 
 
                                 <div className='space-y-5'>
-                                    {courses.map((course) => (
+                                    {studentCourses.map((course) => (
                                         <div key={course.name} className='border border-slate-100 rounded-xl p-4'>
                                             <div className='flex items-start justify-between gap-3 mb-3'>
                                                 <div className='flex items-center gap-3 min-w-0'>
@@ -251,7 +248,7 @@ export default function DashboardStudent() {
                                 </div>
 
                                 <div className='space-y-3'>
-                                    {assignments.map((item) => (
+                                    {upcomingAssignments.map((item) => (
                                         <div key={item.title} className='border border-slate-100 p-3'>
                                             <div className='flex items-start justify-between gap-2'>
                                                 <Typography variant='body2' className='!font-semibold !text-slate-800'>

@@ -37,7 +37,10 @@ exports.createAssignment = async (req, res) => {
 // 3. Get all submissions (for grading review)
 exports.getSubmissions = async (req, res) => {
     try {
-        const submissions = await Submission.find().sort({ createdAt: -1 })
+        const query = req.user?.role === 'student'
+            ? { studentId: req.user.id }
+            : {}
+        const submissions = await Submission.find(query).sort({ createdAt: -1 })
         res.status(200).json(submissions)
     } catch (err) {
         res.status(500).json({ message: 'Failed to fetch submissions' })
