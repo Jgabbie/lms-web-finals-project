@@ -600,6 +600,20 @@ exports.deleteUser = async (req, res) => {
     }
 }
 
+exports.getArchivedUsers = async (req, res) => {
+    try {
+        const filter = req.query.role
+            ? { role: req.query.role.toLowerCase() }
+            : {}
+
+        const users = await ArchivedUser.find(filter).select('-password').sort({ name: 1 })
+        res.status(200).json(users)
+    } catch (error) {
+        console.error('Retrieve archived users error:', error)
+        res.status(500).json({ message: 'Failed to retrieve archived users' })
+    }
+}
+
 exports.restoreUser = async (req, res) => {
     try {
         const { id } = req.params

@@ -1,11 +1,14 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined } from '@mui/icons-material'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function UserManagementPage() {
+    const [activeTab, setActiveTab] = useState('users')
+    const [archivedUsers, setArchivedUsers] = useState([])
+
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
     const [saving, setSaving] = useState(false)
@@ -58,6 +61,26 @@ export default function UserManagementPage() {
         }
     })
 
+    const fetchArchivedUsers = async () => {
+        try {
+            const response = await api.get('/users/account/archived', getAuthConfig())
+            setArchivedUsers(response.data)
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+        }
+    }
+
+    const restoreUser = async (id) => {
+        try {
+            await api.post(`/users/account/restore/${id}`, {}, getAuthConfig())
+            showNotification('User restored successfully', 'success')
+            await fetchUsers()
+            await fetchArchivedUsers()
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to restore user', 'error')
+        }
+    }
+
     const fetchUsers = async () => {
         try {
             setLoading(true)
@@ -73,6 +96,7 @@ export default function UserManagementPage() {
 
     useEffect(() => {
         fetchUsers()
+        fetchArchivedUsers()
     }, [])
 
     const validateInstructorForm = () => {
@@ -308,6 +332,21 @@ export default function UserManagementPage() {
                             ))}
                         </div>
 
+                        <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
+                            <button
+                                onClick={() => setActiveTab('active')}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Active Users
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('archived')}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Archived Users ({archivedUsers.length})
+                            </button>
+                        </div>
+
                         {/* Filter Bar */}
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-0'>
@@ -394,44 +433,72 @@ export default function UserManagementPage() {
                                                     </td>
                                                     <td className='px-6 py-4'>
                                                         <div className='flex justify-end gap-1'>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='View'
-                                                                onClick={() => {
-                                                                    setSelectedUser(user)
-                                                                    setOpenViewUser(true)
-                                                                }}
-                                                            >
-                                                                <VisibilityOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='Edit'
-                                                                onClick={() => {
-                                                                    setSelectedUser(user)
-                                                                    setFormData({
-                                                                        firstName: user.firstName,
-                                                                        lastName: user.lastName,
-                                                                        email: user.email,
-                                                                        role: user.role,
-                                                                        status: user.status,
-                                                                    })
-                                                                    setOpenEditUser(true)
-                                                                }}
-                                                            >
-                                                                <EditOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                color='error'
-                                                                title='Delete'
-                                                                onClick={() => {
-                                                                    setSelectedUser(user)
-                                                                    setOpenDeleteUser(true)
-                                                                }}
-                                                            >
-                                                                <DeleteOutlined fontSize='small' />
-                                                            </IconButton>
+                                                            {(activeTab === 'active' ? filteredUsers : archivedUsers).map((user) => (
+                                                                <tr key={user._id || user.id} className='hover:bg-slate-50'>
+                                                                    <td className='px-6 py-4'>
+                                                                        {user.firstName} {user.lastName}
+                                                                    </td>
+                                                                    <td className='px-6 py-4'>{user.email}</td>
+                                                                    <td className='px-6 py-4'>{user.role}</td>
+                                                                    <td className='px-6 py-4'>
+                                                                        {activeTab === 'archived' ? 'Archived' : (user.status || 'Active')}
+                                                                    </td>
+                                                                    <td className='px-6 py-4 text-right'>
+                                                                        {activeTab === 'archived' ? (
+                                                                            <IconButton
+                                                                                size='small'
+                                                                                title='Restore'
+                                                                                variant='outlined'
+                                                                                onClick={() => restoreUser(user._id || user.id)}
+                                                                            >
+                                                                                <RestoreFromTrash fontSize='small' />
+                                                                            </IconButton>
+                                                                        ) : (
+                                                                            <div>
+                                                                                <IconButton
+                                                                                    size='small'
+                                                                                    title='View'
+                                                                                    onClick={() => {
+                                                                                        setSelectedUser(user)
+                                                                                        setOpenViewUser(true)
+                                                                                    }}
+                                                                                >
+                                                                                    <VisibilityOutlined fontSize='small' />
+                                                                                </IconButton>
+                                                                                <IconButton
+                                                                                    size='small'
+                                                                                    title='Edit'
+                                                                                    onClick={() => {
+                                                                                        setSelectedUser(user)
+                                                                                        setFormData({
+                                                                                            firstName: user.firstName,
+                                                                                            lastName: user.lastName,
+                                                                                            email: user.email,
+                                                                                            role: user.role,
+                                                                                            status: user.status,
+                                                                                        })
+                                                                                        setOpenEditUser(true)
+                                                                                    }}
+                                                                                >
+                                                                                    <EditOutlined fontSize='small' />
+                                                                                </IconButton>
+                                                                                <IconButton
+                                                                                    size='small'
+                                                                                    color='error'
+                                                                                    title='Delete'
+                                                                                    onClick={() => {
+                                                                                        setSelectedUser(user)
+                                                                                        setOpenDeleteUser(true)
+                                                                                    }}
+                                                                                >
+                                                                                    <DeleteOutlined fontSize='small' />
+                                                                                </IconButton>
+                                                                            </div>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+
                                                         </div>
                                                     </td>
                                                 </tr>

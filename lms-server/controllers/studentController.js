@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const Student = require('../models/Student')
 const User = require('../models/User')
+const ArchivedStudent = require('../models/ArchivedStudent')
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
@@ -636,6 +637,18 @@ exports.deleteStudent = async (req, res) => {
     }
 }
 
+exports.getArchivedStudents = async (req, res) => {
+    try {
+        const students = await ArchivedStudent.find({
+            role: 'student'
+        }).select('-password')
+        res.status(200).json(students)
+    } catch (error) {
+        console.error('Retrieve archived students error: ', error)
+        res.status(500).json({ message: 'Failed to retrieve archived students' })
+    }
+}
+
 exports.restoreStudent = async (req, res) => {
     try {
         const { id } = req.params
@@ -661,8 +674,23 @@ exports.restoreStudent = async (req, res) => {
             status: 'active'
         })
 
-        await restoredStudent.save()
+        const restoredStudentInStudent = new Student({
+            _id: archivedStudent._id,
+            studentId: archivedStudent.studentId,
+            firstName: archivedStudent.firstName,
+            lastName: archivedStudent.lastName,
+            email: archivedStudent.email,
+            course: archivedStudent.course,
+            yearLevel: archivedStudent.yearLevel,
+            status: 'active',
+            role: 'student'
+        })
 
+
+        await restoredStudent.save()
+        await restoredStudentInStudent.save()
+
+        await ArchivedStudent.findByIdAndDelete(id)
         await ArchivedUser.findByIdAndDelete(id)
 
         res.status(200).json({ message: 'Student restored successfully' })
@@ -672,4 +700,6 @@ exports.restoreStudent = async (req, res) => {
         res.status(500).json({ message: 'Failed to restore student' })
     }
 }
+
+
 

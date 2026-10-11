@@ -631,7 +631,7 @@ exports.restoreInstructor = async (req, res) => {
             return res.status(404).json({ message: 'Archived instructor not found' })
         }
 
-        const restoredInstructor = new Instructor({
+        const restoredInstructor = new User({
             _id: archivedInstructor._id,
             firstName: archivedInstructor.firstName,
             lastName: archivedInstructor.lastName,
@@ -639,6 +639,22 @@ exports.restoreInstructor = async (req, res) => {
             role: archivedInstructor.role,
         })
 
+
+        const restoredInstructorInInstructor = new Instructor({
+            _id: archivedInstructor._id,
+            firstName: archivedInstructor.firstName,
+            lastName: archivedInstructor.lastName,
+            email: archivedInstructor.email,
+            specialization: archivedInstructor.specialization,
+            department: archivedInstructor.department,
+            role: archivedInstructor.role,
+        })
+
+
+        await restoredInstructor.save()
+        await restoredInstructorInInstructor.save()
+
+        await ArchivedInstructor.findByIdAndDelete(id)
         await ArchivedUser.findByIdAndDelete(id)
 
         res.status(200).json({ message: 'Instructor restored successfully' })
