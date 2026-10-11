@@ -63,7 +63,7 @@ export default function UserManagementPage() {
 
     const fetchArchivedUsers = async () => {
         try {
-            const response = await api.get('/account/archived', getAuthConfig())
+            const response = await api.get('/users/accounts/archived', getAuthConfig())
             setArchivedUsers(response.data)
         } catch (error) {
             showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
@@ -72,7 +72,7 @@ export default function UserManagementPage() {
 
     const restoreUser = async (id) => {
         try {
-            await api.post(`/account/restore/${id}`, {}, getAuthConfig())
+            await api.post(`/users/account/restore/${id}`, {}, getAuthConfig())
             showNotification('User restored successfully', 'success')
             await fetchUsers()
             await fetchArchivedUsers()
