@@ -540,6 +540,84 @@ exports.deleteUser = async (req, res) => {
                 email: userInformation.email
             })
 
+            await transporter.sendMail({
+                from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
+                to: userInformation.email,
+                subject: 'EduLearn LMS - Account Deleted',
+                html: `
+                <div
+                    style="
+                    font-family: Arial, sans-serif;
+                    max-width: 600px;
+                    margin: auto;
+                    padding: 30px;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    "
+                >
+                    <h2 style="color: #2563eb;">
+                        EduLearn LMS
+                    </h2>
+
+                    <p>Hello ${userInformation.firstName} ${userInformation.lastName},</p>
+
+                    <p>
+                        Your account has been deleted successfully.
+                        Your account details are no longer associated with the following information:
+                    </p>
+
+                    <div
+                    style="
+                        text-align: center;
+                        margin: 30px 0;
+                    ">
+                        <span style="
+                            display: inline-block;
+                            background: #eff6ff;
+                            color: #2563eb;
+                            font-size: 32px;
+                            font-weight: bold;
+                            letter-spacing: 8px;
+                            padding: 15px 25px;
+                            border-radius: 10px;
+                        ">
+                            <p style="margin: 0 0 12px; font-size: 14px;">
+                                Email Address:
+                                <strong>${userInformation.email}</strong>
+                            </p>
+                            <p style="margin: 0 0 12px; font-size: 14px;">
+                                Account Role:
+                                <strong>${userInformation.role}</strong>
+                            </p>
+                        </span>
+                    </div>
+
+                    <p>
+                        If you did not request this change, please contact support.
+                    </p>
+
+                    <p>
+                        Thank you for using <strong>EduLearn LMS</strong>!
+                    </p>
+
+                    <div style="
+                        background: #f3f4f6;
+                        border-top: 1px solid #e5e7eb;
+                        padding: 20px;
+                        text-align: center;
+                    "
+                    >
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                            &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
+                        </p>
+                        <p style=""margin: 0; font-size: 12px; color: #6b7280;">
+                        This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
+                        </p>
+                    </div>
+                </div>
+            `
+            })
+
             res.status(200).json({ message: 'User deleted successfully' })
         }
 
@@ -567,6 +645,84 @@ exports.deleteUser = async (req, res) => {
 
             await Instructor.findOneAndDelete({
                 email: userInformation.email
+            })
+
+            await transporter.sendMail({
+                from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
+                to: userInformation.email,
+                subject: 'EduLearn LMS - Account Deleted',
+                html: `
+                <div
+                    style="
+                    font-family: Arial, sans-serif;
+                    max-width: 600px;
+                    margin: auto;
+                    padding: 30px;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    "
+                >
+                    <h2 style="color: #2563eb;">
+                        EduLearn LMS
+                    </h2>
+
+                    <p>Hello ${userInformation.firstName} ${userInformation.lastName},</p>
+
+                    <p>
+                        Your account has been deleted successfully.
+                        Your account details are no longer associated with the following information:
+                    </p>
+
+                    <div
+                    style="
+                        text-align: center;
+                        margin: 30px 0;
+                    ">
+                        <span style="
+                            display: inline-block;
+                            background: #eff6ff;
+                            color: #2563eb;
+                            font-size: 32px;
+                            font-weight: bold;
+                            letter-spacing: 8px;
+                            padding: 15px 25px;
+                            border-radius: 10px;
+                        ">
+                            <p style="margin: 0 0 12px; font-size: 14px;">
+                                Email Address:
+                                <strong>${userInformation.email}</strong>
+                            </p>
+                            <p style="margin: 0 0 12px; font-size: 14px;">
+                                Account Role:
+                                <strong>${userInformation.role}</strong>
+                            </p>
+                        </span>
+                    </div>
+
+                    <p>
+                        If you did not request this change, please contact support.
+                    </p>
+
+                    <p>
+                        Thank you for using <strong>EduLearn LMS</strong>!
+                    </p>
+
+                    <div style="
+                        background: #f3f4f6;
+                        border-top: 1px solid #e5e7eb;
+                        padding: 20px;
+                        text-align: center;
+                    "
+                    >
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                            &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
+                        </p>
+                        <p style=""margin: 0; font-size: 12px; color: #6b7280;">
+                        This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
+                        </p>
+                    </div>
+                </div>
+            `
             })
 
             res.status(200).json({ message: 'User deleted successfully' })
@@ -686,13 +842,62 @@ exports.restoreUser = async (req, res) => {
             return res.status(404).json({ message: 'Archived user not found' })
         }
 
+        const existingUser = await User.findOne({
+            $or: [
+                { email: archivedUser.email },
+                { _id: archivedUser._id }
+            ]
+        })
+
+        if (existingUser) {
+            return res.status(409).json({
+                message: 'A user with this email or ID already exists'
+            })
+        }
+
         const restoredUser = await User.create({
             _id: archivedUser._id,
             firstName: archivedUser.firstName,
             lastName: archivedUser.lastName,
             email: archivedUser.email,
+            password: archivedUser.password,
             role: archivedUser.role
         })
+
+        if (archivedUser.role === 'student') {
+            const archivedStudent = await ArchivedStudent.findById(id)
+
+            if (archivedStudent) {
+                await Student.create({
+                    _id: archivedStudent._id,
+                    firstName: archivedStudent.firstName,
+                    lastName: archivedStudent.lastName,
+                    email: archivedStudent.email,
+                    password: archivedStudent.password,
+                    course: archivedStudent.course,
+                    yearLevel: archivedStudent.yearLevel,
+                    status: 'active'
+                })
+                await ArchivedStudent.findByIdAndDelete(id)
+            }
+        }
+
+        if (archivedUser.role === 'instructor') {
+            const archivedInstructor = await ArchivedInstructor.findById(id)
+            if (archivedInstructor) {
+                await Instructor.create({
+                    _id: archivedInstructor._id,
+                    firstName: archivedInstructor.firstName,
+                    lastName: archivedInstructor.lastName,
+                    email: archivedInstructor.email,
+                    password: archivedInstructor.password,
+                    department: archivedInstructor.department,
+                    specialization: archivedInstructor.specialization,
+                    status: 'active'
+                })
+                await ArchivedInstructor.findByIdAndDelete(id)
+            }
+        }
 
         await ArchivedUser.findByIdAndDelete(id)
 
