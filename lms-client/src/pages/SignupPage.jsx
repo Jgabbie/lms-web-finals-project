@@ -2,6 +2,7 @@ import { TextField, Button, Checkbox, FormControlLabel, Typography, Link, InputA
 import { VisibilityOff, Visibility } from '@mui/icons-material'
 import { useState } from 'react'
 import api from '../api/axiosClient'
+import './SignupPage.css'
 
 
 export default function SignupPage() {
@@ -248,29 +249,36 @@ export default function SignupPage() {
 
     return (
         <>
-            <div className='relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 px-4'>
-
-                <div className='absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blue-200/60 ' />
-                <div className='absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-indigo-200/60 ' />
-                <div className='absolute top-1/3 -right-20 w-64 h-64 rounded-full bg-blue-200/60 ' />
-
-                <div className='relative max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-10'>
-                    <div className='text-center mb-8'>
-                        <Typography variant='h5' className='font-bold text-blue-600 tracking-wide mb-2'>
-                            EduLearn LMS
-                        </Typography>
-                        <Typography variant='h5' className='font-bold text-slate-800'>
-                            Welcome New User
-                        </Typography>
-                        <Typography variant='body2' className='text-slate-500 mt-2'>
-                            Please enter required details to sign up.
-                        </Typography>
+            <main className='edusignup'>
+                <aside className='signup-story'>
+                    <div className='signup-art' aria-hidden='true'><span /><span /><span /></div>
+                    <div>
+                        <a className='signup-brand' href='/'>EduLearn.</a>
+                        <p className='signup-eyebrow'>YOUR NEXT CHAPTER STARTS HERE</p>
+                        <h2>A brighter future<br />starts with you.</h2>
+                        <p className='signup-story-copy'>Build your skills, follow your curiosity, and make room for new possibilities.</p>
+                    </div>
+                    <div className='signup-story-bottom'>
+                        <span>Stay curious.</span><span>Keep growing.</span><span>Learn at your pace.</span>
+                        <p>Small steps. Endless possibilities.</p>
+                    </div>
+                </aside>
+                <section className='signup-form-panel' aria-labelledby='signup-title'>
+                    <div className='signup-heading'>
+                        <Typography className='signup-form-brand'>EduLearn LMS</Typography>
+                        <Typography component='h1' id='signup-title' className='signup-title'>Start your journey.</Typography>
+                        <Typography className='signup-subtitle'>Create your account and take the first step toward something great.</Typography>
+                    </div>
+                    <div className='signup-progress'>
+                        <div className='signup-step-labels'><span aria-current={showOtpModal ? undefined : 'step'}>01 Account details</span><span aria-current={showOtpModal ? 'step' : undefined}>02 Verify email</span></div>
+                        <div className='signup-progress-track' role='progressbar' aria-label='Account creation step' aria-valuemin={0} aria-valuemax={2} aria-valuenow={showOtpModal ? 2 : 1} aria-valuetext={showOtpModal ? 'Step 2 of 2: Verify email' : 'Step 1 of 2: Account details'}><span style={{ width: showOtpModal ? '100%' : '50%' }} /></div>
+                        <p>Step {showOtpModal ? '2' : '1'} of 2  /  {showOtpModal ? 'Verify your email' : 'Tell us about yourself'}</p>
                     </div>
 
-                    <form className='flex flex-col gap-5' onSubmit={handleSubmit}>
+                    <form className='signup-form' onSubmit={handleSubmit}>
 
                         {/* firstname and lastname */}
-                        <div className='flex flex-row gap-3'>
+                        <div className='signup-name-row'>
                             <TextField
                                 label="First Name"
                                 type='text'
@@ -346,6 +354,7 @@ export default function SignupPage() {
                                     endAdornment: (
                                         <InputAdornment position='end'>
                                             <IconButton
+                                                aria-label={showPassword ? "Hide password" : "Show password"}
                                                 onClick={() => { setShowPassword(!showPassword) }} edge="end">
                                                 {showPassword ? <Visibility /> : <VisibilityOff />}
                                             </IconButton>
@@ -373,7 +382,7 @@ export default function SignupPage() {
                                 input: {
                                     endAdornment: (
                                         <InputAdornment position='end'>
-                                            <IconButton onClick={() => { setShowConfirmPassword(!showConfirmPassword) }} edge="end">
+                                            <IconButton aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"} onClick={() => { setShowConfirmPassword(!showConfirmPassword) }} edge="end">
                                                 {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                                             </IconButton>
                                         </InputAdornment>
@@ -387,7 +396,7 @@ export default function SignupPage() {
 
 
 
-                        <div className='flex items-center justify-between -mt-2'>
+                        <div className='signup-terms'>
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -422,13 +431,13 @@ export default function SignupPage() {
                             variant='contained'
                             size='large'
                             disabled={loading}
-                            className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-2 text-base font-medium'
+                            className='signup-submit'
                         >
                             {loading ? 'Creating Account...' : 'Create Account'}
                         </Button>
                     </form>
 
-                    <div className='mt-8 text-center'>
+                    <div className='signup-login'>
                         <Typography variant='body2' className='text-slate-600'>
                             Already have an account?
 
@@ -437,8 +446,8 @@ export default function SignupPage() {
                             </Link>
                         </Typography>
                     </div>
-                </div>
-            </div>
+                </section>
+            </main>
 
 
             {/* terms and conditions modal */}
@@ -509,7 +518,9 @@ export default function SignupPage() {
                 }}
                 className='flex items-center justify-center p-4'
             >
-                <div className='relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                <div className='signup-otp relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                    <p className='signup-otp-step'>Step 2 of 2  /  Verify email</p>
+                    <div className='signup-progress-track' aria-hidden='true'><span style={{ width: '100%' }} /></div>
                     <div className='text-center'>
 
                         <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100'>
