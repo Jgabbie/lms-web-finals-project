@@ -1,79 +1,137 @@
 import { Avatar, Card, CardContent, Typography, Button, Chip, Divider, Dialog, DialogActions, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, DialogContent } from '@mui/material'
 import { Add, ForumOutlined, PersonOutlined, Search, Schedule, SchoolOutlined, ChatBubbleOutlined } from '@mui/icons-material'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
+import api from '../../api/axiosClient'
 
 export default function DiscussionPage() {
     const [search, setSearch] = useState('')
     const [courseFilter, setCourseFilter] = useState('All')
     const [openModal, setOpenModal] = useState(false)
+    const [selectedDiscussion, setSelectedDiscussion] = useState(null)
+    const [discussionReplies, setDiscussionReplies] = useState([])
+    const [replyContent, setReplyContent] = useState('')
+    const [replySaving, setReplySaving] = useState(false)
     const [newDiscussion, setNewDiscussion] = useState({
         title: '',
-        course: '',
+        courseId: '',
         content: ''
     })
+    const [discussions, setDiscussions] = useState([])
+    const [courses, setCourses] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [error, setError] = useState('')
 
-    const discussions = [{
-        id: 1,
-        title: 'What is the difference between HTTP and HTTPS',
-        course: 'Web Development',
-        author: 'John Cruz',
-        initials: 'JC',
-        content: 'DIQWDHIOQWD',
-        replies: 10,
-        createdAt: '2 hours ago',
-        status: 'Open'
-    },
-    {
-        id: 2,
-        title: 'What is the difference between HTTP and HTTPS',
-        course: 'Web Development',
-        author: 'John Cruz',
-        initials: 'JC',
-        content: 'DIQWDHIOQWD',
-        replies: 10,
-        createdAt: '2 hours ago',
-        status: 'Open'
-    },
-    {
-        id: 3,
-        title: 'What is the difference between HTTP and HTTPS',
-        course: 'Web Development',
-        author: 'John Cruz',
-        initials: 'JC',
-        content: 'DIQWDHIOQWD',
-        replies: 10,
-        createdAt: '2 hours ago',
-        status: 'Open'
-    },
-    ]
+    const fetchDiscussionData = useCallback(async () => {
+        try {
+            setLoading(true)
+            const [discussionResponse, courseResponse] = await Promise.all([
+                api.get('/discussions'),
+                api.get('/courses')
+            ])
+            setDiscussions(Array.isArray(discussionResponse.data) ? discussionResponse.data : [])
+            setCourses(Array.isArray(courseResponse.data) ? courseResponse.data : [])
+            setError('')
+        } catch (err) {
+            console.error('Failed to load discussions:', err)
+            setError(err.response?.data?.message || 'Failed to load discussions.')
+        } finally {
+            setLoading(false)
+        }
+    }, [])
 
-    const courses = ['All', ...new Set(discussions.map(item => item.course))]
+    useEffect(() => {
+        // The fetch updates state when the external request resolves.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchDiscussionData()
+    }, [fetchDiscussionData])
+
+    const courseOptions = ['All', ...new Set([
+        ...courses.map(course => course.courseName),
+        ...discussions.map(item => item.course?.courseName)
+    ].filter(Boolean))]
     const filteredDiscussions = discussions.filter(item => {
+        const courseName = item.course?.courseName || 'General Discussion'
+        const authorName = `${item.author?.firstName || ''} ${item.author?.lastName || ''}`.trim()
         const matchesSearch =
             item.title.toLowerCase().includes(search.toLowerCase()) ||
             item.content.toLowerCase().includes(search.toLowerCase()) ||
-            item.author.toLowerCase().includes(search.toLowerCase())
+            authorName.toLowerCase().includes(search.toLowerCase())
 
         const matchesCourse =
-            courseFilter === "All" || item.course === courseFilter
+            courseFilter === "All" || courseName === courseFilter
 
         return matchesSearch && matchesCourse
     })
 
+    const formatCreatedAt = (date) => {
+        if (!date) return ''
+        return new Date(date).toLocaleString()
+    }
 
-    const handleCreateDiscussion = () => {
-        if (!newDiscussion.title || !newDiscussion.course || !newDiscussion.content) {
+
+    const handleCreateDiscussion = async () => {
+        if (!newDiscussion.title.trim() || !newDiscussion.content.trim()) {
             return
         }
 
-        setOpenModal(false)
-        setNewDiscussion({
-            title: '',
-            course: '',
-            content: ''
-        })
+        try {
+            setSaving(true)
+            const response = await api.post('/discussions', {
+                ...newDiscussion,
+                courseId: newDiscussion.courseId || null
+            })
+            setDiscussions(current => [response.data, ...current])
+            setOpenModal(false)
+            setNewDiscussion({ title: '', courseId: '', content: '' })
+            setError('')
+        } catch (err) {
+            console.error('Failed to create discussion:', err)
+            setError(err.response?.data?.message || 'Failed to create discussion.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleViewDiscussion = async (discussion) => {
+        setSelectedDiscussion(discussion)
+        setDiscussionReplies([])
+        setReplyContent('')
+        try {
+            const response = await api.get(`/discussions/${discussion._id}/replies`)
+            setDiscussionReplies(Array.isArray(response.data) ? response.data : [])
+        } catch (err) {
+            console.error('Failed to load discussion replies:', err)
+            setError(err.response?.data?.message || 'Failed to load replies.')
+        }
+    }
+
+    const handleCreateReply = async () => {
+        if (!selectedDiscussion || !replyContent.trim()) return
+
+        try {
+            setReplySaving(true)
+            const response = await api.post(`/discussions/${selectedDiscussion._id}/replies`, {
+                content: replyContent
+            })
+            setDiscussionReplies(current => [...current, response.data])
+            setDiscussions(current => current.map(discussion =>
+                discussion._id === selectedDiscussion._id
+                    ? { ...discussion, replies: discussion.replies + 1 }
+                    : discussion
+            ))
+            setSelectedDiscussion(current => current
+                ? { ...current, replies: current.replies + 1 }
+                : current)
+            setReplyContent('')
+        } catch (err) {
+            console.error('Failed to create discussion reply:', err)
+            setError(err.response?.data?.message || 'Failed to post reply.')
+        } finally {
+            setReplySaving(false)
+        }
     }
 
     return (
@@ -95,11 +153,18 @@ export default function DiscussionPage() {
                             variant='contained'
                             startIcon={<Add />}
                             onClick={() => setOpenModal(true)}
+                            disabled={loading}
                             className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-non'
                         >
                             New Discussion
                         </Button>
                     </div >
+
+                    {error && (
+                        <Typography color='error' className='!mb-4'>
+                            {error}
+                        </Typography>
+                    )}
 
                     <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
@@ -185,7 +250,7 @@ export default function DiscussionPage() {
                                         label='Course'
                                         onChange={e => setCourseFilter(e.target.value)}
                                     >
-                                        {courses.map(course => (
+                                        {courseOptions.map(course => (
                                             <MenuItem key={course} value={course}>
                                                 {course}
                                             </MenuItem>
@@ -198,16 +263,18 @@ export default function DiscussionPage() {
 
 
                     <div className='space-y-4'>
-                        {filteredDiscussions.length > 0 ? (
+                        {loading ? (
+                            <Typography className='!text-slate-500'>Loading discussions...</Typography>
+                        ) : filteredDiscussions.length > 0 ? (
                             filteredDiscussions.map(discussion => (
                                 <Card
-                                    key={discussion.id}
+                                    key={discussion._id}
                                     className='!rounded-xl !border !border-slate-200 !shadow-sm hover:!shadow-md !transition-shadow'
                                 >
                                     <CardContent className='!p-5 sm:!p-6'>
                                         <div className='flex items-start gap-4'>
                                             <Avatar className='!bg-blue-600'>
-                                                {discussion.initials}
+                                                {(discussion.author?.firstName?.[0] || '') + (discussion.author?.lastName?.[0] || '')}
                                             </Avatar>
                                             <div className='flex-1 min-w-0'>
                                                 <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2'>
@@ -218,7 +285,7 @@ export default function DiscussionPage() {
                                                         <div className='flex flex-wrap items-center gap-2 mt-2'>
                                                             <Chip
                                                                 size='small'
-                                                                label={discussion.course}
+                                                                label={discussion.course?.courseName || 'General Discussion'}
                                                                 className='!bg-blue-50 !text-blue-700'
                                                             />
 
@@ -237,7 +304,7 @@ export default function DiscussionPage() {
                                                     <div className='flex items-center gap-1 text-slate-400 whitespace-nowrap'>
                                                         <Schedule fontSize='small' />
                                                         <Typography variant='caption' >
-                                                            {discussion.createdAt}
+                                                            {formatCreatedAt(discussion.createdAt)}
                                                         </Typography>
                                                     </div>
                                                 </div>
@@ -253,12 +320,12 @@ export default function DiscussionPage() {
                                                         <div className='flex items-center gap-1.5'>
                                                             <PersonOutlined fontSize='small' />
                                                             <Typography variant='body2'>
-                                                                {discussion.author}
+                                                                {`${discussion.author?.firstName || ''} ${discussion.author?.lastName || ''}`.trim()}
                                                             </Typography>
                                                         </div>
 
                                                         <div className='flex items-center gap-1.5'>
-                                                            <PersonOutlined fontSize='small' />
+                                                            <ChatBubbleOutlined fontSize='small' />
                                                             <Typography variant='body2'>
                                                                 {discussion.replies} replies
                                                             </Typography>
@@ -267,6 +334,7 @@ export default function DiscussionPage() {
 
                                                     <Button
                                                         variant='outlined'
+                                                        onClick={() => handleViewDiscussion(discussion)}
                                                         className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
                                                     >
                                                         View Discussion
@@ -318,25 +386,33 @@ export default function DiscussionPage() {
                             })}
                         />
 
-                        <FormControl fullWidth>
-                            <InputLabel>
-                                Course
-                            </InputLabel>
-                            <Select
-                                value={newDiscussion.course}
-                                label='Course'
-                                onChange={e => setNewDiscussion({
-                                    ...newDiscussion,
-                                    course: e.target.value
-                                })}
+                        <div className='w-full'>
+                            <label htmlFor='discussion-course' className='block text-sm text-slate-600 mb-1'>
+                                Course (optional)
+                            </label>
+                            <select
+                                id='discussion-course'
+                                name='courseId'
+                                value={newDiscussion.courseId}
+                                onChange={e => {
+                                    const courseId = e.currentTarget.value
+                                    setNewDiscussion(current => ({
+                                        ...current,
+                                        courseId
+                                    }))
+                                }}
+                                className='w-full h-14 rounded border border-slate-300 bg-white px-3 text-slate-700 cursor-pointer focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600'
                             >
-                                {courses.filter(course => course !== 'All').map(course => (
-                                    <MenuItem key={course} value={course}>
-                                        {course}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                                <option value=''>General Discussion</option>
+                                {courses.length > 0 ? courses.map(course => (
+                                    <option key={String(course._id)} value={String(course._id)}>
+                                        {course.courseCode} - {course.courseName}
+                                    </option>
+                                )) : (
+                                    <option value='' disabled>No courses available</option>
+                                )}
+                            </select>
+                        </div>
 
                         <TextField
                             fullWidth
@@ -366,12 +442,108 @@ export default function DiscussionPage() {
                         onClick={handleCreateDiscussion}
                         disabled={
                             !newDiscussion.title ||
-                            !newDiscussion.course ||
-                            !newDiscussion.content
+                            !newDiscussion.content ||
+                            saving
                         }
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
-                        Post Discussion
+                        {saving ? 'Saving...' : 'Post Discussion'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={Boolean(selectedDiscussion)}
+                onClose={() => setSelectedDiscussion(null)}
+                fullWidth
+                maxWidth='sm'
+            >
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    {selectedDiscussion?.title}
+                </DialogTitle>
+
+                <DialogContent>
+                    {selectedDiscussion && (
+                        <div className='space-y-4'>
+                            <div className='flex flex-wrap gap-2'>
+                                <Chip
+                                    size='small'
+                                    label={selectedDiscussion.course?.courseName || 'General Discussion'}
+                                    className='!bg-blue-50 !text-blue-700'
+                                />
+                                <Chip
+                                    size='small'
+                                    label={selectedDiscussion.status}
+                                    className={selectedDiscussion.status === 'Answered'
+                                        ? '!bg-green-50 !text-green-700'
+                                        : '!bg-amber-50 !text-amber-700'}
+                                />
+                            </div>
+
+                            <Typography className='!whitespace-pre-wrap !leading-7 !text-slate-700'>
+                                {selectedDiscussion.content}
+                            </Typography>
+
+                            <Divider />
+
+                            <Typography variant='body2' className='!text-slate-500'>
+                                Posted by {`${selectedDiscussion.author?.firstName || ''} ${selectedDiscussion.author?.lastName || ''}`.trim()}
+                                {' '}on {formatCreatedAt(selectedDiscussion.createdAt)}
+                            </Typography>
+
+                            <Typography variant='body2' className='!text-slate-500'>
+                                {selectedDiscussion.replies} replies
+                            </Typography>
+
+                            <Divider />
+
+                            <div className='space-y-3'>
+                                <Typography className='!font-semibold !text-slate-800'>
+                                    Replies
+                                </Typography>
+                                {discussionReplies.length > 0 ? discussionReplies.map(reply => (
+                                    <div key={reply._id} className='rounded-lg bg-slate-50 p-3'>
+                                        <Typography variant='body2' className='!whitespace-pre-wrap !text-slate-700'>
+                                            {reply.content}
+                                        </Typography>
+                                        <Typography variant='caption' className='!text-slate-500'>
+                                            {`${reply.author?.firstName || ''} ${reply.author?.lastName || ''}`.trim()}
+                                            {' '}on {formatCreatedAt(reply.createdAt)}
+                                        </Typography>
+                                    </div>
+                                )) : (
+                                    <Typography variant='body2' className='!text-slate-500'>
+                                        No replies yet.
+                                    </Typography>
+                                )}
+                            </div>
+
+                            <TextField
+                                fullWidth
+                                multiline
+                                minRows={3}
+                                label='Write a reply'
+                                value={replyContent}
+                                onChange={e => setReplyContent(e.target.value)}
+                            />
+                        </div>
+                    )}
+                </DialogContent>
+
+                <DialogActions>
+                    <Button
+                        variant='contained'
+                        onClick={handleCreateReply}
+                        disabled={!replyContent.trim() || replySaving}
+                        className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
+                    >
+                        {replySaving ? 'Posting...' : 'Post Reply'}
+                    </Button>
+                    <Button
+                        onClick={() => setSelectedDiscussion(null)}
+                        className='!normal-case !text-slate-600'
+                    >
+                        Close
                     </Button>
                 </DialogActions>
             </Dialog>

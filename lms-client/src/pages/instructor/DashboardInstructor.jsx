@@ -1,5 +1,5 @@
 import { Card, CardContent, Typography, Button, Chip, CircularProgress } from '@mui/material'
-import { MenuBook, People, Assignment, RateReview, TrendingUp, AccessTime, PersonAdd } from '@mui/icons-material'
+import { MenuBook, People, Assignment, RateReview, TrendingUp, AccessTime, PersonAdd, ArrowForward } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import { useState, useEffect, useCallback, useMemo } from 'react'
@@ -24,7 +24,6 @@ export default function DashboardInstructor() {
                 api.get('/assignments'),
                 api.get('/assignments/submissions')
             ])
-
             setCourses(Array.isArray(coursesRes.data) ? coursesRes.data : [])
             const allUsers = Array.isArray(usersRes.data) ? usersRes.data : []
             setStudents(allUsers.filter(u => u.role?.toLowerCase() === 'student'))
@@ -41,7 +40,6 @@ export default function DashboardInstructor() {
         fetchDashboardData()
     }, [fetchDashboardData])
 
-    // Compute live stats
     const totalCourses = courses.length
     const totalStudents = students.length
     const totalAssignments = assignments.length
@@ -50,7 +48,6 @@ export default function DashboardInstructor() {
         [submissions]
     )
 
-    // Compute submissions progress for each active assignment
     const assignmentsToGrade = useMemo(() => {
         return assignments.map(asg => {
             const relatedSubs = submissions.filter(
@@ -69,7 +66,6 @@ export default function DashboardInstructor() {
         })
     }, [assignments, submissions, totalStudents])
 
-    // Courses with class schedules defined
     const upcomingClasses = useMemo(() => {
         return courses.filter(c => c.schedule || c.room)
     }, [courses])
@@ -82,7 +78,8 @@ export default function DashboardInstructor() {
             description: 'in curriculum',
             icon: <MenuBook />,
             iconBg: 'bg-blue-100',
-            iconColor: 'text-blue-600'
+            iconColor: 'text-blue-600',
+            action: () => navigate('/instructor/courses')
         },
         {
             title: 'Total Students',
@@ -91,7 +88,8 @@ export default function DashboardInstructor() {
             description: 'registered',
             icon: <People />,
             iconBg: 'bg-purple-100',
-            iconColor: 'text-purple-600'
+            iconColor: 'text-purple-600',
+            action: () => navigate('/instructor/students')
         },
         {
             title: 'Assignments',
@@ -100,7 +98,8 @@ export default function DashboardInstructor() {
             description: 'published tasks',
             icon: <Assignment />,
             iconBg: 'bg-green-100',
-            iconColor: 'text-green-600'
+            iconColor: 'text-green-600',
+            action: () => navigate('/instructor/assignments')
         },
         {
             title: 'To Grade',
@@ -109,7 +108,8 @@ export default function DashboardInstructor() {
             description: 'needs review',
             icon: <RateReview />,
             iconBg: 'bg-amber-100',
-            iconColor: 'text-amber-600'
+            iconColor: 'text-amber-600',
+            action: () => navigate('/instructor/assignments')
         },
     ]
 
@@ -122,7 +122,6 @@ export default function DashboardInstructor() {
                 style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
             >
                 <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    {/* Header */}
                     <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
                         <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
@@ -161,7 +160,11 @@ export default function DashboardInstructor() {
                             {/* Stat Cards */}
                             <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6'>
                                 {statistics.map(stat => (
-                                    <Card key={stat.title} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
+                                    <Card
+                                        key={stat.title}
+                                        onClick={stat.action}
+                                        className='!rounded-xl !border !border-slate-200 !shadow-sm hover:!shadow-md hover:!border-blue-200 transition-all cursor-pointer'
+                                    >
                                         <CardContent className='!p-5'>
                                             <div className='flex items-start justify-between'>
                                                 <div>
@@ -202,16 +205,20 @@ export default function DashboardInstructor() {
                                             <Chip
                                                 label={`${pendingSubmissions.length} pending`}
                                                 size='small'
-                                                className='!bg-amber-100 !text-amber-700 !font-medium'
+                                                onClick={() => navigate('/instructor/assignments')}
+                                                className='!bg-amber-100 !text-amber-700 !font-medium hover:!bg-amber-200 cursor-pointer'
                                             />
                                         </div>
-
                                         <div className='space-y-4'>
                                             {assignmentsToGrade.length > 0 ? (
                                                 assignmentsToGrade.slice(0, 5).map(item => {
                                                     const progress = Math.min(100, Math.round((item.submitted / item.total) * 100))
                                                     return (
-                                                        <div key={item._id} className='border-b border-slate-100 last:border-0 pb-4 last:pb-0'>
+                                                        <div
+                                                            key={item._id}
+                                                            onClick={() => navigate('/instructor/assignments')}
+                                                            className='border-b border-slate-100 last:border-0 pb-4 last:pb-0 hover:bg-slate-50/70 p-2 rounded-lg cursor-pointer transition'
+                                                        >
                                                             <div className='flex justify-between items-start mb-1'>
                                                                 <div>
                                                                     <Typography variant='body2' className='!font-semibold !text-slate-800'>
@@ -278,7 +285,7 @@ export default function DashboardInstructor() {
                                                 onClick={() => navigate('/instructor/assignments')}
                                                 className='!normal-case !justify-start !py-2.5 !rounded-lg !border-slate-200 !text-slate-700 hover:!bg-blue-50 hover:!border-blue-300'
                                             >
-                                                View Assignments
+                                                Review Assignments
                                             </Button>
                                         </div>
                                     </CardContent>
@@ -289,16 +296,32 @@ export default function DashboardInstructor() {
                             <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
                                 <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                     <CardContent className='!p-6'>
-                                        <Typography variant='h6' className='!font-bold !text-slate-800 mb-1'>
-                                            Course Schedules
-                                        </Typography>
-                                        <Typography variant='body2' className='!text-slate-500 mb-4'>
-                                            Active timetables from your courses
-                                        </Typography>
+                                        <div className='flex items-center justify-between mb-4'>
+                                            <div>
+                                                <Typography variant='h6' className='!font-bold !text-slate-800 mb-1'>
+                                                    Course Schedules
+                                                </Typography>
+                                                <Typography variant='body2' className='!text-slate-500'>
+                                                    Active timetables from your courses
+                                                </Typography>
+                                            </div>
+                                            <Button
+                                                size='small'
+                                                endIcon={<ArrowForward fontSize='small' />}
+                                                onClick={() => navigate('/instructor/courses')}
+                                                className='!normal-case !text-blue-600'
+                                            >
+                                                View All
+                                            </Button>
+                                        </div>
                                         <div className='space-y-3'>
                                             {upcomingClasses.length > 0 ? (
                                                 upcomingClasses.map(c => (
-                                                    <div key={c._id} className='p-3 rounded-lg border border-slate-100 flex items-center justify-between'>
+                                                    <div
+                                                        key={c._id}
+                                                        onClick={() => navigate('/instructor/courses')}
+                                                        className='p-3 rounded-lg border border-slate-100 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition'
+                                                    >
                                                         <div>
                                                             <Typography variant='body2' className='!font-semibold !text-slate-800'>
                                                                 {c.courseName} ({c.courseCode})

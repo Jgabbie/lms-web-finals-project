@@ -17,7 +17,6 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
-app.use(express.json())
 
 
 mongoose.connect((process.env.MONGO_URI))
@@ -38,10 +37,11 @@ app.use('/api/instructors', instructorRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/logs', logsRouter)
 app.use('/api/profile', profileRouter)
-app.use('/api/students', studentRouter)
+app.use('/api/students', studentRouter) 
 app.use('/api/user', userRouter)
 app.use('/api/users', userRouter)
 app.use('/api/notifications', notificationRouter)
+app.use('/api/discussions', require('./routes/discussionRouter'))
 
 
 app.listen(process.env.PORT, () => console.log(`Server on port ${process.env.PORT}`))

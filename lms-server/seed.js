@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const Assignment = require('./models/Assignment');
 const Submission = require('./models/Submission');
+const Course = require('./models/Course');
 require('dotenv').config();
 
 mongoose.connect(process.env.MONGO_URI)
@@ -25,6 +26,9 @@ mongoose.connect(process.env.MONGO_URI)
     });
     await Assignment.deleteMany({});
     await Submission.deleteMany({});
+    await Course.deleteMany({
+      courseCode: { $in: ['WEB101', 'CS102'] }
+    });
 
     await User.create([
       {
@@ -67,9 +71,30 @@ mongoose.connect(process.env.MONGO_URI)
     const studentUser = await User.findOne({ email: 'taysan@portal.com' });
     const instructorUser = await User.findOne({ email: 'instructor@portal.com' });
 
+    const [sampleCourse] = await Course.create([
+      {
+        courseCode: 'WEB101',
+        courseName: 'Web Development',
+        instructor: 'Instructor Portal',
+        instructorId: instructorUser?._id,
+        description: 'Learn the fundamentals of modern web development.',
+        status: 'Active',
+        enrolledStudents: studentUser ? [studentUser._id] : []
+      },
+      {
+        courseCode: 'CS102',
+        courseName: 'Introduction to Programming',
+        instructor: 'Instructor Portal',
+        instructorId: instructorUser?._id,
+        description: 'Practice programming concepts, problem solving, and algorithms.',
+        status: 'Active',
+        enrolledStudents: studentUser ? [studentUser._id] : []
+      },
+    ]);
+
     const sampleAssignment = await Assignment.create({
       title: 'React Fundamentals Activity',
-      course: 'Web Development',
+      course: sampleCourse.courseName,
       dueDate: '2026-10-15',
       points: 100,
       description: 'Build a modular component layout using props and state.',
