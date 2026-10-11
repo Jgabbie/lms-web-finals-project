@@ -65,7 +65,7 @@ export default function StudentManagement() {
 
     const fetchArchivedUsers = async () => {
         try {
-            const response = await api.get('/users/archived', getAuthConfig())
+            const response = await api.get('/students/archived', getAuthConfig())
             setArchivedUsers(response.data)
         } catch (error) {
             console.error('Error fetching archived users:', error)
@@ -75,7 +75,7 @@ export default function StudentManagement() {
 
     const restoreUser = async (id) => {
         try {
-            await api.post(`/users/account/restore/${id}`, {}, getAuthConfig())
+            await api.post(`/students/restore/${id}`, {}, getAuthConfig())
             showNotification('User restored successfully', 'success')
             await fetchStudents()
             await fetchArchivedUsers()
