@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, Divider } from '@mui/material'
 import { People, School, MenuBook, TrendingUp, ArrowForward, MoreVert, CheckCircle, AccessTime, PersonAdd, Assignment, } from '@mui/icons-material'
 import NavbarAdmin from '../../components/NavbarAdmin'
@@ -135,7 +136,7 @@ export default function Dashboard() {
     }))
 
     return (
-        <>
+        <RoleScreen page="dashboard" role="admin">
             <div className="min-h-screen bg-slate-50">
                 <NavbarAdmin />
                 <SidebarAdmin
@@ -150,7 +151,7 @@ export default function Dashboard() {
                     }}
                 >
                     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
+                        <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
                             <div>
                                 <Typography variant='h4' className='!font-bold !text-slate-800'>
                                     Admin Dashboard
@@ -185,7 +186,7 @@ export default function Dashboard() {
 
                         </div>
 
-                        <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6'>
+                        <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6'>
                             {statistics.map((stat) => (
                                 <Card key={stat.title} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                     <CardContent className='!p-5'>
@@ -566,7 +567,7 @@ export default function Dashboard() {
                     </main >
                 </div>
             </div >
-        </>
+        </RoleScreen>
 
     )
 }

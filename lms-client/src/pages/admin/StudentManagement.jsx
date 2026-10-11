@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
@@ -344,7 +345,7 @@ export default function StudentManagement() {
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
     return (
-        <>
+        <RoleScreen page="studentmanagement" role="admin">
             <div className='min-h-screen bg-slate-50'>
                 <NavbarAdmin />
                 <SidebarAdmin
@@ -358,7 +359,7 @@ export default function StudentManagement() {
                     }}
                 >
                     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                        <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                             <div>
                                 <Typography variant='h4' className='!font-bold !text-slate-800'>
                                     Students Management
@@ -381,7 +382,7 @@ export default function StudentManagement() {
                         </div>
 
                         {/* Top Stats */}
-                        <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
+                        <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
                             {[
                                 ['Total Students', students.length],
                                 ['Active Students', students.filter(student => student.status?.toLowerCase() === 'active').length,],
@@ -424,9 +425,9 @@ export default function StudentManagement() {
                                         placeholder='Search by name or email...'
                                         value={search}
                                         onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
-                                        InputProps={{
+                                        slotProps={{ input: {
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                        }}
+                                        } }}
                                     />
                                     <TextField
                                         select
@@ -619,7 +620,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.studentId)}
                             helperText={fieldErrors.studentId}
-                            inputProps={{ maxLength: 11 }}
+                            slotProps={{ htmlInput: { maxLength: 11 } }}
                         />
                         <TextField
                             fullWidth
@@ -629,7 +630,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.firstName)}
                             helperText={fieldErrors.firstName}
-                            inputProps={{ maxLength: 50 }}
+                            slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
                             fullWidth
@@ -639,7 +640,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.lastName)}
                             helperText={fieldErrors.lastName}
-                            inputProps={{ maxLength: 50 }}
+                            slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
                             fullWidth
@@ -650,7 +651,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.email)}
                             helperText={fieldErrors.email}
-                            inputProps={{ maxLength: 100 }}
+                            slotProps={{ htmlInput: { maxLength: 100 } }}
                         />
                         <TextField
                             fullWidth
@@ -661,7 +662,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.course)}
                             helperText={fieldErrors.course}
-                            inputProps={{ maxLength: 100 }}
+                            slotProps={{ htmlInput: { maxLength: 100 } }}
                         />
                         <TextField
                             fullWidth
@@ -672,7 +673,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.yearLevel)}
                             helperText={fieldErrors.yearLevel}
-                            inputProps={{ maxLength: 10 }}
+                            slotProps={{ htmlInput: { maxLength: 10 } }}
                         />
                         <TextField
                             select
@@ -808,7 +809,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.studentId)}
                             helperText={fieldErrors.studentId}
-                            inputProps={{ maxLength: 20 }}
+                            slotProps={{ htmlInput: { maxLength: 20 } }}
                         />
                         <TextField
                             fullWidth
@@ -818,7 +819,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.firstName)}
                             helperText={fieldErrors.firstName}
-                            inputProps={{ maxLength: 50 }}
+                            slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
                             fullWidth
@@ -828,7 +829,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.lastName)}
                             helperText={fieldErrors.lastName}
-                            inputProps={{ maxLength: 50 }}
+                            slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
                             fullWidth
@@ -839,7 +840,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.email)}
                             helperText={fieldErrors.email}
-                            inputProps={{ maxLength: 100 }}
+                            slotProps={{ htmlInput: { maxLength: 100 } }}
                         />
                         <TextField
                             fullWidth
@@ -850,7 +851,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.course)}
                             helperText={fieldErrors.course}
-                            inputProps={{ maxLength: 100 }}
+                            slotProps={{ htmlInput: { maxLength: 100 } }}
                         />
                         <TextField
                             fullWidth
@@ -861,7 +862,7 @@ export default function StudentManagement() {
                             onChange={handleFormChange}
                             error={Boolean(fieldErrors.yearLevel)}
                             helperText={fieldErrors.yearLevel}
-                            inputProps={{ maxLength: 10 }}
+                            slotProps={{ htmlInput: { maxLength: 10 } }}
                         />
                         <TextField
                             select
@@ -973,6 +974,6 @@ export default function StudentManagement() {
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </>
+        </RoleScreen>
     )
 }

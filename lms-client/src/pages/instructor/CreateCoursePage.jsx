@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, FormControl, InputLabel, MenuItem, Select, TextField, Alert, Snackbar } from '@mui/material'
 import { SaveOutlined, SchoolOutlined, ArrowBack } from '@mui/icons-material'
 import { useState } from 'react'
@@ -48,6 +49,7 @@ export default function CreateCoursePage() {
     }
 
     return (
+        <RoleScreen page="createcoursepage" role="instructor">
         <div className='min-h-screen bg-slate-50'>
             <Navbar />
             <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
@@ -63,7 +65,7 @@ export default function CreateCoursePage() {
                     >
                         Back to Courses
                     </Button>
-                    <div className='mb-7'>
+                    <div className='student-page-heading mb-7'>
                         <Typography variant='h4' className='!font-bold !text-slate-800'>
                             Create Course
                         </Typography>
@@ -184,5 +186,6 @@ export default function CreateCoursePage() {
                 </Alert>
             </Snackbar>
         </div>
+        </RoleScreen>
     )
 }

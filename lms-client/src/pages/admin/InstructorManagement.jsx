@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
@@ -330,7 +331,7 @@ export default function ActivityLogs() {
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
     return (
-        <>
+        <RoleScreen page="instructormanagement" role="admin">
             <div className='min-h-screen bg-slate-50'>
                 <NavbarAdmin />
                 <SidebarAdmin
@@ -344,7 +345,7 @@ export default function ActivityLogs() {
                     }}
                 >
                     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                        <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
 
                             <div>
                                 <Typography variant='h4' className='!font-bold !text-slate-800'>
@@ -376,7 +377,7 @@ export default function ActivityLogs() {
                         </div>
 
 
-                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                        <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                             {[
                                 ['Total Instructors', instructors.length],
                                 ['Active', instructors.filter(instructor => instructor.status?.toLowerCase() === 'active').length,],
@@ -985,6 +986,6 @@ export default function ActivityLogs() {
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </>
+        </RoleScreen>
     )
 }

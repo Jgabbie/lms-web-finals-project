@@ -330,7 +330,7 @@ export default function ProfilePage() {
     const roleLabel = (profile.role || userRole || 'User').charAt(0).toUpperCase() + (profile.role || userRole || 'User').slice(1)
 
     return (
-        <StudentScreen page="profile" enabled={userRole === 'student'}>
+        <StudentScreen page="profile" role={userRole} enabled={['student', 'instructor', 'admin'].includes(userRole)}>
         <div className='min-h-screen bg-slate-50'>
             <Navbar />
 

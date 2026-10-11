@@ -1,5 +1,5 @@
 .edulogin {
-    --login-blue: #245de8;
+    --login-blue: #073342;
     --login-ink: #202321;
     --login-muted: #686d68;
     display: grid;
@@ -24,16 +24,16 @@
     border-radius: 26px;
     min-height: 680px;
     padding: clamp(30px, 4vw, 64px);
-    background: linear-gradient(145deg, #102e91 0%, #245de8 52%, #188ddb 100%);
+    background: linear-gradient(180deg, #052b3826, #052b3866), url('../assets/images/login-study.jpg') center / cover no-repeat;
     color: #fff;
 }
-.login-story-art { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.login-story-art { display: none; }
 .login-story-art span {
     position: absolute;
     display: block;
     border-radius: 50%;
-    box-shadow: inset -25px -40px 55px #071c7566, inset 16px 22px 55px #77d0ff66, 0 25px 70px #091e8555;
-    background: linear-gradient(145deg, #2399ec, #2342c5 65%, #102a99);
+    box-shadow: inset -25px -40px 55px #052b3866, inset 16px 22px 55px #78dce266, 0 25px 70px #07334255;
+    background: linear-gradient(145deg, #00b4c6, #0d99a6 65%, #073342);
 }
 .login-story-art span:nth-child(1) { width: 480px; height: 700px; top: -330px; left: -160px; transform: rotate(35deg); }
 .login-story-art span:nth-child(2) { width: 370px; height: 750px; top: 120px; right: -190px; transform: rotate(-28deg); opacity: .8; }
@@ -43,12 +43,12 @@
 .login-brand svg { width: 29px; height: 29px; }
 .login-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .15em; margin: 58px 0 22px; }
 .login-story h2 { font-size: clamp(38px, 4.2vw, 64px); font-weight: 700; line-height: 1.06; letter-spacing: -.055em; margin: 0; text-wrap: balance; }
-.login-story-copy { max-width: 380px; font-size: 15px; line-height: 1.7; margin: 24px 0 50px; color: #edf3ff; }
-.login-story-bottom > p { font-size: 12px; color: #e1ecff; margin: 0 0 22px; }
+.login-story-copy { max-width: 380px; font-size: 15px; line-height: 1.7; margin: 24px 0 50px; color: #edf8fa; }
+.login-story-bottom > p { font-size: 12px; color: #d6edf0; margin: 0 0 22px; }
 .login-audiences { display: flex; flex-wrap: wrap; gap: 22px; }
 .login-audiences span { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; }
 .login-audiences svg { width: 19px; height: 19px; }
-.login-story-note { display: block; font-size: 11px; color: #e1ecff; margin-top: 38px; }
+.login-story-note { display: block; font-size: 11px; color: #d6edf0; margin-top: 38px; }
 .login-form-panel { width: min(100%, 410px); align-self: center; justify-self: center; padding: 50px 12px; }
 .login-heading { margin-bottom: 36px; }
 .edulogin .login-form-brand { color: var(--login-blue); font-size: 13px; font-weight: 700; margin-bottom: 20px; letter-spacing: -.02em; }
@@ -66,7 +66,7 @@
 .edulogin .MuiLink-root { color: var(--login-blue); font-size: 13px; font-weight: 600; }
 .edulogin .MuiCheckbox-root.Mui-checked { color: var(--login-blue); }
 .edulogin .login-submit { border-radius: 99px; min-height: 48px; background: var(--login-blue); font-size: 14px; font-weight: 600; text-transform: none; box-shadow: none; margin-top: 7px; }
-.edulogin .login-submit:hover { background: #184bc9; box-shadow: 0 5px 18px #245de824; }
+.edulogin .login-submit:hover { background: #0a4658; box-shadow: 0 5px 18px #07334224; }
 .login-signup { margin-top: 28px; text-align: center; }
 .edulogin .login-signup .MuiTypography-root { font-size: 13px; color: var(--login-muted); }
 .edulogin a:focus-visible, .edulogin button:focus-visible { outline: 3px solid #e7b600; outline-offset: 4px; }

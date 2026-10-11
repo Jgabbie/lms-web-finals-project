@@ -1,13 +1,13 @@
 .edusignup { display:grid; grid-template-columns:1fr 1fr; gap:36px; padding:18px; min-height:100svh; background:#fff; color:#202321; font-family:Arial,Helvetica,sans-serif; }
 .edusignup * { box-sizing:border-box; }
 .edusignup .MuiTypography-root,.edusignup .MuiInputBase-root,.edusignup .MuiInputLabel-root,.edusignup .MuiButton-root,.edusignup .MuiFormHelperText-root { font-family:inherit; }
-.signup-story { position:relative; isolation:isolate; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; border-radius:26px; padding:clamp(30px,4vw,64px); background:linear-gradient(145deg,#f4c72c,#ffdf66 55%,#f6b923); }
-.signup-art { position:absolute; inset:0; z-index:-1; overflow:hidden; }
+.signup-story { position:relative; isolation:isolate; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; border-radius:26px; padding:clamp(30px,4vw,64px); background:linear-gradient(145deg,#ffba00,#ffca3a 55%,#ffba00); }
+.signup-art { display:none; }
 .signup-art span { position:absolute; border-radius:50%; background:linear-gradient(140deg,#fff1a5,#f5c62c 65%,#d99f13); box-shadow:inset -25px -40px 55px #ae790333,inset 16px 22px 55px #fff9cb99,0 25px 70px #aa790333; }
 .signup-art span:nth-child(1) { width:480px;height:700px;top:-360px;left:-160px;transform:rotate(35deg); }
 .signup-art span:nth-child(2) { width:370px;height:750px;top:180px;right:-230px;transform:rotate(-28deg); }
 .signup-art span:nth-child(3) { width:420px;height:500px;bottom:-350px;left:0; }
-.signup-brand { color:#173875; font-size:24px; font-weight:800; letter-spacing:-.04em; text-decoration:none; }
+.signup-brand { color:#fff; font-size:24px; font-weight:800; letter-spacing:-.04em; text-decoration:none; }
 .signup-eyebrow { margin:65px 0 22px; font-size:10px; font-weight:700; letter-spacing:.15em; }
 .signup-story h2 { margin:0; font-size:clamp(38px,4.2vw,64px); font-weight:700; line-height:1.06; letter-spacing:-.055em; }
 .signup-story-copy { max-width:370px; margin:24px 0 65px; font-size:15px; line-height:1.7; }
@@ -15,27 +15,27 @@
 .signup-story-bottom span { display:inline-block; padding:10px 14px; margin:0 8px 10px 0; border:1px solid #20232130; border-radius:99px; font-weight:600; }
 .signup-story-bottom p { margin:25px 0 0; }
 .signup-form-panel { width:min(100%,460px); justify-self:center; align-self:center; padding:35px 16px; }
-.edusignup .signup-form-brand { color:#245de8; font-size:13px; font-weight:700; margin-bottom:18px; }
+.edusignup .signup-form-brand { color:#073342; font-size:13px; font-weight:700; margin-bottom:18px; }
 .edusignup .signup-title { font-size:clamp(34px,3vw,44px); line-height:1.1; letter-spacing:-.055em; font-weight:700; }
 .edusignup .signup-subtitle { margin-top:12px; font-size:14px; line-height:1.6; color:#686d68; }
 .signup-progress { margin:26px 0; }
 .signup-step-labels { display:flex; justify-content:space-between; gap:12px; font-size:12px; color:#686d68; margin-bottom:10px; }
-.signup-step-labels [aria-current='step'] { color:#245de8; font-weight:700; }
+.signup-step-labels [aria-current='step'] { color:#073342; font-weight:700; }
 .signup-progress-track { height:5px; overflow:hidden; border-radius:99px; background:#eceee8; }
-.signup-progress-track span { display:block; height:100%; background:#245de8; border-radius:inherit; }
+.signup-progress-track span { display:block; height:100%; background:#073342; border-radius:inherit; }
 .signup-progress p,.signup-otp-step { font-size:11px; color:#686d68; margin:10px 0 0; }
 .signup-form { display:flex; flex-direction:column; gap:20px; }
 .signup-name-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
 .edusignup .MuiOutlinedInput-root { border-radius:12px; font-size:14px; }
 .edusignup .MuiOutlinedInput-notchedOutline { border-color:#d8ddd8; }
 .edusignup .MuiInputLabel-root { font-size:14px; }
-.edusignup .MuiInputLabel-root.Mui-focused,.edusignup .MuiCheckbox-root.Mui-checked { color:#245de8; }
-.edusignup .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color:#245de8; }
+.edusignup .MuiInputLabel-root.Mui-focused,.edusignup .MuiCheckbox-root.Mui-checked { color:#073342; }
+.edusignup .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color:#073342; }
 .signup-terms { display:flex; flex-direction:column; align-items:flex-start; }
 .edusignup .signup-terms .MuiTypography-root { font-size:12px; }
-.edusignup .MuiLink-root { color:#245de8; font-family:inherit; }
-.edusignup .signup-submit { border-radius:99px; min-height:48px; background:#245de8; font-size:14px; font-weight:600; text-transform:none; box-shadow:none; }
-.edusignup .signup-submit:hover { background:#184bc9; box-shadow:none; }
+.edusignup .MuiLink-root { color:#073342; font-family:inherit; }
+.edusignup .signup-submit { border-radius:99px; min-height:48px; background:#073342; font-size:14px; font-weight:600; text-transform:none; box-shadow:none; }
+.edusignup .signup-submit:hover { background:#0a4658; box-shadow:none; }
 .edusignup .signup-submit.Mui-disabled { background:#e4e7e4; color:#686d68; }
 .signup-login { margin-top:24px; text-align:center; }
 .edusignup .signup-login .MuiTypography-root { font-size:13px; color:#686d68; }
@@ -48,13 +48,13 @@
 @media(max-width:360px) { .signup-name-row { grid-template-columns:1fr; } }
 
 /* Signup-specific polish keeps the landing and login styles independent. */
-.edusignup { --signup-navy:#173875; --signup-blue:#245de8; gap:36px; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
-.edusignup .signup-story { color:var(--signup-navy); background:linear-gradient(135deg,#ffe895 0%,#ffda54 58%,#f6c944 100%); }
+.edusignup { --signup-navy:#073342; --signup-blue:#073342; gap:36px; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+.edusignup .signup-story { color:#fff; background:linear-gradient(180deg,#052b3826,#052b3866),url('../assets/images/signup-study.jpg') center / cover no-repeat; }
 .signup-art span { background:linear-gradient(140deg,#fff5bd,#ffdf70 65%,#ecc34b); box-shadow:inset -25px -40px 65px #be8d141a,inset 16px 22px 55px #fff9d499,0 25px 70px #c291101a; }
-.signup-story-copy { color:#345078; max-width:355px; font-size:16px; }
+.signup-story-copy { color:#edf8fa; max-width:355px; font-size:16px; }
 .signup-eyebrow { font-size:11px; letter-spacing:.12em; }
-.signup-story-bottom span { border-color:#17387526; background:#fff8d93d; padding:11px 16px; }
-.signup-story-bottom p { color:#345078; font-size:13px; }
+.signup-story-bottom span { border-color:#ffffff45; background:#ffffff12; padding:11px 16px; }
+.signup-story-bottom p { color:#d6edf0; font-size:13px; }
 .signup-form-panel { width:min(100%,480px); padding:40px 20px; }
 .edusignup .signup-form-brand { letter-spacing:.03em; }
 .edusignup .signup-subtitle { max-width:360px; font-size:15px; }
@@ -62,13 +62,13 @@
 .signup-step-labels { align-items:center; font-size:12px; margin-bottom:14px; }
 .signup-step-labels span { display:flex; align-items:center; gap:8px; }
 .signup-step-labels span::before { content:''; width:8px; height:8px; border-radius:50%; background:#a4adbc; flex-shrink:0; }
-.signup-step-labels [aria-current='step']::before { background:var(--signup-blue); box-shadow:0 0 0 4px #245de814; }
+.signup-step-labels [aria-current='step']::before { background:var(--signup-blue); box-shadow:0 0 0 4px #07334214; }
 .signup-progress-track { height:4px; background:#dde4ef; }
 .signup-progress p { font-size:12px; margin-top:12px; }
 .edusignup .MuiOutlinedInput-root { background:#fff; min-height:56px; }
 .edusignup .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline { border-color:#8b9db6; }
 .edusignup .MuiIconButton-root { min-width:44px; min-height:44px; }
-.edusignup .signup-submit { min-height:52px; box-shadow:0 5px 14px #245de819; }
+.edusignup .signup-submit { min-height:52px; box-shadow:0 5px 14px #07334219; }
 .edusignup .signup-login .MuiLink-root { color:var(--signup-blue); }
 .edusignup .signup-terms .MuiTypography-root { font-size:13px; line-height:1.6; }
 @media(min-width:1600px) { .edusignup { gap:60px; } }
@@ -92,14 +92,14 @@
 .edusignup .signup-submit { min-height:48px; }
 .signup-login { margin-top:18px; }
 @media(max-width:650px) { .signup-form-panel { padding-top:28px; padding-bottom:32px; } }
-.signup-otp { padding:28px 32px; border:1px solid #e7ecf5; border-radius:24px; box-shadow:0 24px 80px #17387526; }
+.signup-otp { padding:28px 32px; border:1px solid #e7ecf5; border-radius:24px; box-shadow:0 24px 80px #07334226; }
 .signup-otp .MuiTypography-root,.signup-otp .MuiInputBase-root,.signup-otp .MuiInputLabel-root,.signup-otp .MuiButton-root,.signup-otp .MuiFormHelperText-root { font-family:inherit; }
 .signup-envelope { position:relative; width:180px; height:160px; margin:10px auto 22px; isolation:isolate; }
-.signup-envelope-glow { position:absolute; inset:-15px -25px 10px; background:radial-gradient(ellipse,#dce7ff 0%,#f2f6ff 45%,transparent 72%); z-index:-1; }
-.signup-envelope-back { position:absolute; left:15px; right:15px; top:18px; height:125px; background:#edf3ff; clip-path:polygon(50% 0,100% 38%,100% 100%,0 100%,0 38%); }
-.signup-envelope-logo { position:absolute; top:46px; left:49px; width:82px; height:82px; border-radius:20px; display:grid; place-items:center; background:linear-gradient(145deg,#407aff,#245de8); box-shadow:0 8px 20px #245de830; color:#fff; }
+.signup-envelope-glow { position:absolute; inset:-15px -25px 10px; background:radial-gradient(ellipse,#d6edf0 0%,#edf8fa 45%,transparent 72%); z-index:-1; }
+.signup-envelope-back { position:absolute; left:15px; right:15px; top:18px; height:125px; background:#e7f4f6; clip-path:polygon(50% 0,100% 38%,100% 100%,0 100%,0 38%); }
+.signup-envelope-logo { position:absolute; top:46px; left:49px; width:82px; height:82px; border-radius:20px; display:grid; place-items:center; background:linear-gradient(145deg,#00b4c6,#073342); box-shadow:0 8px 20px #07334230; color:#fff; }
 .signup-envelope-logo svg { width:44px; height:44px; }
-.signup-envelope-front { position:absolute; left:15px; right:15px; top:65px; height:85px; border-radius:0 0 12px 12px; background:linear-gradient(32deg,#e2e9f4 49%,transparent 50%),linear-gradient(-32deg,#edf2fa 49%,transparent 50%); filter:drop-shadow(0 8px 5px #17387512); }
+.signup-envelope-front { position:absolute; left:15px; right:15px; top:65px; height:85px; border-radius:0 0 12px 12px; background:linear-gradient(32deg,#e2e9f4 49%,transparent 50%),linear-gradient(-32deg,#edf2fa 49%,transparent 50%); filter:drop-shadow(0 8px 5px #07334212); }
 .signup-otp .signup-verify-title { color:#202321; font-size:27px; font-weight:700; letter-spacing:-.04em; line-height:1.2; }
 .signup-otp .MuiTypography-body2 { font-size:14px; line-height:1.6; }
 .signup-code-field { margin-top:26px; }
@@ -107,8 +107,8 @@
 .signup-code-field input { text-align:center; font-size:26px; letter-spacing:.3em; font-variant-numeric:tabular-nums; }
 .signup-code-field input::placeholder { font-size:14px; letter-spacing:normal; }
 .signup-code-field .MuiFormHelperText-root { text-align:center; margin-top:8px; }
-.signup-otp .signup-verify-button { margin-top:20px; min-height:50px; border-radius:99px; background:#245de8; box-shadow:none; text-transform:none; font-size:14px; font-weight:600; }
-.signup-otp .signup-verify-button:hover { background:#184bc9; }
+.signup-otp .signup-verify-button { margin-top:20px; min-height:50px; border-radius:99px; background:#073342; box-shadow:none; text-transform:none; font-size:14px; font-weight:600; }
+.signup-otp .signup-verify-button:hover { background:#0a4658; }
 .signup-otp .signup-verify-button.Mui-disabled { background:#e8edf6; color:#687791; }
 .signup-otp .MuiButton-text { text-transform:none; min-height:44px; border-radius:99px; }
 @media(max-width:480px) { .signup-otp { padding:24px 20px; } .signup-otp .signup-verify-title { font-size:24px; } .signup-envelope { margin-top:0; margin-bottom:14px; } }

@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, CircularProgress } from '@mui/material'
 import { MenuBook, People, Assignment, RateReview, TrendingUp, AccessTime, PersonAdd, ArrowForward } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
@@ -113,6 +114,7 @@ export default function DashboardInstructor() {
     ]
 
     return (
+        <RoleScreen page="dashboardinstructor" role="instructor">
         <div className='min-h-screen bg-slate-50'>
             <Navbar />
             <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
@@ -121,7 +123,7 @@ export default function DashboardInstructor() {
                 style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
             >
                 <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
+                    <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
                         <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
                                 Instructor Dashboard
@@ -157,7 +159,7 @@ export default function DashboardInstructor() {
                     ) : (
                         <>
                             {/* Stat Cards */}
-                            <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6'>
+                            <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6'>
                                 {statistics.map(stat => (
                                     <Card
                                         key={stat.title}
@@ -385,5 +387,6 @@ export default function DashboardInstructor() {
                 </main>
             </div>
         </div>
+        </RoleScreen>
     )
 }

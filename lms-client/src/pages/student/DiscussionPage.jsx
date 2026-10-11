@@ -136,7 +136,7 @@ export default function DiscussionPage() {
     }
 
     return (
-        <StudentScreen page="discussions" enabled={localStorage.getItem('role')?.toLowerCase() === 'student'}>
+        <StudentScreen page="discussions" role={localStorage.getItem('role')?.toLowerCase() || 'student'}>
             <Navbar />
             <Sidebar />
             <div className='min-h-screen bg-slate-50'>

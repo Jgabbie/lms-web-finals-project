@@ -17,18 +17,7 @@ import {
     DialogContentText,
     DialogActions
 } from '@mui/material'
-import {
-    Dashboard,
-    MenuBook,
-    People,
-    PersonAdd,
-    CloudUpload,
-    Assignment,
-    Person,
-    Logout,
-    Menu,
-    ChevronLeft
-} from '@mui/icons-material'
+import { DashboardRounded as Dashboard, MenuBookRounded as MenuBook, PeopleRounded as People, PersonAddRounded as PersonAdd, CloudUploadRounded as CloudUpload, AssignmentRounded as Assignment, PersonRounded as Person, LogoutRounded as Logout, MenuRounded as Menu, ChevronLeftRounded as ChevronLeft } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getProfileInitials, getStoredProfile } from '../utils/profileStorage'
@@ -85,6 +74,8 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
     return (
         <>
             <IconButton
+                aria-label={open ? 'Collapse sidebar' : 'Expand sidebar'}
+                aria-expanded={open}
                 onClick={() => setOpen(!open)}
                 className='!fixed !top-5 !z-[1300] !bg-white !shadow-sm !border !border-slate-200'
                 sx={{
@@ -138,6 +129,7 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
                                 <ListItem key={item.label} disablePadding className='!mb-1'>
                                     <Tooltip title={!open ? item.label : ''} placement='right'>
                                         <ListItemButton
+                                        aria-label={item.label}
                                             onClick={() => navigate(item.path)}
                                             selected={isSelected}
                                             sx={{
@@ -166,7 +158,7 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
                                             {open && (
                                                 <ListItemText
                                                     primary={item.label}
-                                                    primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
+                                                    slotProps={{ primary: { fontSize: 14, fontWeight: 500 } }}
                                                 />
                                             )}
                                         </ListItemButton>
@@ -184,6 +176,7 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
                         <ListItem disablePadding className='!mb-1'>
                             <Tooltip title={!open ? 'Profile' : ''} placement='right'>
                                 <ListItemButton
+                                        aria-label='Profile'
                                     onClick={() => navigate('/profile')}
                                     selected={location.pathname === '/profile'}
                                     sx={{
@@ -198,7 +191,7 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
                                     {open && (
                                         <ListItemText
                                             primary='Profile'
-                                            primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
+                                            slotProps={{ primary: { fontSize: 14, fontWeight: 500 } }}
                                         />
                                     )}
                                 </ListItemButton>

@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
@@ -310,7 +311,7 @@ export default function UserManagementPage() {
     }
 
     return (
-        <>
+        <RoleScreen page="usermanagementpage" role="admin">
             <div className='min-h-screen bg-slate-50'>
                 <NavbarAdmin />
                 <SidebarAdmin
@@ -324,7 +325,7 @@ export default function UserManagementPage() {
                     }}
                 >
                     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                        <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                             <div>
                                 <Typography variant='h4' className='!font-bold !text-slate-800'>
                                     User Management
@@ -347,7 +348,7 @@ export default function UserManagementPage() {
                         </div>
 
                         {/* Top Stats */}
-                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                        <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                             {[
                                 ['Total Users', users.length],
                                 ['Students', users.filter(user => user.role?.toLowerCase() === 'student').length,],
@@ -391,9 +392,9 @@ export default function UserManagementPage() {
                                         placeholder='Search by name or email...'
                                         value={search}
                                         onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
-                                        InputProps={{
+                                        slotProps={{ input: {
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                        }}
+                                        } }}
                                     />
                                     <TextField
                                         select
@@ -890,6 +891,6 @@ export default function UserManagementPage() {
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </>
+        </RoleScreen>
     )
 }

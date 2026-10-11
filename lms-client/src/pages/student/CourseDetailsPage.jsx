@@ -92,7 +92,7 @@ export default function CourseDetailsPage() {
 
 
     return (
-        <StudentScreen page="course-details" enabled={localStorage.getItem('role')?.toLowerCase() === 'student'}>
+        <StudentScreen page="course-details" role={localStorage.getItem('role')?.toLowerCase() || 'student'}>
             <Navbar />
             <div className='min-h-screen bg-slate-50'>
                 <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>

@@ -147,7 +147,7 @@ export default function NotificationsPage() {
     }
 
     return (
-        <StudentScreen page="notifications" enabled={isStudent}>
+        <StudentScreen page="notifications" role={localStorage.getItem('role') || 'student'}>
             <Navbar />
             {isStudent && <Sidebar />}
             <div className='min-h-screen bg-slate-50'>

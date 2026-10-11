@@ -1,5 +1,5 @@
 .edulanding {
-    --blue:#245de8;
+    --blue:#073342;
     --ink:#202321;
     --muted:#686d68;
     font-family:Arial,Helvetica,sans-serif;
@@ -53,8 +53,8 @@
     color:#fff
 }
 .edulanding .MuiButton-contained:hover {
-    background:#184bc9;
-    box-shadow:0 5px 18px #245de824
+    background:#0a4658;
+    box-shadow:0 5px 18px #07334224
 }
 .edulanding .MuiButton-outlined {
     border-color:#d8ddd8;
@@ -96,7 +96,7 @@
     min-height:690px;
     position:relative;
     border-radius:0;
-    background:linear-gradient(180deg,rgba(9,24,65,.12) 0%,rgba(9,24,65,.3) 45%,rgba(9,24,65,.38) 100%),url('../../assets/images/landing-campus.jpg') center 35%/cover;
+    background:linear-gradient(180deg,#052b3814 0%,#052b3826 45%,#052b3840 100%),url('../../assets/images/landing-hero-study.jpg') center/cover;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -197,7 +197,7 @@
 .landing-status-dot {
     width:7px;
     height:7px;
-    background:#e4eb95;
+    background:#ffba00;
     border-radius:50%
 }
 .landing-intro {
@@ -262,7 +262,7 @@
 }
 .landing-course-card.course-1 {
     transform:rotate(-4deg);
-    box-shadow:0 16px 40px #245de821;
+    box-shadow:0 16px 40px #07334221;
     border:7px solid white;
     outline:1px solid #eceeeb
 }
@@ -273,7 +273,7 @@
     height:220px;
     position:relative;
     overflow:hidden;
-    background:#eff1e9;
+    background:#eef7f6;
     display:grid;
     place-items:center
 }
@@ -282,7 +282,7 @@
     color:white
 }
 .course-2 .landing-course-art {
-    background:#ecedfb
+    background:#e7f4f6
 }
 .course-art-icon {
     height:105px;
@@ -375,11 +375,11 @@
     color:white
 }
 .tag-2 {
-    background:#f5d924;
+    background:#ffba00;
     color:#272c14
 }
 .tag-3 {
-    background:#139854;
+    background:#009b71;
     color:white
 }
 .landing-about {
@@ -446,7 +446,7 @@
     margin:0 auto;
     border-radius:16px;
     padding:65px 20px;
-    background:linear-gradient(rgba(38,32,9,.06),rgba(38,32,9,.12)),url('../../assets/images/landing-hallway.jpg') center/cover;
+    background:url('../../assets/images/landing-learning.jpg') center/cover no-repeat;
     min-height:440px;
     display:grid;
     place-items:center
@@ -547,10 +547,10 @@
     height:78px;
     background:var(--blue);
     border-radius:28px;
-    border:6px double #9ebafe;
+    border:6px double #6dbec6;
     display:grid;
     place-items:center;
-    box-shadow:0 7px 0 #1349c4;
+    box-shadow:0 7px 0 #052b38;
     color:white
 }
 .landing-seal svg {
@@ -576,7 +576,7 @@
     color:#fff
 }
 .landing-footer p {
-    color:#e2eaff;
+    color:#d6edf0;
     font-size:13px;
     margin-top:16px;
     max-width:310px
@@ -585,7 +585,7 @@
     font-size:13px;
     font-weight:500;
     margin-bottom:20px;
-    color:#d1deff
+    color:#bce1e6
 }
 .landing-footer-content>div>a:not(.landing-brand) {
     display:block;
@@ -848,3 +848,8 @@
 
 
 
+
+@layer utilities {
+ .edulanding .MuiButton-contained { background:#ffba00!important; color:#073342!important; }
+ .edulanding .MuiButton-contained:hover { background:#ffca3a!important; }
+}

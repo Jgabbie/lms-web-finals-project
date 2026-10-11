@@ -43,7 +43,7 @@ export default function NavbarAdmin() {
                             </Menu>
                         </div>
 
-                        {/* <Typography variant="h6" noWrap className="font-bold text-white-600 tracking-wide cursor-pointer">EduLearn LMS</Typography> */}
+                        <Typography variant="h6" noWrap className="font-bold tracking-wide">EduLearn LMS</Typography>
                     </div>
 
                     <div className="hidden md:flex gap-6 items-center">

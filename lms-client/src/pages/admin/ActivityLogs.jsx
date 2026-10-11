@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, IconButton, MenuItem, Chip, TextField, Tooltip, Pagination } from '@mui/material'
 import { AssignmentTurnedInOutlined, DeleteOutlined, EditOutlined, HistoryEduOutlined, HistoryOutlined, LoginOutlined, LogoutOutlined, PersonAddAltOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
@@ -100,7 +101,7 @@ export default function ActivityLogs() {
 
 
     return (
-        <>
+        <RoleScreen page="activitylogs" role="admin">
 
 
             <div className='min-h-screen bg-slate-50'>
@@ -118,7 +119,7 @@ export default function ActivityLogs() {
                     }}
                 >
                     <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                        <div className='mb-7'>
+                        <div className='student-page-heading mb-7'>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
                                 Activity Logs
                             </Typography>
@@ -128,7 +129,7 @@ export default function ActivityLogs() {
                         </div>
 
 
-                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                        <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                             {[
                                 ['Total Activities', logs.length, 'text-slate-800'],
                                 ['Successful', successful, 'text-green-600'],
@@ -157,9 +158,9 @@ export default function ActivityLogs() {
                                         placeholder='Search user or activity...'
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        InputProps={{
+                                        slotProps={{ input: {
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                        }}
+                                        } }}
                                     />
 
                                     <TextField
@@ -309,6 +310,6 @@ export default function ActivityLogs() {
                     </main >
                 </div>
             </div >
-        </>
+        </RoleScreen>
     )
 }

@@ -1,6 +1,6 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material'
-import { PeopleOutlined, Dashboard, People, MenuBook, School, Assignment, Person, Logout, Menu, ChevronLeft } from '@mui/icons-material'
+import { PeopleOutlineRounded as PeopleOutlined, DashboardRounded as Dashboard, PeopleRounded as People, MenuBookRounded as MenuBook, SchoolRounded as School, AssignmentRounded as Assignment, PersonRounded as Person, LogoutRounded as Logout, MenuRounded as Menu, ChevronLeftRounded as ChevronLeft } from '@mui/icons-material'
 import { useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import api from '../api/axiosClient'
@@ -83,6 +83,8 @@ export default function SidebarAdmin() {
 
         <>
             <IconButton
+                aria-label={open ? 'Collapse sidebar' : 'Expand sidebar'}
+                aria-expanded={open}
                 onClick={() => setOpen(!open)}
                 className='!fixed !top-5 !z-[1300] !bg-white !shadow-sm !border !border-slate-200'
                 sx={{
@@ -131,6 +133,7 @@ export default function SidebarAdmin() {
                                     placement='right'
                                 >
                                     <ListItemButton
+                                        aria-label={item.label}
                                         component={Link}
                                         to={item.path}
                                         selected={location.pathname === item.path}
@@ -162,10 +165,10 @@ export default function SidebarAdmin() {
                                         {open && (
                                             <ListItemText
                                                 primary={item.label}
-                                                primaryTypographyProps={{
+                                                slotProps={{ primary: {
                                                     fontSize: 14,
                                                     fontWeight: 500
-                                                }}
+                                                } }}
                                             />
                                         )}
 
@@ -192,6 +195,7 @@ export default function SidebarAdmin() {
                                     placement='right'
                                 >
                                     <ListItemButton
+                                        aria-label={item.label}
                                         component={Link}
                                         to={item.path}
                                         selected={location.pathname === item.path}

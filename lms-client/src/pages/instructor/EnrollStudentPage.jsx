@@ -1,3 +1,4 @@
+import RoleScreen from '../../components/StudentScreen'
 import {
     Avatar,
     Card,
@@ -160,6 +161,7 @@ export default function EnrollStudentPage() {
     }
 
     return (
+        <RoleScreen page="enrollstudentpage" role="instructor">
         <div className='min-h-screen bg-slate-50'>
             <Navbar />
             <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
@@ -168,7 +170,7 @@ export default function EnrollStudentPage() {
                 style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
             >
                 <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='mb-7'>
+                    <div className='student-page-heading mb-7'>
                         <Typography variant='h4' className='!font-bold !text-slate-800'>
                             Enroll Students
                         </Typography>
@@ -200,7 +202,7 @@ export default function EnrollStudentPage() {
                                     placeholder='Search students by name or email...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    InputProps={{ startAdornment: <Search className='!text-slate-400 !mr-2' /> }}
+                                    slotProps={{ input: { startAdornment: <Search className='!text-slate-400 !mr-2' /> } }}
                                 />
                                 <Button
                                     variant='contained'
@@ -308,5 +310,6 @@ export default function EnrollStudentPage() {
                 </Alert>
             </Snackbar>
         </div>
+        </RoleScreen>
     )
 }
