@@ -1,6 +1,6 @@
 
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Avatar, Divider, Button, IconButton, Tooltip } from '@mui/material'
-import { Dashboard, MenuBook, Assignment, Menu, ChevronLeft, FolderCopy, Forum, Logout, Person } from '@mui/icons-material'
+import { DashboardRounded as Dashboard, MenuBookRounded as MenuBook, AssignmentRounded as Assignment, MenuRounded as Menu, ChevronLeftRounded as ChevronLeft, FolderCopyRounded as FolderCopy, ForumRounded as Forum, LogoutRounded as Logout, PersonRounded as Person } from '@mui/icons-material'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getProfileInitials, getStoredProfile } from '../utils/profileStorage'
@@ -80,6 +80,8 @@ export default function Sidebar() {
 
         <>
             <IconButton
+                aria-label={open ? 'Collapse sidebar' : 'Expand sidebar'}
+                aria-expanded={open}
                 onClick={() => setOpen(!open)}
                 className='!fixed !top-5 !z-[1300] !bg-white !shadow-sm !border !border-slate-200'
                 sx={{
@@ -128,6 +130,7 @@ export default function Sidebar() {
                                     placement='right'
                                 >
                                     <ListItemButton
+                                        aria-label={item.label}
                                         onClick={() => navigate(item.path)}
                                         selected={location.pathname === item.path}
                                         sx={{
@@ -158,10 +161,10 @@ export default function Sidebar() {
                                         {open && (
                                             <ListItemText
                                                 primary={item.label}
-                                                primaryTypographyProps={{
+                                                slotProps={{ primary: {
                                                     fontSize: 14,
                                                     fontWeight: 500
-                                                }}
+                                                } }}
                                             />
                                         )}
 
@@ -188,6 +191,7 @@ export default function Sidebar() {
                                     placement='right'
                                 >
                                     <ListItemButton
+                                        aria-label={item.label}
                                         onClick={() => navigate(item.path)}
                                         selected={location.pathname === item.path}
                                         sx={{
@@ -212,10 +216,10 @@ export default function Sidebar() {
                                         {open && (
                                             <ListItemText
                                                 primary={item.label}
-                                                primaryTypographyProps={{
+                                                slotProps={{ primary: {
                                                     fontSize: 14,
                                                     fontWeight: 500
-                                                }}
+                                                } }}
                                             />
                                         )}
 

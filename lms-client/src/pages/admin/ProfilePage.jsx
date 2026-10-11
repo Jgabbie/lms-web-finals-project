@@ -1,3 +1,4 @@
+import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Avatar, Divider, TextField, Alert, CircularProgress, Snackbar, InputAdornment, IconButton, Modal } from '@mui/material'
 import { Person, Email, Lock, Edit, Save, Close, Visibility, VisibilityOff, PhotoCamera } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
@@ -329,6 +330,7 @@ export default function ProfilePage() {
     const roleLabel = (profile.role || userRole || 'User').charAt(0).toUpperCase() + (profile.role || userRole || 'User').slice(1)
 
     return (
+        <StudentScreen page="profile" enabled={userRole === 'student'}>
         <div className='min-h-screen bg-slate-50'>
             <Navbar />
 
@@ -352,7 +354,7 @@ export default function ProfilePage() {
                 }}
             >
                 <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='mb-6'>
+                    <div className='student-page-heading mb-6'>
                         <Typography variant='h4' className='!font-bold !text-slate-800'>
                             My Profile
                         </Typography>
@@ -458,11 +460,11 @@ export default function ProfilePage() {
                                     value={draft.firstName}
                                     onChange={updateDraft('firstName')}
                                     disabled={!editing || saving}
-                                    InputProps={{
+                                    slotProps={{ input: {
                                         startAdornment: (
                                             <Person className='!text-slate-400 !mr-2' />
                                         )
-                                    }}
+                                    } }}
                                 />
                                 <TextField
                                     fullWidth
@@ -470,11 +472,11 @@ export default function ProfilePage() {
                                     value={draft.lastName}
                                     onChange={updateDraft('lastName')}
                                     disabled={!editing || saving}
-                                    InputProps={{
+                                    slotProps={{ input: {
                                         startAdornment: (
                                             <Person className='!text-slate-400 !mr-2' />
                                         )
-                                    }}
+                                    } }}
                                 />
                                 <TextField
                                     fullWidth
@@ -483,11 +485,11 @@ export default function ProfilePage() {
                                     onChange={updateDraft('email')}
                                     disabled={!editing || saving}
                                     type='email'
-                                    InputProps={{
+                                    slotProps={{ input: {
                                         startAdornment: (
                                             <Email className='!text-slate-400 !mr-2' />
                                         )
-                                    }}
+                                    } }}
                                 />
                             </div>
                             {editing && (
@@ -586,7 +588,7 @@ export default function ProfilePage() {
                             }}
                             error={Boolean(otpError)}
                             helperText={otpError || 'The code will expire in 5 minutes'}
-                            inputProps={{ maxLength: 6, inputMode: 'numeric' }}
+                            slotProps={{ htmlInput: { maxLength: 6, inputMode: 'numeric' } }}
                         />
                     </div>
                     <Button
@@ -661,7 +663,7 @@ export default function ProfilePage() {
                             error={Boolean(passwordError)}
                             helperText={passwordError}
                             autoComplete='new-password'
-                            InputProps={{
+                            slotProps={{ input: {
                                 endAdornment: (
                                     <InputAdornment position='end'>
                                         <IconButton onClick={() => setShowPassword(!showPassword)} edge='end'>
@@ -669,7 +671,7 @@ export default function ProfilePage() {
                                         </IconButton>
                                     </InputAdornment>
                                 )
-                            }}
+                            } }}
                         />
                         <TextField
                             label="Confirm New Password"
@@ -683,7 +685,7 @@ export default function ProfilePage() {
                             error={Boolean(confirmPasswordError)}
                             helperText={confirmPasswordError}
                             autoComplete='new-password'
-                            InputProps={{
+                            slotProps={{ input: {
                                 endAdornment: (
                                     <InputAdornment position='end'>
                                         <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge='end'>
@@ -691,7 +693,7 @@ export default function ProfilePage() {
                                         </IconButton>
                                     </InputAdornment>
                                 )
-                            }}
+                            } }}
                         />
                         <Button
                             fullWidth
@@ -773,5 +775,6 @@ export default function ProfilePage() {
                 </Alert>
             </Snackbar>
         </div>
+        </StudentScreen>
     )
 }

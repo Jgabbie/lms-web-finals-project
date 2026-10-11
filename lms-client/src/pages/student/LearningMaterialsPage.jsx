@@ -1,3 +1,4 @@
+import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, TextField, Chip, MenuItem, CircularProgress } from '@mui/material'
 import {
     DescriptionOutlined,
@@ -76,12 +77,12 @@ export default function LearningMaterialsPage() {
     const types = ['All', ...new Set(materials.map(item => item.type).filter(Boolean))]
 
     return (
-        <>
+        <StudentScreen page="materials">
             <Navbar />
             <Sidebar />
             <div className='min-h-screen bg-slate-50'>
                 <main className='ml-0 lg:ml-[260px] transition-all max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                    <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                         <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
                                 Learning Materials
@@ -92,7 +93,7 @@ export default function LearningMaterialsPage() {
                         </div>
                     </div>
 
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                    <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                         {[
                             ['Total Materials', materials.length],
                             ['PDF Files', materials.filter(item => item.type === 'PDF').length],
@@ -116,7 +117,7 @@ export default function LearningMaterialsPage() {
                                     placeholder='Search learning materials...'
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    InputProps={{ startAdornment: <Search className='!text-slate-400 !mr-2' /> }}
+                                    slotProps={{ input: { startAdornment: <Search className='!text-slate-400 !mr-2' /> } }}
                                 />
                                 <TextField
                                     select
@@ -225,6 +226,6 @@ export default function LearningMaterialsPage() {
                     )}
                 </main>
             </div>
-        </>
+        </StudentScreen>
     )
 }

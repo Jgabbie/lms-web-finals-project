@@ -1,3 +1,4 @@
+import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, TextField, InputAdornment, Chip, MenuItem, CircularProgress } from '@mui/material'
 import { Search, MenuBook } from '@mui/icons-material'
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -40,12 +41,13 @@ export default function CoursePage() {
     }, [courses, search, statusFilter])
 
     return (
+        <StudentScreen page="courses">
         <div className='min-h-screen bg-slate-50'>
             <Navbar />
             <Sidebar />
             <main className='ml-0 lg:ml-[260px] transition-all'>
                 <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
+                    <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
                         <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
                                 Enrolled Courses
@@ -65,7 +67,7 @@ export default function CoursePage() {
                                     placeholder='Search your courses...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    InputProps={{ startAdornment: (<InputAdornment position='start'><Search className='!text-slate-400' /></InputAdornment>) }}
+                                    slotProps={{ input: { startAdornment: (<InputAdornment position='start'><Search className='!text-slate-400' /></InputAdornment>) } }}
                                 />
                                 <TextField
                                     select
@@ -99,7 +101,7 @@ export default function CoursePage() {
                             <CircularProgress />
                         </div>
                     ) : filteredCourses.length > 0 ? (
-                        <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5'>
+                        <div className='student-course-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5'>
                             {filteredCourses.map((course) => (
                                 <Card key={course._id} className='!rounded-xl !border !border-slate-200 !shadow-sm hover:!shadow-md transition-shadow'>
                                     <div className='h-32 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center'>
@@ -148,5 +150,6 @@ export default function CoursePage() {
                 </div>
             </main>
         </div>
+        </StudentScreen>
     )
 }

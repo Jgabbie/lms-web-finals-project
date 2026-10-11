@@ -1,3 +1,4 @@
+import StudentScreen from '../components/StudentScreen'
 import { Avatar, Badge, Card, CardContent, Typography, Button, Menu, MenuItem, Chip, TextField, IconButton } from '@mui/material'
 import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
@@ -146,12 +147,12 @@ export default function NotificationsPage() {
     }
 
     return (
-        <>
+        <StudentScreen page="notifications" enabled={isStudent}>
             <Navbar />
             {isStudent && <Sidebar />}
             <div className='min-h-screen bg-slate-50'>
                 <main className={`${isStudent ? 'ml-0 lg:ml-[260px] transition-all' : ''} max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
-                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                    <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                         <div >
                             <div className='flex items-center gap-3'>
                                 <Typography variant='h4' className='!font-bold !text-slate-800'>
@@ -183,7 +184,7 @@ export default function NotificationsPage() {
                         </Button>
                     </div>
 
-                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
+                    <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-5'>
                                 <div className='flex items-center gap-4'>
@@ -250,9 +251,9 @@ export default function NotificationsPage() {
                                     placeholder='Search notifications...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    InputProps={{
+                                    slotProps={{ input: {
                                         startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                    }}
+                                    } }}
                                 />
 
                                 <div className='flex flex-wrap gap-2 lg:justify-end lg:shrink-0'>
@@ -403,6 +404,6 @@ export default function NotificationsPage() {
                     </MenuItem>
                 )}
             </Menu>
-        </>
+        </StudentScreen>
     )
 }

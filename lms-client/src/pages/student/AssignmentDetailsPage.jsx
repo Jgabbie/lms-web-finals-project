@@ -1,3 +1,4 @@
+import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, Divider, TextField, Snackbar, Alert } from '@mui/material'
 import { ArrowBack, CalendarToday, CloudUpload, CheckCircle, AssignmentTurnedIn } from '@mui/icons-material'
 import { useState } from 'react'
@@ -69,7 +70,7 @@ export default function AssignmentDetailsPage() {
     const isSubmitted = assignment.status === 'submitted' || isGraded
 
     return (
-        <>
+        <StudentScreen page="assignment-details" enabled={localStorage.getItem('role')?.toLowerCase() === 'student'}>
             <Navbar />
             <div className='min-h-screen bg-slate-50'>
                 <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
@@ -84,7 +85,7 @@ export default function AssignmentDetailsPage() {
                         <div className='flex-1 min-w-0'>
                             <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                 <CardContent className='!p-6 sm:!p-8'>
-                                    <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
+                                    <div className='student-assignment-heading flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4'>
                                         <div>
                                             <Typography variant='body2' className='!text-blue-600 !font-semibold !mb-2'>
                                                 {assignment.course}
@@ -250,6 +251,6 @@ export default function AssignmentDetailsPage() {
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </>
+        </StudentScreen>
     )
 }

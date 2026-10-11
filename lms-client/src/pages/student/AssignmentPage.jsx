@@ -1,3 +1,4 @@
+import StudentScreen from '../../components/StudentScreen'
 import {
     Card,
     CardContent,
@@ -112,12 +113,12 @@ export default function AssignmentPage() {
     const completionRate = combinedAssignments.length > 0 ? Math.round((completedCount / combinedAssignments.length) * 100) : 0
 
     return (
-        <>
+        <StudentScreen page="assignments">
             <Navbar />
             <Sidebar />
             <div className='min-h-screen bg-slate-50'>
                 <main className='ml-0 lg:ml-[260px] transition-all max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7'>
+                    <div className='student-page-heading flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7'>
                         <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
                                 Assignments
@@ -126,7 +127,7 @@ export default function AssignmentPage() {
                                 View, track, and submit your course assignments.
                             </Typography>
                         </div>
-                        <div className='flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm'>
+                        <div className='student-heading-summary flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm'>
                             <div className='w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center'>
                                 <AssignmentIcon />
                             </div>
@@ -137,7 +138,7 @@ export default function AssignmentPage() {
                         </div>
                     </div>
 
-                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
+                    <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-5'>
                                 <div className='flex items-center justify-between'>
@@ -208,13 +209,13 @@ export default function AssignmentPage() {
                                     placeholder='Search assignments or courses...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    InputProps={{
+                                    slotProps={{ input: {
                                         startAdornment: (
                                             <InputAdornment position='start'>
                                                 <Search className='!text-slate-400' />
                                             </InputAdornment>
                                         )
-                                    }}
+                                    } }}
                                 />
                                 <TextField
                                     select
@@ -345,6 +346,6 @@ export default function AssignmentPage() {
                     )}
                 </main>
             </div>
-        </>
+        </StudentScreen>
     )
 }

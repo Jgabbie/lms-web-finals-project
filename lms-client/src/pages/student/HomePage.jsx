@@ -1,6 +1,8 @@
+import StudentScreen from '../../components/StudentScreen'
 import Navbar from "../../components/Navbar"
 import { Button, Card, CardContent, Typography, LinearProgress } from '@mui/material'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import SchoolRounded from '@mui/icons-material/SchoolRounded'
 import { getStoredProfile } from '../../utils/profileStorage'
 
 export default function HomePage() {
@@ -13,11 +15,11 @@ export default function HomePage() {
     ]
 
     return (
-        <>
+        <StudentScreen page="home" enabled={localStorage.getItem('role')?.toLowerCase() === 'student'}>
             <Navbar />
             <div className="min-h-screen bg-slate-50">
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="student-page-heading bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
                         <div>
                             <Typography variant="h4" className="font-bold text-slate-800 mb-2">
                                 Welcome back, {displayName}!
@@ -30,8 +32,8 @@ export default function HomePage() {
                             </Button>
                         </div>
 
-                        <div className="hidden md:flex w-64 h-40 bg-blue-50 rounded-xl border-2 border-dashed border-blue-200 items-center justify-center text-blue-500 font-medium">
-                            Image here
+                        <div aria-hidden="true" className="student-home-art hidden md:flex w-64 h-40 bg-blue-50 rounded-xl border-2 border-dashed border-blue-200 items-center justify-center text-blue-500 font-medium">
+                            <SchoolRounded sx={{ fontSize: 88 }} />
                         </div>
                     </div>
 
@@ -40,7 +42,7 @@ export default function HomePage() {
                             Your Active Courses
                         </Typography>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="student-course-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                             {activeCourses.map((course) => (
                                 <Card key={course.id} className="shadow-sm border border-slate-200 rounded-xl hover:shadow-md transition-shadow duration-200 cursor-pointer">
@@ -65,6 +67,6 @@ export default function HomePage() {
                     </div>
                 </main>
             </div>
-        </>
+        </StudentScreen>
     )
 }

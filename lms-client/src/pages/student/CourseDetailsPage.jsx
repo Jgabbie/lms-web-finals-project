@@ -1,3 +1,4 @@
+import StudentScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, Button, Chip, Divider, LinearProgress, Tab, Tabs } from '@mui/material'
 import { AnnouncementOutlined, AssignmentOutlined, CalendarTodayOutlined, CheckCircleOutlined, MenuBookOutlined, PersonOutlined, PlayCircleOutlined, Schedule, SchoolOutlined } from '@mui/icons-material'
 import { useState } from 'react'
@@ -91,12 +92,12 @@ export default function CourseDetailsPage() {
 
 
     return (
-        <>
+        <StudentScreen page="course-details" enabled={localStorage.getItem('role')?.toLowerCase() === 'student'}>
             <Navbar />
             <div className='min-h-screen bg-slate-50'>
                 <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <Card className='!rounded-2xl !border !border-slate-200 !shadow-sm !overflow-hidden !mb-6'>
-                        <div className='bg-gradient-to-r from-blue-700 to-blue-500 px-6 sm:px-8 py-8 text-white'>
+                        <div className='student-detail-banner bg-gradient-to-r from-blue-700 to-blue-500 px-6 sm:px-8 py-8 text-white'>
                             <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>
                                 <div>
                                     <div className='flex flex-wrap gap-2 mb-4'>
@@ -159,7 +160,7 @@ export default function CourseDetailsPage() {
                         </div>
                     </Card>
 
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
+                    <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-5'>
                                 <div className='flex items-center gap-3'>
@@ -271,8 +272,8 @@ export default function CourseDetailsPage() {
                                             'Buildjqwoidjowqi',
                                             'Buildjqwoidjowqi',
                                             'Buildjqwoidjowqi',
-                                        ].map(item => (
-                                            <div key={item} className='flex items-start gap-3'>
+                                        ].map((item, index) => (
+                                            <div key={`${item}-${index}`} className='flex items-start gap-3'>
                                                 <CheckCircleOutlined className='!text-green-600 !mt-0.5' />
                                                 <Typography variant='body2' className='!text-slate-600'>
                                                     {item}
@@ -484,6 +485,6 @@ export default function CourseDetailsPage() {
                     </CardContent>
                 </main >
             </div >
-        </>
+        </StudentScreen>
     )
 }
