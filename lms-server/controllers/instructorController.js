@@ -3,6 +3,8 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const Instructor = require('../models/Instructor')
 const User = require('../models/User')
+const ArchivedInstructor = require('../models/ArchivedInstructor')
+const ArchivedUser = require('../models/ArchivedUser')
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
@@ -499,32 +501,51 @@ exports.deleteInstructor = async (req, res) => {
             })
         }
 
-        const instructor = await Instructor.findByIdAndDelete(id)
         const instructorInformation = await User.findByIdAndDelete(id)
 
-        if (instructorInformation) {
-            await ArchivedUser.create({
-                _id: instructorInformation._id,
-                firstName: instructorInformation.firstName,
-                lastName: instructorInformation.lastName,
-                email: instructorInformation.email,
-                role: instructorInformation.role
-            })
-        }
-
-        if (!instructor) {
+        if (!instructorInformation) {
             return res.status(404).json({ message: 'Instructor not found' })
         }
 
         if (
             req.user &&
             req.user.id &&
-            String(instructor._id) === String(req.user.id)
+            String(instructorInformation._id) === String(req.user.id)
         ) {
             return res.status(400).json({
                 message: 'You cannot delete your own account'
             })
         }
+
+        await ArchivedInstructor.findOneAndUpdate(
+            { _id: instructorInformation._id },
+            {
+                _id: instructorInformation._id,
+                firstName: instructorInformation.firstName,
+                lastName: instructorInformation.lastName,
+                password: instructorInformation.password,
+                department: instructorInformation.department,
+                specialization: instructorInformation.specialization,
+                status: instructorInformation.status,
+                email: instructorInformation.email,
+                role: instructorInformation.role
+            },
+            { upsert: true, new: true, runValidators: true }
+        );
+
+        await ArchivedUser.findOneAndUpdate(
+            { _id: instructorInformation._id },
+            {
+                _id: instructorInformation._id,
+                firstName: instructorInformation.firstName,
+                lastName: instructorInformation.lastName,
+                password: instructorInformation.password,
+                status: instructorInformation.status,
+                email: instructorInformation.email,
+                role: instructorInformation.role
+            },
+            { upsert: true, new: true, runValidators: true }
+        );
 
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
@@ -622,13 +643,44 @@ exports.deleteInstructor = async (req, res) => {
     }
 }
 
+exports.getArchivedInstructors = async (req, res) => {
+    try {
+        const instructors = await ArchivedInstructor.find({})
+        res.status(200).json(instructors)
+    } catch (error) {
+        console.error('Retrieve archived instructors error: ', error)
+        res.status(500).json({ message: 'Failed to retrieve archived instructors' })
+    }
+}
+
 exports.restoreInstructor = async (req, res) => {
     try {
         const { id } = req.params
 
-        const archivedInstructor = await ArchivedUser.findById(id)
-        if (!archivedInstructor) {
-            return res.status(404).json({ message: 'Archived instructor not found' })
+        if (!id) {
+            return res.status(400).json({
+                message: 'Instructor ID is required'
+            })
+        }
+
+        const archivedUser = await ArchivedUser.findById(id)
+        const archivedInstructor = await ArchivedInstructor.findById(id)
+
+        if (!archivedUser) {
+            return res.status(404).json({ message: 'Archived user not found' })
+        }
+
+        const existingInstructor = await User.findOne({
+            $or: [
+                { email: archivedUser.email },
+                { _id: archivedUser._id }
+            ]
+        })
+
+        if (existingInstructor) {
+            return res.status(400).json({
+                message: 'An instructor with this email already exists'
+            })
         }
 
         const restoredInstructor = new User({
@@ -637,17 +689,20 @@ exports.restoreInstructor = async (req, res) => {
             lastName: archivedInstructor.lastName,
             email: archivedInstructor.email,
             role: archivedInstructor.role,
+            status: 'active'
         })
 
 
         const restoredInstructorInInstructor = new Instructor({
             _id: archivedInstructor._id,
+            instructorId: archivedInstructor.instructorId,
             firstName: archivedInstructor.firstName,
             lastName: archivedInstructor.lastName,
             email: archivedInstructor.email,
             specialization: archivedInstructor.specialization,
             department: archivedInstructor.department,
-            role: archivedInstructor.role,
+            status: 'active',
+            role: 'instructor',
         })
 
 

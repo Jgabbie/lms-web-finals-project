@@ -1,11 +1,14 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
-import api from '../../api/axiosClient'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
+import api from '../../api/axiosClient'
 
 export default function ActivityLogs() {
+    const [activeTab, setActiveTab] = useState('active')
+    const [archivedUsers, setArchivedUsers] = useState([])
+
     const [instructors, setInstructors] = useState([])
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -60,6 +63,28 @@ export default function ActivityLogs() {
         }
     })
 
+    const fetchArchivedUsers = async () => {
+        try {
+            const response = await api.get('/instructors/archived/instructors', getAuthConfig())
+            setArchivedUsers(response.data)
+        } catch (error) {
+            console.error('Error fetching archived users:', error)
+            showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+        }
+    }
+
+    const restoreUser = async (id) => {
+        try {
+            await api.post(`/instructors/restore/instructors/${id}`, {}, getAuthConfig())
+            showNotification('User restored successfully', 'success')
+            await fetchInstructors()
+            await fetchArchivedUsers()
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to restore user', 'error')
+        }
+    }
+
+
     const fetchInstructors = async () => {
         try {
             setLoading(true)
@@ -78,10 +103,12 @@ export default function ActivityLogs() {
 
     useEffect(() => {
         fetchInstructors()
+        fetchArchivedUsers()
     }, [])
 
     const validateInstructorForm = () => {
         const errors = {}
+
         const firstName = formData.firstName?.trim() || ''
         const lastName = formData.lastName?.trim() || ''
         const email = formData.email?.trim() || ''
@@ -335,6 +362,20 @@ export default function ActivityLogs() {
                             ))}
                         </div>
 
+                        <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
+                            <button
+                                onClick={() => setActiveTab('active')}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Active Users
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('archived')}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Archived Users ({archivedUsers.length})
+                            </button>
+                        </div>
 
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-0'>
@@ -390,90 +431,113 @@ export default function ActivityLogs() {
 
                                         <tbody className='divide-y divide-slate-100'>
 
-                                            {filteredInstructors.map(instructor =>
-                                                <tr key={instructor.id} className='hover:bg-slate-50'>
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex items-center gap-3'>
-                                                            <Avatar className='!bg-blue-600'>
-                                                                {initials(`${instructor.firstName} ${instructor.lastName}`)}
-                                                            </Avatar>
+                                            {(activeTab === 'active' ? filteredInstructors : archivedUsers)
+                                                .filter((instructor) => {
+                                                    const firstName = instructor.firstName || ''
+                                                    const lastName = instructor.lastName || ''
+                                                    const email = instructor.email || ''
 
-                                                            <div>
-                                                                <Typography className='!font-semibold !text-slate-800'>
-                                                                    {instructor.firstName} {instructor.lastName}
-                                                                </Typography>
-                                                                <Typography variant='caption' className='!text-slate-500'>
-                                                                    {instructor.email}
-                                                                </Typography>
+                                                    const matchesSearch =
+                                                        `${firstName} ${lastName} `.toLowerCase().includes(search.toLowerCase()) ||
+                                                        email.toLowerCase().includes(search.toLowerCase())
+
+                                                    return matchesSearch
+                                                }).map((instructor) =>
+                                                    <tr key={instructor.id} className='hover:bg-slate-50'>
+                                                        <td className='px-6 py-4'>
+                                                            <div className='flex items-center gap-3'>
+                                                                <Avatar className='!bg-blue-600'>
+                                                                    {initials(`${instructor.firstName} ${instructor.lastName}`)}
+                                                                </Avatar>
+
+                                                                <div>
+                                                                    <Typography className='!font-semibold !text-slate-800'>
+                                                                        {instructor.firstName} {instructor.lastName}
+                                                                    </Typography>
+                                                                    <Typography variant='caption' className='!text-slate-500'>
+                                                                        {instructor.email}
+                                                                    </Typography>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </td>
+                                                        </td>
 
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {instructor.department}
-                                                    </td>
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {instructor.department}
+                                                        </td>
 
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {instructor.specialization}
-                                                    </td>
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {instructor.specialization}
+                                                        </td>
 
-                                                    <td className='px-6 py-4'>
-                                                        <Chip
-                                                            size='small'
-                                                            label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
-                                                            className={
-                                                                instructor.status === 'active'
-                                                                    ? '!bg-green-50 !text-green-700'
-                                                                    : '!bg-slate-100 !text-slate-600'
-                                                            }
-                                                        />
-                                                    </td>
-
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex justify-end gap-1'>
-                                                            <IconButton
+                                                        <td className='px-6 py-4'>
+                                                            <Chip
                                                                 size='small'
-                                                                title='View'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setOpenViewInstructor(true)
-                                                                }}
-                                                            >
-                                                                <VisibilityOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='Edit'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setFormData({
-                                                                        firstName: instructor.firstName,
-                                                                        lastName: instructor.lastName,
-                                                                        email: instructor.email,
-                                                                        department: instructor.department,
-                                                                        specialization: instructor.specialization,
-                                                                        status: instructor.status,
-                                                                    })
-                                                                    setOpenEditInstructor(true)
-                                                                }}
-                                                            >
-                                                                <EditOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                color='error'
-                                                                title='Delete'
-                                                                onClick={() => {
-                                                                    setSelectedInstructor(instructor)
-                                                                    setOpenDeleteInstructor(true)
-                                                                }}
-                                                            >
-                                                                <DeleteOutlined fontSize='small' />
-                                                            </IconButton>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
+                                                                label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
+                                                                className={
+                                                                    instructor.status === 'active'
+                                                                        ? '!bg-green-50 !text-green-700'
+                                                                        : '!bg-slate-100 !text-slate-600'
+                                                                }
+                                                            />
+                                                        </td>
+
+                                                        <td className='px-6 py-4 text-right'>
+                                                            {activeTab === 'archived' ? (
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='Restore'
+                                                                    variant='outlined'
+                                                                    onClick={() => restoreUser(instructor._id || instructor.id)}
+                                                                >
+                                                                    <RestoreFromTrash fontSize='small' />
+                                                                </IconButton>
+                                                            ) : (
+                                                                <div>
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        title='View'
+                                                                        onClick={() => {
+                                                                            setSelectedInstructor(instructor)
+                                                                            setOpenViewInstructor(true)
+                                                                        }}
+                                                                    >
+                                                                        <VisibilityOutlined fontSize='small' />
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        title='Edit'
+                                                                        onClick={() => {
+                                                                            setSelectedInstructor(instructor)
+                                                                            setFormData({
+                                                                                firstName: instructor.firstName,
+                                                                                lastName: instructor.lastName,
+                                                                                email: instructor.email,
+                                                                                role: instructor.role,
+                                                                                department: instructor.department,
+                                                                                specialization: instructor.specialization,
+                                                                                status: instructor.status,
+                                                                            })
+                                                                            setOpenEditInstructor(true)
+                                                                        }}
+                                                                    >
+                                                                        <EditOutlined fontSize='small' />
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        color='error'
+                                                                        title='Delete'
+                                                                        onClick={() => {
+                                                                            setSelectedInstructor(instructor)
+                                                                            setOpenDeleteInstructor(true)
+                                                                        }}
+                                                                    >
+                                                                        <DeleteOutlined fontSize='small' />
+                                                                    </IconButton>
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                )}
                                         </tbody>
                                     </table>
 

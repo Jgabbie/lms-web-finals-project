@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer')
 const Student = require('../models/Student')
 const User = require('../models/User')
 const ArchivedStudent = require('../models/ArchivedStudent')
+const ArchivedUser = require('../models/ArchivedUser')
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
@@ -514,32 +515,51 @@ exports.deleteStudent = async (req, res) => {
             })
         }
 
-        const student = await Student.findByIdAndDelete(id)
         const studentInformation = await User.findByIdAndDelete(id)
 
-        if (studentInformation) {
-            await ArchivedUser.create({
-                _id: studentInformation._id,
-                firstName: studentInformation.firstName,
-                lastName: studentInformation.lastName,
-                email: studentInformation.email,
-                role: studentInformation.role
-            })
-        }
-
-        if (!student) {
+        if (!studentInformation) {
             return res.status(404).json({ message: 'Student not found' })
         }
 
         if (
             req.user &&
             req.user.id &&
-            String(student._id) === String(req.user.id)
+            String(studentInformation._id) === String(req.user.id)
         ) {
             return res.status(400).json({
                 message: 'You cannot delete your own account'
             })
         }
+
+        await ArchivedStudent.findOneAndUpdate(
+            { _id: studentInformation._id },
+            {
+                _id: studentInformation._id,
+                firstName: studentInformation.firstName,
+                lastName: studentInformation.lastName,
+                password: studentInformation.password,
+                course: studentInformation.course,
+                yearLevel: studentInformation.yearLevel,
+                status: studentInformation.status,
+                email: studentInformation.email,
+                role: studentInformation.role
+            },
+            { upsert: true, new: true, runValidators: true }
+        );
+
+        await ArchivedUser.findOneAndUpdate(
+            { _id: studentInformation._id },
+            {
+                _id: studentInformation._id,
+                firstName: studentInformation.firstName,
+                lastName: studentInformation.lastName,
+                password: studentInformation.password,
+                status: studentInformation.status,
+                email: studentInformation.email,
+                role: studentInformation.role
+            },
+            { upsert: true, new: true, runValidators: true }
+        );
 
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
@@ -639,9 +659,7 @@ exports.deleteStudent = async (req, res) => {
 
 exports.getArchivedStudents = async (req, res) => {
     try {
-        const students = await ArchivedStudent.find({
-            role: 'student'
-        }).select('-password')
+        const students = await ArchivedStudent.find({})
         res.status(200).json(students)
     } catch (error) {
         console.error('Retrieve archived students error: ', error)
@@ -659,18 +677,32 @@ exports.restoreStudent = async (req, res) => {
             })
         }
 
-        const archivedStudent = await ArchivedUser.findById(id)
+        const archivedUser = await ArchivedUser.findById(id)
+        const archivedStudent = await ArchivedStudent.findById(id)
 
-        if (!archivedStudent) {
+        if (!archivedUser) {
             return res.status(404).json({ message: 'Archived student not found' })
         }
 
+        const existingStudent = await User.findOne({
+            $or: [
+                { email: archivedUser.email },
+                { _id: archivedUser._id }
+            ]
+        })
+
+        if (existingStudent) {
+            return res.status(400).json({
+                message: 'A student with this email already exists'
+            })
+        }
+
         const restoredStudent = new User({
-            _id: archivedStudent._id,
-            firstName: archivedStudent.firstName,
-            lastName: archivedStudent.lastName,
-            email: archivedStudent.email,
-            role: archivedStudent.role,
+            _id: archivedUser._id,
+            firstName: archivedUser.firstName,
+            lastName: archivedUser.lastName,
+            email: archivedUser.email,
+            role: archivedUser.role,
             status: 'active'
         })
 

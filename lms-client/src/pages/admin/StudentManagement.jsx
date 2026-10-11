@@ -1,11 +1,14 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, } from '@mui/icons-material'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function StudentManagement() {
+    const [activeTab, setActiveTab] = useState('active')
+    const [archivedUsers, setArchivedUsers] = useState([])
+
     const [students, setStudents] = useState([])
     const [loading, setLoading] = useState(false)
     const [saving, setSaving] = useState(false)
@@ -60,6 +63,27 @@ export default function StudentManagement() {
         }
     })
 
+    const fetchArchivedUsers = async () => {
+        try {
+            const response = await api.get('/users/archived', getAuthConfig())
+            setArchivedUsers(response.data)
+        } catch (error) {
+            console.error('Error fetching archived users:', error)
+            showNotification(error.response?.data?.message || 'Failed to retrieve archived users', 'error')
+        }
+    }
+
+    const restoreUser = async (id) => {
+        try {
+            await api.post(`/users/account/restore/${id}`, {}, getAuthConfig())
+            showNotification('User restored successfully', 'success')
+            await fetchStudents()
+            await fetchArchivedUsers()
+        } catch (error) {
+            showNotification(error.response?.data?.message || 'Failed to restore user', 'error')
+        }
+    }
+
     const fetchStudents = async () => {
         try {
             setLoading(true)
@@ -75,6 +99,7 @@ export default function StudentManagement() {
 
     useEffect(() => {
         fetchStudents()
+        fetchArchivedUsers()
     }, [])
 
     const validateStudentForm = () => {
@@ -338,6 +363,21 @@ export default function StudentManagement() {
                             ))}
                         </div>
 
+                        <div className='flex gap-2 border-b border-slate-200 px-5 pt-4'>
+                            <button
+                                onClick={() => setActiveTab('active')}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'active' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Active Users
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('archived')}
+                                className={`px-4 py-2 font-semibold ${activeTab === 'archived' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500'}`}
+                            >
+                                Archived Users ({archivedUsers.length})
+                            </button>
+                        </div>
+
                         {/* Filter Bar */}
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-0'>
@@ -379,104 +419,136 @@ export default function StudentManagement() {
                                             </tr>
                                         </thead>
                                         <tbody className='divide-y divide-slate-100'>
-                                            {filteredStudents.map((student, idx) => (
-                                                <tr key={student._id || student.id || idx} className='hover:bg-slate-50'>
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex items-center gap-3'>
-                                                            <Avatar className='!bg-blue-600 !text-sm'>
-                                                                {student.firstName?.charAt(0) || 'U'}
-                                                                {student.lastName?.charAt(0) || ''}
-                                                            </Avatar>
-                                                            <Typography className='!font-semibold !text-slate-800'>
-                                                                {student.firstName || ''} {student.lastName || ''}
-                                                            </Typography>
-                                                        </div>
-                                                    </td>
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {student.email || '—'}
-                                                    </td>
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {student.studentId || '—'}
-                                                    </td>
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {student.course || '—'}
-                                                    </td>
-                                                    <td className='px-6 py-4 text-slate-600'>
-                                                        {student.yearLevel || '—'}
-                                                    </td>
-                                                    <td className='px-6 py-4'>
-                                                        <Chip
-                                                            size='small'
-                                                            label={student.status === "active"
-                                                                ? "Active"
-                                                                : "Inactive"
-                                                            }
-                                                            className={
-                                                                student.status === 'active'
-                                                                    ? '!bg-green-50 !text-green-700'
-                                                                    : '!bg-slate-100 !text-slate-600'
-                                                            }
-                                                        />
-                                                    </td>
-                                                    <td className='px-6 py-4'>
-                                                        <div className='flex justify-end gap-1'>
-                                                            <IconButton
+                                            {(activeTab === 'active' ? filteredStudents : archivedUsers)
+                                                .filter((student) => {
+                                                    const firstName = student.firstName || ''
+                                                    const lastName = student.lastName || ''
+                                                    const email = student.email || ''
+
+                                                    const matchesSearch =
+                                                        `${firstName} ${lastName} `.toLowerCase().includes(search.toLowerCase()) ||
+                                                        email.toLowerCase().includes(search.toLowerCase())
+
+                                                    return matchesSearch
+                                                }).map((student) => (
+                                                    <tr key={student._id || student.id} className='hover:bg-slate-50'>
+                                                        <td className='px-6 py-4'>
+                                                            <div className='flex items-center gap-3'>
+                                                                <Avatar className='!bg-blue-600 !text-sm'>
+                                                                    {student.firstName?.charAt(0) || 'U'}
+                                                                    {student.lastName?.charAt(0) || ''}
+                                                                </Avatar>
+                                                                <Typography className='!font-semibold !text-slate-800'>
+                                                                    {student.firstName || ''} {student.lastName || ''}
+                                                                </Typography>
+                                                            </div>
+                                                        </td>
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {student.email || '—'}
+                                                        </td>
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {student.studentId || '—'}
+                                                        </td>
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {student.course || '—'}
+                                                        </td>
+                                                        <td className='px-6 py-4 text-slate-600'>
+                                                            {student.yearLevel || '—'}
+                                                        </td>
+                                                        <td className='px-6 py-4'>
+                                                            <Chip
                                                                 size='small'
-                                                                title='View'
-                                                                onClick={() => {
-                                                                    setSelectedStudent(student)
-                                                                    setOpenViewStudent(true)
-                                                                }}
-                                                            >
-                                                                <VisibilityOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                title='Edit'
-                                                                onClick={() => {
-                                                                    setSelectedStudent(student)
-                                                                    setFormData({
-                                                                        firstName: student.firstName,
-                                                                        lastName: student.lastName,
-                                                                        email: student.email,
-                                                                        department: student.department,
-                                                                        specialization: student.specialization,
-                                                                        status: student.status,
-                                                                    })
-                                                                    setOpenEditStudent(true)
-                                                                }}
-                                                            >
-                                                                <EditOutlined fontSize='small' />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                size='small'
-                                                                color='error'
-                                                                title='Delete'
-                                                                onClick={() => {
-                                                                    setSelectedStudent(student)
-                                                                    setOpenDeleteStudent(true)
-                                                                }}
-                                                            >
-                                                                <DeleteOutlined fontSize='small' />
-                                                            </IconButton>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                                                label={student.status === "active"
+                                                                    ? "Active"
+                                                                    : "Inactive"
+                                                                }
+                                                                className={
+                                                                    student.status === 'active'
+                                                                        ? '!bg-green-50 !text-green-700'
+                                                                        : '!bg-slate-100 !text-slate-600'
+                                                                }
+                                                            />
+                                                        </td>
+                                                        <td className='px-6 py-4 text-right'>
+                                                            {activeTab === 'archived' ? (
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='Restore'
+                                                                    variant='outlined'
+                                                                    onClick={() => restoreUser(student._id || student.id)}
+                                                                >
+                                                                    <RestoreFromTrash fontSize='small' />
+                                                                </IconButton>
+                                                            ) : (
+                                                                <div>
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        title='View'
+                                                                        onClick={() => {
+                                                                            setSelectedStudent(student)
+                                                                            setOpenViewStudent(true)
+                                                                        }}
+                                                                    >
+                                                                        <VisibilityOutlined fontSize='small' />
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        title='Edit'
+                                                                        onClick={() => {
+                                                                            setSelectedStudent(student)
+                                                                            setFormData({
+                                                                                firstName: student.firstName,
+                                                                                lastName: student.lastName,
+                                                                                email: student.email,
+                                                                                role: student.role,
+                                                                                course: student.course,
+                                                                                yearLevel: student.yearLevel,
+                                                                                status: student.status,
+                                                                            })
+                                                                            setOpenEditStudent(true)
+                                                                        }}
+                                                                    >
+                                                                        <EditOutlined fontSize='small' />
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        color='error'
+                                                                        title='Delete'
+                                                                        onClick={() => {
+                                                                            setSelectedStudent(student)
+                                                                            setOpenDeleteStudent(true)
+                                                                        }}
+                                                                    >
+                                                                        <DeleteOutlined fontSize='small' />
+                                                                    </IconButton>
+                                                                </div>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
                                         </tbody>
                                     </table>
 
-                                    {filteredStudents.length === 0 && (
-                                        <div className='py-14 text-center'>
-                                            <PersonOutlined className='!text-slate-300 !text-5xl' />
-                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                {loading ? 'Loading students...' : 'No students found'}
-                                            </Typography>
-                                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                Try changing your search or status filter.
-                                            </Typography>
-                                        </div>
-                                    )}
+                                    {(activeTab === 'active'
+                                        ? filteredStudents
+                                        : archivedUsers.filter(
+                                            user => {
+                                                const matchesSearch =
+                                                    `${user.firstName || ''} ${user.lastName || ''} `.toLowerCase().includes(search.toLowerCase()) ||
+                                                    (user.email || '').toLowerCase().includes(search.toLowerCase())
+                                                return matchesSearch
+                                            }
+                                        )).length === 0 && (
+                                            <div className='py-14 text-center'>
+                                                <PersonOutlined className='!text-slate-300 !text-5xl' />
+                                                <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                    {loading ? 'Loading students...' : 'No students found'}
+                                                </Typography>
+                                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                    Try changing your search or status filter.
+                                                </Typography>
+                                            </div>
+                                        )}
                                 </div>
                             </CardContent>
                         </Card>
