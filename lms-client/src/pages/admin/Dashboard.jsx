@@ -27,10 +27,13 @@ export default function Dashboard() {
                 ])
 
                 setDashboardData(statsResponse.data)
-                setActivityLogs(activityResponse.data)
+
+                const logs = Array.isArray(activityResponse.data) ? activityResponse.data : []
+                setActivityLogs(Array.isArray(logs) ? logs : [])
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error)
                 setStatsError('Failed to fetch dashboard statistics.')
+                setActivityLogs([])
             } finally {
                 setLoadingStats(false)
                 setLoadingActivity(false)
@@ -502,36 +505,40 @@ export default function Dashboard() {
                                     ) : (
                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8'>
                                             {activityLogs.map((item, index) => {
-                                                <div key={index}>
-                                                    <div className='flex items-center gap-4 py-4'>
-                                                        <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${item.bg} ${item.color}`}>
-                                                            {item.icon}
+                                                const style = getActivityStyle(item.action)
+                                                return (
+                                                    <div key={index}>
+                                                        <div className='flex items-center gap-4 py-4'>
+                                                            <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${item.bg} ${item.color}`}>
+                                                                {style.icon}
+                                                            </div>
+
+                                                            <div className='flex-1 min-w-0'>
+                                                                <Typography variant='body2' className='!font-semibold !text-slate-800'>
+                                                                    {item.action}
+                                                                    {item.user ? ` - ${item.user}` : ''}
+                                                                </Typography>
+
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {item.description}
+                                                                </Typography>
+
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {item.role} - {item.status}
+                                                                </Typography>
+                                                            </div>
+
+                                                            <div className='flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap'>
+                                                                <AccessTime className='!text-sm' />
+                                                                {item.date} at {item.time}
+                                                            </div>
                                                         </div>
 
-                                                        <div className='flex-1 min-w-0'>
-                                                            <Typography variant='body2' className='!font-semibold !text-slate-800'>
-                                                                {item.title}
-                                                            </Typography>
-
-                                                            <Typography variant='caption' className='!text-slate-500'>
-                                                                {item.description}
-                                                            </Typography>
-
-                                                            <Typography variant='caption' className='!text-slate-500'>
-                                                                {item.role} - {item.status}
-                                                            </Typography>
-                                                        </div>
-
-                                                        <div className='flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap'>
-                                                            <AccessTime className='!text-sm' />
-                                                            {item.time}
-                                                        </div>
+                                                        {index < activityLogs.length - 1 && (
+                                                            <Divider />
+                                                        )}
                                                     </div>
-
-                                                    {index < activityLogs.length - 1 && (
-                                                        <Divider />
-                                                    )}
-                                                </div>
+                                                )
                                             })}
                                         </div>
                                     )}
