@@ -137,18 +137,21 @@ exports.addUser = async (req, res) => {
         const generatedPassword = crypto.randomBytes(6).toString('base64url')
         const hashedPassword = await bcrypt.hash(generatedPassword, 10)
 
-        const lastInstructor = await Instructor.findOne().sort({ instructorId: -1 })
 
-        let newInstructorId = 'INST001'
-        if (lastInstructor) {
-            const lastIdNumber = parseInt(lastInstructor.instructorId.replace('INST', ''))
-            const nextIdNumber = lastIdNumber + 1
-            newInstructorId = `INST${nextIdNumber.toString().padStart(3, '0')}`
-        }
+        let instructorId
 
-        const instructorId = newInstructorId
 
         if (normalizedRole === 'instructor') {
+            const lastInstructor = await Instructor.findOne().sort({ instructorId: -1 })
+
+            let nextIdNumber = 1
+
+            if (!lastInstructor && lastInstructor.instructorId) {
+                const lastIdNumber = parseInt(lastInstructor.instructorId.replace('INST', ''))
+                const nextIdNumber = lastIdNumber + 1
+            }
+
+            const instructorId = `INST${nextIdNumber.toString().padStart(3, '0')}`
             await Instructor.create({
                 instructorId: instructorId,
                 firstName: normalizedFirstName,
@@ -173,6 +176,14 @@ exports.addUser = async (req, res) => {
                 status: 'active',
             })
         }
+
+        await User.create({
+            firstName: normalizedFirstName,
+            lastName: normalizedLastName,
+            email: normalizedEmail,
+            password: hashedPassword,
+            role: normalizedRole
+        })
 
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
@@ -238,20 +249,12 @@ exports.addUser = async (req, res) => {
                         <p style="margin: 0; font-size: 12px; color: #6b7280;">
                             &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
                         </p>
-                        <p style=""margin: 0; font-size: 12px; color: #6b7280;">
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
                         This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
                         </p>
                     </div>
                 </div>
             `
-        })
-
-        await User.create({
-            firstName: normalizedFirstName,
-            lastName: normalizedLastName,
-            email: normalizedEmail,
-            password: hashedPassword,
-            role: normalizedRole
         })
 
         return res.status(201).json({
