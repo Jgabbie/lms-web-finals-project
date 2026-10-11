@@ -263,12 +263,6 @@ exports.addUser = async (req, res) => {
     } catch (error) {
         console.error('Add user error:', error)
 
-        if (error.code === 11000) {
-            return res.status(409).json({
-                message: 'An account with this email already exists'
-            })
-        }
-
         return res.status(500).json({
             message: 'Unable to create account. Please try again'
         })
