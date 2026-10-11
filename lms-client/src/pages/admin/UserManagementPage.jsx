@@ -1,6 +1,6 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber } from '@mui/icons-material'
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, CircularProgress, VisibilityOutlined } from '@mui/icons-material'
+import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
@@ -8,20 +8,40 @@ import api from '../../api/axiosClient'
 export default function UserManagementPage() {
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
+    const [saving, setSaving] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false)
 
     const [openAddUser, setOpenAddUser] = useState(false)
     const [openEditUser, setOpenEditUser] = useState(false)
-    const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
-    const [userToDelete, setUserToDelete] = useState(false)
-
-    const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [openDeleteUser, setOpenDeleteUser] = useState(false)
+    const [openViewUser, setOpenViewUser] = useState(false)
 
     const [selectedUser, setSelectedUser] = useState(false)
-    const [roleFilter, setRoleFilter] = useState('All')
-    const [message, setMessage] = useState('')
+
+    const [sidebarOpen, setSidebarOpen] = useState(true)
     const [search, setSearch] = useState('')
-    const [error, setError] = useState('')
+    const [roleFilter, setRoleFilter] = useState('All')
+
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    })
+
+    const showNotification = (message, severity = 'success') => {
+        setNotification({
+            open: true,
+            message,
+            severity
+        })
+    }
+
+    const closeNotification = (_, reason) => {
+        if (reason === 'clickaway') {
+            return
+        }
+        setNotification({ ...notification, open: false })
+    }
 
     const [fieldErrors, setFieldErrors] = useState({})
     const [formData, setFormData] = useState({
@@ -38,30 +58,22 @@ export default function UserManagementPage() {
         }
     })
 
-    const fetchUsers = useCallback(async () => {
+    const fetchUsers = async () => {
         try {
             setLoading(true)
-            setError('')
             const response = await api.get('/users/accounts', getAuthConfig())
-            if (Array.isArray(response.data)) {
-                setUsers(response.data)
-            } else if (Array.isArray(response.data?.users)) {
-                setUsers(response.data.users)
-            } else if (Array.isArray(response.data?.data)) {
-                setUsers(response.data.data)
-            } else {
-                setUsers([])
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to retrieve users')
+            setUsers(response.data)
+        } catch (error) {
+            console.error('Error fetching users:', error)
+            showNotification(error.response?.data?.message || 'Failed to retrieve users', 'error')
         } finally {
             setLoading(false)
         }
-    }, [])
+    }
 
     useEffect(() => {
         fetchUsers()
-    }, [fetchUsers])
+    }, [])
 
     const validateInstructorForm = () => {
         const errors = {}
@@ -124,9 +136,11 @@ export default function UserManagementPage() {
     }
 
     const handleAddUser = async () => {
-        setError('')
+        setFieldErrors({})
         if (!validateInstructorForm()) return
         try {
+            setSaving(true)
+
             await api.post('/users/account/add', {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
@@ -136,44 +150,27 @@ export default function UserManagementPage() {
 
             setOpenAddUser(false)
             resetForm()
-            setMessage('User added successfully')
+            showNotification('User added successfully!', 'success')
             await fetchUsers()
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to add user')
-        }
-    }
-
-    const handleOpenEdit = async (id) => {
-        try {
-            setError('')
-            if (!id) return
-            const response = await api.get(`/users/account/${id}`, getAuthConfig())
-            const user = response.data
-            setSelectedUser(user)
-            setFormData({
-                firstName: user.firstName || '',
-                lastName: user.lastName || '',
-                email: user.email || '',
-                role: user.role || 'student',
-                status: user.status || 'Active'
-            })
-            setOpenEditUser(true)
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to retrieve user')
+        } catch (error) {
+            console.error('Error adding user:', error)
+            showNotification(error.response?.data?.message || 'Failed to add user', 'error')
+        } finally {
+            setSaving(false)
         }
     }
 
     const handleUpdateUser = async () => {
         const id = selectedUser?._id || selectedUser?.id
         if (!id) {
-            setError('User ID is missing')
+            showNotification('No user selected for update.', 'error')
             return
         }
 
-        setError('')
+        setFieldErrors({})
         if (!validateInstructorForm()) return
         try {
-            setError('')
+            setSaving(true)
             const payload = {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
@@ -183,46 +180,36 @@ export default function UserManagementPage() {
             await api.put(`/users/account/update/${id}`, payload, getAuthConfig())
             setOpenEditUser(false)
             resetForm()
-            setMessage('User updated successfully')
+            showNotification('User updated successfully', 'success')
             await fetchUsers()
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update user')
+        } catch (error) {
+            console.error('Error updating user:', error)
+            showNotification(error.response?.data?.message || 'Failed to update user', 'error')
         }
     }
 
-    const handleOpenDelete = (user) => {
-        setUserToDelete(user)
-        setOpenDeleteDialog(true)
-    }
-
-    const handleCloseDelete = () => {
-        if (deleteLoading) return
-
-        setOpenDeleteDialog(false)
-        setUserToDelete(null)
-    }
-
     const handleDeleteUser = async () => {
-        const id = userToDelete?._id || userToDelete?.id
+        const id = selectedUser?._id || selectedUser?.id
         if (!id) {
-            setError('User ID is missing')
+            showNotification('No user selected for deletion.', 'error')
             return
         }
 
         try {
-            setDeleteLoading(true)
-            setError('')
+            setSaving(true)
+
             await api.delete(`/users/account/delete/${id}`, getAuthConfig())
 
-            setUsers(prev => prev.filter(user => user._id !== userToDelete._id))
+            setUsers(prev => prev.filter(user => user._id !== selectedUser._id))
 
-            setOpenDeleteDialog(false)
-            setUserToDelete(null)
-            setMessage('User deleted successfully')
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to delete user')
+            setOpenDeleteUser(false)
+            setSelectedUser(null)
+            showNotification('User deleted successfully', 'success')
+        } catch (error) {
+            console.error('Error deleting user:', error)
+            showNotification(error.response?.data?.message || 'Failed to delete user', 'error')
         } finally {
-            setDeleteLoading(false)
+            setSaving(false)
         }
     }
 
@@ -253,6 +240,9 @@ export default function UserManagementPage() {
             return matchesSearch && matchesRole
         })
     }, [users, search, roleFilter])
+
+    const initials = name =>
+        name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
     const roleClass = (role) => {
         if (role === 'admin' || role === 'Administrator') return '!bg-purple-50 !text-purple-700'
@@ -406,8 +396,28 @@ export default function UserManagementPage() {
                                                         <div className='flex justify-end gap-1'>
                                                             <IconButton
                                                                 size='small'
+                                                                title='View'
+                                                                onClick={() => {
+                                                                    setSelectedUser(user)
+                                                                    setOpenViewUser(true)
+                                                                }}
+                                                            >
+                                                                <VisibilityOutlined fontSize='small' />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size='small'
                                                                 title='Edit'
-                                                                onClick={() => handleOpenEdit(user._id || user.id)}
+                                                                onClick={() => {
+                                                                    setSelectedUser(user)
+                                                                    setFormData({
+                                                                        firstName: user.firstName,
+                                                                        lastName: user.lastName,
+                                                                        email: user.email,
+                                                                        role: user.role,
+                                                                        status: user.status,
+                                                                    })
+                                                                    setOpenEditUser(true)
+                                                                }}
                                                             >
                                                                 <EditOutlined fontSize='small' />
                                                             </IconButton>
@@ -415,7 +425,10 @@ export default function UserManagementPage() {
                                                                 size='small'
                                                                 color='error'
                                                                 title='Delete'
-                                                                onClick={() => handleOpenDelete(user)}
+                                                                onClick={() => {
+                                                                    setSelectedUser(user)
+                                                                    setOpenDeleteUser(true)
+                                                                }}
                                                             >
                                                                 <DeleteOutlined fontSize='small' />
                                                             </IconButton>
@@ -444,6 +457,73 @@ export default function UserManagementPage() {
                 </div>
             </div>
 
+            <Dialog
+                open={openViewUser}
+                onClose={() => setOpenViewUser(false)}
+                fullWidth
+                maxWidth='sm'
+            >
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    User Details
+                </DialogTitle>
+
+                <DialogContent>
+                    {selectedUser && (
+                        <div className='space-y-5 pt-2'>
+                            <div className='flex items-center gap-4'>
+                                <Avatar src={selectedUser.avatar} alt={selectedUser.name} className='!bg-blue-600 !w-14 !h-14'>
+                                    {initials(`${selectedUser.firstName} ${selectedUser.lastName}`)}
+                                </Avatar>
+
+                                <div>
+                                    <Typography variant='h6' className='!font-semibold !text-slate-800'>
+                                        {selectedUser.firstName} {selectedUser.lastName}
+                                    </Typography>
+                                </div>
+                            </div>
+
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Email
+                                    </Typography>
+                                    <Typography variant='body1' className='!font-medium !text-slate-800'>
+                                        {selectedUser.email}
+                                    </Typography>
+                                </div>
+
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Status
+                                    </Typography>
+
+                                    <div className='!mt-1'>
+                                        <Chip
+                                            size='small'
+                                            label={selectedUser.status === 'active' ? 'Active' : 'Inactive'}
+                                            className={
+                                                selectedUser.status === 'active'
+                                                    ? '!bg-green-50 !text-green-700'
+                                                    : '!bg-slate-100 !text-slate-600'
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent >
+
+                <DialogActions className='!px-6 !pb-5'>
+                    <Button
+                        onClick={() => setOpenViewUser(false)}
+                        className='!normal-case !text-slate-600'
+                    >
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog >
+
             {/* Add User Modal */}
             <Dialog
                 open={openAddUser}
@@ -457,6 +537,7 @@ export default function UserManagementPage() {
                 <DialogContent>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2'>
                         <TextField
+                            required
                             fullWidth
                             label='First Name'
                             name='firstName'
@@ -467,6 +548,7 @@ export default function UserManagementPage() {
                             slotProps={{ maxLength: 50 }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Last Name'
                             name='lastName'
@@ -477,6 +559,7 @@ export default function UserManagementPage() {
                             slotProps={{ maxLength: 50 }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Email Address'
                             type='email'
@@ -488,6 +571,7 @@ export default function UserManagementPage() {
                             slotProps={{ maxLength: 100 }}
                         />
                         <TextField
+                            required
                             select
                             fullWidth
                             label='Role'
@@ -510,9 +594,10 @@ export default function UserManagementPage() {
                     <Button
                         variant='contained'
                         onClick={handleAddUser}
+                        disabled={saving}
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
-                        Add User
+                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Add User'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -530,6 +615,7 @@ export default function UserManagementPage() {
                 <DialogContent>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2'>
                         <TextField
+                            required
                             fullWidth
                             label='First Name'
                             name='firstName'
@@ -540,6 +626,7 @@ export default function UserManagementPage() {
                             slotProps={{ maxLength: 50 }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Last Name'
                             name='lastName'
@@ -550,6 +637,7 @@ export default function UserManagementPage() {
                             slotProps={{ maxLength: 50 }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Email Address'
                             type='email'
@@ -561,6 +649,7 @@ export default function UserManagementPage() {
                             slotProps={{ maxLength: 100 }}
                         />
                         <TextField
+                            required
                             select
                             fullWidth
                             label='Role'
@@ -583,17 +672,18 @@ export default function UserManagementPage() {
                     <Button
                         variant='contained'
                         onClick={handleUpdateUser}
+                        disabled={saving}
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
-                        Save Changes
+                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Save Changes'}
                     </Button>
                 </DialogActions>
             </Dialog>
 
 
             <Dialog
-                open={openDeleteDialog}
-                onClose={handleCloseDelete}
+                open={openDeleteUser}
+                onClose={() => setOpenDeleteUser(false)}
                 fullWidth
                 maxWidth='xs'
                 PaperProps={{
@@ -615,22 +705,22 @@ export default function UserManagementPage() {
                             Are you sure you want to delete this account?
                         </Typography>
 
-                        {userToDelete && (
+                        {selectedUser && (
                             <div className='w-full mt-4 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3'>
                                 <Typography variant='body2' className='!font-semibold !text-slate-800'>
-                                    {userToDelete.firstName} {userToDelete.lastName}
+                                    {selectedUser.firstName} {selectedUser.lastName}
                                 </Typography>
 
                                 <Typography variant='caption' className='!text-slate-500'>
-                                    {userToDelete.email}
+                                    {selectedUser.email}
                                 </Typography>
 
                                 <div>
                                     <Chip
                                         size='small'
-                                        label={displayRole(userToDelete.role)}
+                                        label={displayRole(selectedUser.role)}
                                         className={roleClass(
-                                            displayRole(userToDelete.role)
+                                            displayRole(selectedUser.role)
                                         )}
                                     />
                                 </div>
@@ -645,7 +735,7 @@ export default function UserManagementPage() {
 
                 <DialogActions className='!px-6 !pb-6 !pt-4 !justify-center !gap-2'>
                     <Button
-                        onClick={handleCloseDelete}
+                        onClick={() => setOpenDeleteUser(false)}
                         disabled={deleteLoading}
                         variant='outlined'
                         className='!normal-case !rounded-lg !border-slate-300 !text-slate-600 hover:!bg-slate-50 !px-5'
@@ -660,7 +750,7 @@ export default function UserManagementPage() {
                         startIcon={<DeleteOutlined />}
                         className='!normal-case !rounded-lg !bg-red-600 hover:!bg-red-700 !shadow-none !px-5'
                     >
-                        {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                        {deleteLoading ? <CircularProgress size={20} className='!text-white' /> : 'Delete Account'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -668,24 +758,19 @@ export default function UserManagementPage() {
 
             {/* Notifications */}
             <Snackbar
-                open={Boolean(message)}
-                autoHideDuration={3000}
-                onClose={() => setMessage('')}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert onClose={() => setMessage('')} severity='success' variant='filled'>
-                    {message}
-                </Alert>
-            </Snackbar>
-
-            <Snackbar
-                open={Boolean(error)}
+                open={notification.open}
                 autoHideDuration={4000}
-                onClose={() => setError('')}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                onClose={closeNotification}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
-                <Alert onClose={() => setError('')} severity='error' variant='filled'>
-                    {error}
+                <Alert
+                    onClose={closeNotification}
+                    severity={notification.severity}
+                    variant='filled'
+                    elevation={6}
+                    sx={{ width: '100%' }}
+                >
+                    {notification.message}
                 </Alert>
             </Snackbar>
         </>

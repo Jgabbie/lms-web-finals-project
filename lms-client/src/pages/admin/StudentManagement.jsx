@@ -1,6 +1,6 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, ContentCopy } from '@mui/icons-material'
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, CircularProgress } from '@mui/icons-material'
+import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
@@ -13,15 +13,14 @@ export default function StudentManagement() {
 
     const [openAddStudent, setOpenAddStudent] = useState(false)
     const [openEditStudent, setOpenEditStudent] = useState(false)
-    const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+    const [openDeleteStudent, setOpenDeleteStudent] = useState(false)
+    const [openViewStudent, setOpenViewStudent] = useState(false)
 
-    const [studentToDelete, setStudentToDelete] = useState(null)
     const [selectedStudent, setSelectedStudent] = useState(null)
 
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [statusFilter, setStatusFilter] = useState('All')
     const [search, setSearch] = useState('')
-
 
     const [notification, setNotification] = useState({
         open: false,
@@ -61,29 +60,22 @@ export default function StudentManagement() {
         }
     })
 
-    const fetchStudents = useCallback(async () => {
+    const fetchStudents = async () => {
         try {
             setLoading(true)
             const response = await api.get('/students', getAuthConfig())
-            if (Array.isArray(response.data)) {
-                setStudents(response.data)
-            } else if (Array.isArray(response.data?.students)) {
-                setStudents(response.data.students)
-            } else if (Array.isArray(response.data?.data)) {
-                setStudents(response.data.data)
-            } else {
-                setStudents([])
-            }
-        } catch (err) {
-            showNotification(err.response?.data?.message || 'Failed to retrieve students', 'error')
+            setStudents(response.data)
+        } catch (error) {
+            console.error('Error fetching students:', error)
+            showNotification(error.response?.data?.message || 'Failed to retrieve students', 'error')
         } finally {
             setLoading(false)
         }
-    }, [])
+    }
 
     useEffect(() => {
         fetchStudents()
-    }, [fetchStudents])
+    }, [])
 
     const validateStudentForm = () => {
         const errors = {}
@@ -172,7 +164,6 @@ export default function StudentManagement() {
         const { name, value } = e.target
         setFormData(prev => ({ ...prev, [name]: value }))
         setFieldErrors(prev => ({ ...prev, [name]: '' }))
-        setNotification({ ...notification, open: false })
     }
 
     const handleAddStudent = async () => {
@@ -201,30 +192,10 @@ export default function StudentManagement() {
         } catch (error) {
             console.error('Add student error:', error)
             showNotification(error.response?.data?.message || 'Failed to add student', 'error')
+        } finally {
+            setSaving(false)
         }
     }
-
-    const handleOpenEdit = async (id) => {
-        try {
-            if (!id) return
-            const response = await api.get(`/students/${id}`, getAuthConfig())
-            const student = response.data
-            setSelectedStudent(student)
-            setFormData({
-                firstName: student.firstName || '',
-                lastName: student.lastName || '',
-                email: student.email || '',
-                course: student.course || '',
-                yearLevel: student.yearLevel || '',
-                studentId: student.studentId || '',
-                status: student.status || 'Active'
-            })
-            setOpenEditStudent(true)
-        } catch (error) {
-            showNotification(error.response?.data?.message || 'Failed to retrieve student', 'error')
-        }
-    }
-
 
     const handleUpdateStudent = async () => {
         const id = selectedStudent?._id || selectedStudent?.id
@@ -232,7 +203,13 @@ export default function StudentManagement() {
             showNotification('Student ID is missing', 'error')
             return
         }
+
+        setFieldErrors({})
+        if (!validateStudentForm()) {
+            return
+        }
         try {
+            setSaving(true)
             const payload = {
                 studentId: formData.studentId.trim(),
                 firstName: formData.firstName.trim(),
@@ -249,25 +226,15 @@ export default function StudentManagement() {
             await fetchStudents()
         } catch (error) {
             showNotification(error.response?.data?.message || 'Failed to update student', 'error')
+        } finally {
+            setSaving(false)
         }
     }
 
-    const handleOpenDelete = (student) => {
-        setStudentToDelete(student)
-        setOpenDeleteDialog(true)
-    }
-
-    const handleCloseDelete = () => {
-        if (deleteLoading) return
-
-        setOpenDeleteDialog(false)
-        setStudentToDelete(null)
-    }
-
     const handleDeleteStudent = async () => {
-        const id = studentToDelete?._id || studentToDelete?.id
+        const id = selectedStudent?._id || selectedStudent?.id
         if (!id) {
-            showNotification('Student ID is missing', 'error')
+            showNotification('No Student selected for deletion', 'error')
             return
         }
 
@@ -275,13 +242,14 @@ export default function StudentManagement() {
             setDeleteLoading(true)
             await api.delete(`/students/${id}`, getAuthConfig())
 
-            setStudents(prev => prev.filter(student => student._id !== studentToDelete._id))
+            setStudents(prev => prev.filter(student => student._id !== selectedStudent._id))
 
-            setOpenDeleteDialog(false)
-            setStudentToDelete(null)
-
+            setOpenDeleteStudent(false)
+            setSelectedStudent(null)
             showNotification('Student deleted successfully', 'success')
+            await fetchStudents()
         } catch (error) {
+            console.error('Delete student error:', error)
             showNotification(error.response?.data?.message || 'Failed to delete student', 'error')
         } finally {
             setDeleteLoading(false)
@@ -309,6 +277,9 @@ export default function StudentManagement() {
             return matchesSearch && matchesStatus
         })
     }, [students, search, statusFilter])
+
+    const initials = name =>
+        name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
     return (
         <>
@@ -451,8 +422,29 @@ export default function StudentManagement() {
                                                         <div className='flex justify-end gap-1'>
                                                             <IconButton
                                                                 size='small'
+                                                                title='View'
+                                                                onClick={() => {
+                                                                    setSelectedStudent(student)
+                                                                    setOpenViewStudent(true)
+                                                                }}
+                                                            >
+                                                                <VisibilityOutlined fontSize='small' />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size='small'
                                                                 title='Edit'
-                                                                onClick={() => handleOpenEdit(student._id || student.id)}
+                                                                onClick={() => {
+                                                                    setSelectedStudent(student)
+                                                                    setFormData({
+                                                                        firstName: student.firstName,
+                                                                        lastName: student.lastName,
+                                                                        email: student.email,
+                                                                        department: student.department,
+                                                                        specialization: student.specialization,
+                                                                        status: student.status,
+                                                                    })
+                                                                    setOpenEditStudent(true)
+                                                                }}
                                                             >
                                                                 <EditOutlined fontSize='small' />
                                                             </IconButton>
@@ -460,7 +452,10 @@ export default function StudentManagement() {
                                                                 size='small'
                                                                 color='error'
                                                                 title='Delete'
-                                                                onClick={() => handleOpenDelete(student)}
+                                                                onClick={() => {
+                                                                    setSelectedStudent(student)
+                                                                    setOpenDeleteStudent(true)
+                                                                }}
                                                             >
                                                                 <DeleteOutlined fontSize='small' />
                                                             </IconButton>
@@ -588,10 +583,97 @@ export default function StudentManagement() {
                         onClick={handleAddStudent}
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
-                        Add Student
+                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Add Student'}
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog
+                open={openViewStudent}
+                onClose={() => setOpenViewStudent(false)}
+                fullWidth
+                maxWidth='sm'
+            >
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    Student Details
+                </DialogTitle>
+
+                <DialogContent>
+                    {selectedStudent && (
+                        <div className='space-y-5 pt-2'>
+                            <div className='flex items-center gap-4'>
+                                <Avatar src={selectedStudent.avatar} alt={selectedStudent.name} className='!bg-blue-600 !w-14 !h-14'>
+                                    {initials(`${selectedStudent.firstName} ${selectedStudent.lastName}`)}
+                                </Avatar>
+
+                                <div>
+                                    <Typography variant='h6' className='!font-semibold !text-slate-800'>
+                                        {selectedStudent.firstName} {selectedStudent.lastName}
+                                    </Typography>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        {selectedStudent.studentId}
+                                    </Typography>
+                                </div>
+                            </div>
+
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Email
+                                    </Typography>
+                                    <Typography variant='body1' className='!font-medium !text-slate-800'>
+                                        {selectedStudent.email}
+                                    </Typography>
+                                </div>
+
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Course
+                                    </Typography>
+                                    <Typography variant='body1' className='!font-medium !text-slate-800'>
+                                        {selectedStudent.course}
+                                    </Typography>
+                                </div>
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Year Level
+                                    </Typography>
+                                    <Typography variant='body1' className='!font-medium !text-slate-800'>
+                                        {selectedStudent.yearLevel}
+                                    </Typography>
+                                </div>
+
+                                <div>
+                                    <Typography variant='body2' className='!text-slate-600'>
+                                        Status
+                                    </Typography>
+
+                                    <div className='!mt-1'>
+                                        <Chip
+                                            size='small'
+                                            label={selectedStudent.status === 'active' ? 'Active' : 'Inactive'}
+                                            className={
+                                                selectedStudent.status === 'active'
+                                                    ? '!bg-green-50 !text-green-700'
+                                                    : '!bg-slate-100 !text-slate-600'
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent >
+
+                <DialogActions className='!px-6 !pb-5'>
+                    <Button
+                        onClick={() => setOpenViewStudent(false)}
+                        className='!normal-case !text-slate-600'
+                    >
+                        {saving ? <CircularProgress size={20} className='!text-slate-600' /> : 'Close'}
+                    </Button>
+                </DialogActions>
+            </Dialog >
 
             {/* Edit Student Modal */}
             <Dialog
@@ -690,15 +772,15 @@ export default function StudentManagement() {
                         onClick={handleUpdateStudent}
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
-                        Save Changes
+                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Save Changes'}
                     </Button>
                 </DialogActions>
             </Dialog>
 
 
             <Dialog
-                open={openDeleteDialog}
-                onClose={handleCloseDelete}
+                open={openDeleteStudent}
+                onClose={() => setOpenDeleteStudent(false)}
                 fullWidth
                 maxWidth='xs'
                 PaperProps={{
@@ -720,14 +802,14 @@ export default function StudentManagement() {
                             Are you sure you want to delete this account?
                         </Typography>
 
-                        {studentToDelete && (
+                        {selectedStudent && (
                             <div className='w-full mt-4 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3'>
                                 <Typography variant='body2' className='!font-semibold !text-slate-800'>
-                                    {studentToDelete.firstName} {studentToDelete.lastName}
+                                    {selectedStudent.firstName} {selectedStudent.lastName}
                                 </Typography>
 
                                 <Typography variant='caption' className='!text-slate-500'>
-                                    {studentToDelete.email}
+                                    {selectedStudent.email}
                                 </Typography>
                             </div>
                         )}
@@ -740,7 +822,7 @@ export default function StudentManagement() {
 
                 <DialogActions className='!px-6 !pb-6 !pt-4 !justify-center !gap-2'>
                     <Button
-                        onClick={handleCloseDelete}
+                        onClick={() => setOpenDeleteStudent(false)}
                         disabled={deleteLoading}
                         variant='outlined'
                         className='!normal-case !rounded-lg !border-slate-300 !text-slate-600 hover:!bg-slate-50 !px-5'
@@ -755,7 +837,7 @@ export default function StudentManagement() {
                         startIcon={<DeleteOutlined />}
                         className='!normal-case !rounded-lg !bg-red-600 hover:!bg-red-700 !shadow-none !px-5'
                     >
-                        {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                        {deleteLoading ? <CircularProgress size={20} className='!text-white' /> : 'Delete Account'}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -11,14 +11,11 @@ export default function ActivityLogs() {
     const [saving, setSaving] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false)
 
-
-
     const [openAddInstructor, setOpenAddInstructor] = useState(false)
     const [openEditInstructor, setOpenEditInstructor] = useState(false)
     const [openDeleteInstructor, setOpenDeleteInstructor] = useState(false)
     const [openViewInstructor, setOpenViewInstructor] = useState(false)
 
-    const [instructorToDelete, setInstructorToDelete] = useState(null)
     const [selectedInstructor, setSelectedInstructor] = useState(null)
 
     const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -66,8 +63,7 @@ export default function ActivityLogs() {
     const fetchInstructors = async () => {
         try {
             setLoading(true)
-
-            const response = await api.get('/instructors/instructors')
+            const response = await api.get('/instructors/instructors', getAuthConfig())
             setInstructors(response.data)
         } catch (error) {
             console.error('Error fetching instructors:', error)
@@ -178,7 +174,7 @@ export default function ActivityLogs() {
                 department: formData.department.trim(),
                 specialization: formData.specialization.trim(),
                 status: formData.status
-            })
+            }, getAuthConfig())
 
             setOpenAddInstructor(false)
             resetForm()
@@ -192,27 +188,6 @@ export default function ActivityLogs() {
         }
     }
 
-    const handleOpenEdit = async (id) => {
-        try {
-            if (!id) return
-            const response = await api.get(`/instructors/instructors/${id}`)
-            const instructor = response.data
-            setSelectedInstructor(instructor)
-            setFormData({
-                firstName: instructor.firstName || '',
-                lastName: instructor.lastName || '',
-                email: instructor.email || '',
-                department: instructor.department || '',
-                specialization: instructor.specialization || '',
-                status: instructor.status || 'Active'
-            })
-            setOpenEditInstructor(true)
-        } catch (error) {
-            console.error('Error fetching instructor details:', error)
-            showNotification(error.response?.data?.message || 'Failed to retrieve instructor details.', 'error')
-        }
-    }
-
     const handleUpdateInstructor = async () => {
         const id = selectedInstructor?._id || selectedInstructor?.id
         if (!id) {
@@ -220,9 +195,10 @@ export default function ActivityLogs() {
             return
         }
 
+        setFieldErrors({})
+        if (!validateInstructorForm()) return
         try {
             setSaving(true)
-
             const payload = {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
@@ -231,12 +207,11 @@ export default function ActivityLogs() {
                 specialization: formData.specialization.trim(),
                 status: formData.status
             }
-            await api.put(`/instructors/update/instructors/${selectedInstructor._id}`, payload)
+            await api.put(`/instructors/update/instructors/${selectedInstructor._id}`, payload, getAuthConfig())
             setOpenEditInstructor(false)
             resetForm()
             showNotification('Instructor updated successfully', 'success')
             await fetchInstructors()
-
         } catch (error) {
             console.error('Error editing instructor:', error)
             showNotification(error.response?.data?.message || 'Failed to edit instructor.', 'error')
@@ -244,7 +219,6 @@ export default function ActivityLogs() {
             setSaving(false)
         }
     }
-
 
     const handleDeleteInstructor = async () => {
         const id = selectedInstructor?._id || selectedInstructor?.id
@@ -254,19 +228,19 @@ export default function ActivityLogs() {
         }
 
         try {
-            setSaving(true)
+            setDeleteLoading(true)
 
-            await api.delete(`/instructors/delete/instructors/${id}`)
+            await api.delete(`/instructors/delete/instructors/${id}`, getAuthConfig())
 
             setOpenDeleteInstructor(false)
             setSelectedInstructor(null)
-
+            showNotification('Instructor deleted successfully', 'success')
             await fetchInstructors()
         } catch (error) {
             console.error('Error deleting instructor:', error)
             showNotification(error.response?.data?.message || 'Failed to delete instructor.', 'error')
         } finally {
-            setSaving(false)
+            setDeleteLoading(false)
         }
 
     }
@@ -547,36 +521,51 @@ export default function ActivityLogs() {
                 <DialogContent>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2'>
                         <TextField
+                            required
                             fullWidth
                             label='First Name'
                             name='firstName'
                             value={formData.firstName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.firstName)}
+                            helperText={fieldErrors.firstName}
+                            slotProps={{ maxLength: 50 }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Last Name'
                             name='lastName'
                             value={formData.lastName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.lastName)}
+                            helperText={fieldErrors.lastName}
+                            slotProps={{ maxLength: 50 }}
                         />
 
                         <TextField
+                            required
                             fullWidth
                             label='Email Address'
                             type='email'
                             name='email'
                             value={formData.email}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.email)}
+                            helperText={fieldErrors.email}
+                            slotProps={{ maxLength: 100 }}
                         />
 
                         <TextField
+                            required
                             select
                             fullWidth
                             label='Department'
                             name='department'
                             value={formData.department}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.department)}
+                            helperText={fieldErrors.department}
                         >
                             <MenuItem value='Information Technology'>Information Technology</MenuItem>
                             <MenuItem value='Computer Science'>Computer Science</MenuItem>
@@ -584,21 +573,28 @@ export default function ActivityLogs() {
                         </TextField>
 
                         <TextField
+                            required
                             fullWidth
                             label='Specialization'
                             placeholder='e.g. Web Development'
                             name='specialization'
                             value={formData.specialization}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.specialization)}
+                            helperText={fieldErrors.specialization}
+                            slotProps={{ maxLength: 100 }}
                         />
 
                         <TextField
+                            required
                             select
                             fullWidth
                             label='Status'
                             name='status'
                             value={formData.status}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.status)}
+                            helperText={fieldErrors.status}
                         >
                             <MenuItem value='active'>Active</MenuItem>
                             <MenuItem value='inactive'>Inactive</MenuItem>
@@ -727,35 +723,50 @@ export default function ActivityLogs() {
 
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2'>
                         <TextField
+                            required
                             fullWidth
                             label='First Name'
                             name='firstName'
                             value={formData.firstName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.firstName)}
+                            helperText={fieldErrors.firstName}
+                            slotProps={{ maxLength: 50 }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Last Name'
                             name='lastName'
                             value={formData.lastName}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.lastName)}
+                            helperText={fieldErrors.lastName}
+                            slotProps={{ maxLength: 50 }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Email Address'
                             type='email'
                             name='email'
                             value={formData.email}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.email)}
+                            helperText={fieldErrors.email}
+                            slotProps={{ maxLength: 100 }}
                         />
 
                         <TextField
+                            required
                             select
                             fullWidth
                             label='Department'
                             name='department'
                             value={formData.department}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.status)}
+                            helperText={fieldErrors.status}
                         >
                             <MenuItem value='Information Technology'>Information Technology</MenuItem>
                             <MenuItem value='Computer Science'>Computer Science</MenuItem>
@@ -763,21 +774,28 @@ export default function ActivityLogs() {
                         </TextField>
 
                         <TextField
+                            required
                             fullWidth
                             label='Specialization'
                             placeholder='e.g. Web Development'
                             name='specialization'
                             value={formData.specialization}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.specialization)}
+                            helperText={fieldErrors.specialization}
+                            slotProps={{ maxLength: 50 }}
                         />
 
                         <TextField
+                            required
                             select
                             fullWidth
                             label='Status'
                             name='status'
                             value={formData.status}
                             onChange={handleFormChange}
+                            error={Boolean(fieldErrors.status)}
+                            helperText={fieldErrors.status}
                         >
                             <MenuItem value='active'>Active</MenuItem>
                             <MenuItem value='inactive'>Inactive</MenuItem>
@@ -794,7 +812,7 @@ export default function ActivityLogs() {
                     </Button>
                     <Button
                         variant='contained'
-                        onClick={handleEditInstructor}
+                        onClick={handleUpdateInstructor}
                         disabled={saving}
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
@@ -817,22 +835,36 @@ export default function ActivityLogs() {
                     <Typography variant='body1' className='!text-slate-600'>
                         Are you sure you want to delete this instructor?
                     </Typography>
+
+                    {selectedInstructor && (
+                        <div className='w-full mt-4 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3'>
+                            <Typography variant='body2' className='!font-semibold !text-slate-800'>
+                                {selectedInstructor.firstName} {selectedInstructor.lastName}
+                            </Typography>
+
+                            <Typography variant='caption' className='!text-slate-500'>
+                                {selectedInstructor.email}
+                            </Typography>
+                        </div>
+                    )}
                 </DialogContent>
                 <DialogActions className='!px-6 !pb-5'>
                     <Button
                         onClick={() => setOpenDeleteInstructor(false)}
+                        disabled={deleteLoading}
+                        variant='outlined'
                         className='!normal-case !text-slate-600'
                     >
                         Cancel
                     </Button>
                     <Button
-                        variant='contained'
-                        color='error'
                         onClick={handleDeleteInstructor}
-                        disabled={saving}
-                        className='!normal-case !rounded-lg !shadow-none'
+                        variant='contained'
+                        disabled={deleteLoading}
+                        startIcon={<DeleteOutlined />}
+                        className='!normal-case !rounded-lg !bg-red-600 hover:!bg-red-700 !shadow-none !px-5'
                     >
-                        {saving ? <CircularProgress size={20} className='!text-white' /> : 'Delete'}
+                        {deleteLoading ? <CircularProgress size={20} className='!text-white' /> : 'Delete Instructor'}
                     </Button>
                 </DialogActions>
             </Dialog >
