@@ -589,8 +589,8 @@ exports.deleteUser = async (req, res) => {
             `
         })
 
-        await Student.findByIdAndDelete(id)
-        await Instructor.findByIdAndDelete(id)
+        await Student.findOneAndDelete(userInformation.email)
+        await Instructor.findOneAndDelete(userInformation.email)
         await User.findByIdAndDelete(id)
 
         res.status(200).json({ message: 'User deleted successfully' })
