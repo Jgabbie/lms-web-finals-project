@@ -10,6 +10,7 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
+    DialogContentText,
     DialogTitle,
     Snackbar,
     Alert
@@ -23,12 +24,15 @@ import {
     Search,
     SlideshowOutlined,
     VideoLibraryOutlined,
-    CheckCircle
+    CheckCircle,
+    Edit,
+    Delete
 } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import api from '../../api/axiosClient'
+import { getStoredProfile } from '../../utils/profileStorage'
 
 export default function UploadMaterialsPage() {
     const [search, setSearch] = useState('')
@@ -41,6 +45,10 @@ export default function UploadMaterialsPage() {
     const [courses, setCourses] = useState([])
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
 
+    const profile = getStoredProfile()
+    const instructorFullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ') || 'Instructor'
+
+    // Upload Form State
     const [form, setForm] = useState({
         title: '',
         course: '',
@@ -49,6 +57,21 @@ export default function UploadMaterialsPage() {
         fileName: '',
         fileSize: ''
     })
+
+    // Edit Form State
+    const [openEdit, setOpenEdit] = useState(false)
+    const [editingId, setEditingId] = useState(null)
+    const [editForm, setEditForm] = useState({
+        title: '',
+        course: '',
+        type: 'PDF',
+        description: ''
+    })
+
+    // Delete Modal State
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [selectedDeleteMaterial, setSelectedDeleteMaterial] = useState(null)
+    const [deleting, setDeleting] = useState(false)
 
     const fetchMaterials = useCallback(async () => {
         try {
@@ -68,7 +91,7 @@ export default function UploadMaterialsPage() {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [form.course])
 
     useEffect(() => {
         fetchMaterials()
@@ -89,23 +112,22 @@ export default function UploadMaterialsPage() {
         }
     }
 
+    // Submit Upload
     const handleUploadSubmit = async () => {
         if (!form.title.trim()) {
             setNotification({ open: true, message: 'Please provide a material title', severity: 'error' })
             return
         }
-
         try {
             await api.post('/materials/upload', {
                 title: form.title.trim(),
                 course: form.course || 'General',
                 type: form.type,
                 description: form.description.trim(),
-                instructor: 'Instructor Portal',
+                instructor: instructorFullName,
                 fileName: form.fileName || 'document.pdf',
                 fileSize: form.fileSize || '1.5 MB'
             })
-
             setNotification({ open: true, message: 'Material uploaded successfully!', severity: 'success' })
             setOpenUpload(false)
             setForm({
@@ -123,6 +145,67 @@ export default function UploadMaterialsPage() {
                 message: err.response?.data?.message || 'Failed to upload material',
                 severity: 'error'
             })
+        }
+    }
+
+    // Open Edit Dialog
+    const handleOpenEdit = (material) => {
+        setEditingId(material._id)
+        setEditForm({
+            title: material.title || '',
+            course: material.course || '',
+            type: material.type || 'PDF',
+            description: material.description || ''
+        })
+        setOpenEdit(true)
+    }
+
+    // Submit Edit
+    const handleEditSubmit = async (e) => {
+        e.preventDefault()
+        if (!editForm.title.trim()) {
+            setNotification({ open: true, message: 'Title is required', severity: 'error' })
+            return
+        }
+        try {
+            await api.put(`/materials/${editingId}`, editForm)
+            setNotification({ open: true, message: 'Material updated successfully!', severity: 'success' })
+            setOpenEdit(false)
+            setEditingId(null)
+            fetchMaterials()
+        } catch (err) {
+            setNotification({
+                open: true,
+                message: err.response?.data?.message || 'Failed to update material',
+                severity: 'error'
+            })
+        }
+    }
+
+    // Open Delete Modal
+    const handleOpenDelete = (material) => {
+        setSelectedDeleteMaterial(material)
+        setDeleteModalOpen(true)
+    }
+
+    // Confirm Delete
+    const handleConfirmDelete = async () => {
+        if (!selectedDeleteMaterial) return
+        try {
+            setDeleting(true)
+            await api.delete(`/materials/${selectedDeleteMaterial._id}`)
+            setNotification({ open: true, message: 'Material deleted successfully', severity: 'success' })
+            setMaterials(prev => prev.filter(m => m._id !== selectedDeleteMaterial._id))
+            setDeleteModalOpen(false)
+            setSelectedDeleteMaterial(null)
+        } catch (err) {
+            setNotification({
+                open: true,
+                message: err.response?.data?.message || 'Failed to delete material',
+                severity: 'error'
+            })
+        } finally {
+            setDeleting(false)
         }
     }
 
@@ -177,7 +260,7 @@ export default function UploadMaterialsPage() {
                                 Learning Materials
                             </Typography>
                             <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                Upload and manage documents, presentations, and resources for students.
+                                Upload, edit, and manage materials for your students.
                             </Typography>
                         </div>
                         <Button
@@ -190,6 +273,7 @@ export default function UploadMaterialsPage() {
                         </Button>
                     </div>
 
+                    {/* Stat Cards */}
                     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                         {[
                             ['Total Materials', materials.length],
@@ -206,6 +290,7 @@ export default function UploadMaterialsPage() {
                         ))}
                     </div>
 
+                    {/* Filter Bar */}
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                         <CardContent className='!p-5'>
                             <div className='grid grid-cols-1 lg:grid-cols-[1fr_220px_220px] gap-4'>
@@ -246,6 +331,7 @@ export default function UploadMaterialsPage() {
                         </CardContent>
                     </Card>
 
+                    {/* Materials Table */}
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mt-6'>
                         <CardContent className='!p-0'>
                             <div className='overflow-x-auto'>
@@ -257,6 +343,7 @@ export default function UploadMaterialsPage() {
                                             <th className='text-left font-semibold px-6 py-4'>Type</th>
                                             <th className='text-left font-semibold px-6 py-4'>Date</th>
                                             <th className='text-left font-semibold px-6 py-4'>Size</th>
+                                            <th className='text-right font-semibold px-6 py-4'>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className='divide-y divide-slate-100'>
@@ -267,9 +354,14 @@ export default function UploadMaterialsPage() {
                                                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${getIconClass(material.type)}`}>
                                                             {getIcon(material.type)}
                                                         </div>
-                                                        <Typography className='!font-semibold !text-slate-800'>
-                                                            {material.title}
-                                                        </Typography>
+                                                        <div>
+                                                            <Typography className='!font-semibold !text-slate-800'>
+                                                                {material.title}
+                                                            </Typography>
+                                                            <Typography variant='caption' className='!text-slate-400'>
+                                                                Uploaded by {material.instructor}
+                                                            </Typography>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className='px-6 py-4 text-slate-600'>{material.course}</td>
@@ -280,6 +372,26 @@ export default function UploadMaterialsPage() {
                                                     {new Date(material.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
                                                 </td>
                                                 <td className='px-6 py-4 text-slate-600'>{material.fileSize}</td>
+                                                <td className='px-6 py-4 text-right'>
+                                                    <div className='flex justify-end gap-1'>
+                                                        <IconButton
+                                                            size='small'
+                                                            color='primary'
+                                                            title='Edit Material'
+                                                            onClick={() => handleOpenEdit(material)}
+                                                        >
+                                                            <Edit fontSize='small' />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            size='small'
+                                                            color='error'
+                                                            title='Delete Material'
+                                                            onClick={() => handleOpenDelete(material)}
+                                                        >
+                                                            <Delete fontSize='small' />
+                                                        </IconButton>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -298,6 +410,7 @@ export default function UploadMaterialsPage() {
                 </main>
             </div>
 
+            {/* UPLOAD MODAL */}
             <Dialog open={openUpload} onClose={() => setOpenUpload(false)} fullWidth maxWidth='sm'>
                 <DialogTitle className='!font-bold !text-slate-800'>
                     Upload Learning Material
@@ -374,6 +487,109 @@ export default function UploadMaterialsPage() {
                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                     >
                         Upload Material
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* EDIT MODAL */}
+            <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth maxWidth='sm'>
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    Edit Learning Material
+                </DialogTitle>
+                <form onSubmit={handleEditSubmit}>
+                    <DialogContent>
+                        <div className='space-y-4 mt-2'>
+                            <TextField
+                                fullWidth
+                                required
+                                label='Material Title'
+                                value={editForm.title}
+                                onChange={(e) => setEditForm(p => ({ ...p, title: e.target.value }))}
+                            />
+                            <TextField
+                                select
+                                fullWidth
+                                label='Course'
+                                value={editForm.course}
+                                onChange={(e) => setEditForm(p => ({ ...p, course: e.target.value }))}
+                            >
+                                {courses.map(c => (
+                                    <MenuItem key={c._id} value={c.courseName}>
+                                        {c.courseName}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                            <TextField
+                                select
+                                fullWidth
+                                label='Material Type'
+                                value={editForm.type}
+                                onChange={(e) => setEditForm(p => ({ ...p, type: e.target.value }))}
+                            >
+                                <MenuItem value='PDF'>PDF</MenuItem>
+                                <MenuItem value='Presentation'>Presentation</MenuItem>
+                                <MenuItem value='Video'>Video</MenuItem>
+                                <MenuItem value='Document'>Document</MenuItem>
+                            </TextField>
+                            <TextField
+                                fullWidth
+                                multiline
+                                minRows={3}
+                                label='Description'
+                                value={editForm.description}
+                                onChange={(e) => setEditForm(p => ({ ...p, description: e.target.value }))}
+                            />
+                        </div>
+                    </DialogContent>
+                    <DialogActions className='!px-6 !pb-5'>
+                        <Button onClick={() => setOpenEdit(false)} className='!normal-case !text-slate-600'>
+                            Cancel
+                        </Button>
+                        <Button
+                            type='submit'
+                            variant='contained'
+                            className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
+                        >
+                            Save Changes
+                        </Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+
+            {/* DELETE CONFIRMATION MODAL */}
+            <Dialog
+                open={deleteModalOpen}
+                onClose={() => !deleting && setDeleteModalOpen(false)}
+                maxWidth='xs'
+                fullWidth
+                PaperProps={{
+                    className: '!rounded-2xl !p-2'
+                }}
+            >
+                <DialogTitle className='!font-bold !text-slate-800'>
+                    Confirm Deletion
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText className='!text-slate-600'>
+                        Are you sure you want to delete <span className='font-semibold text-slate-800'>"{selectedDeleteMaterial?.title}"</span>? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions className='!px-4 !pb-3'>
+                    <Button
+                        onClick={() => setDeleteModalOpen(false)}
+                        disabled={deleting}
+                        className='!normal-case !text-slate-600'
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleConfirmDelete}
+                        variant='contained'
+                        color='error'
+                        disabled={deleting}
+                        className='!normal-case !rounded-lg !shadow-none'
+                    >
+                        {deleting ? 'Deleting...' : 'Delete Material'}
                     </Button>
                 </DialogActions>
             </Dialog>

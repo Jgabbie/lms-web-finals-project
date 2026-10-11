@@ -3,6 +3,8 @@ import { Person, Email, Lock, Edit, Save, Close, Visibility, VisibilityOff, Phot
 import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
+import SidebarInstructor from '../components/SidebarInstructor'
+import SidebarAdmin from '../components/SidebarAdmin'
 import api from '../api/axiosClient'
 import { getStoredProfile, saveStoredProfile } from '../utils/profileStorage'
 
@@ -15,8 +17,9 @@ const getApiMessage = (error, fallback) => (
 )
 
 export default function ProfilePage() {
+    const userRole = (localStorage.getItem('role') || '').toLowerCase()
+    const [sidebarOpen, setSidebarOpen] = useState(true)
 
-    const isStudent = localStorage.getItem('role') === 'student'
     const [profile, setProfile] = useState(getStoredProfile)
     const [draft, setDraft] = useState(getStoredProfile)
     const [saving, setSaving] = useState(false)
@@ -31,25 +34,21 @@ export default function ProfilePage() {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [otp, setOtp] = useState('')
-
     const [passwordError, setPasswordError] = useState('')
     const [confirmPasswordError, setConfirmPasswordError] = useState('')
     const [otpError, setOtpError] = useState('')
-
     const [loading, setLoading] = useState(false)
     const [otpLoading, setOtpLoading] = useState(false)
     const [resendLoading, setResendLoading] = useState(false)
-
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
     const [showOtpModal, setShowOtpModal] = useState(false)
     const [showResetModal, setShowResetModal] = useState(false)
 
     const initials = useMemo(() => {
         const firstInitial = profile.firstName?.[0] || ''
         const lastInitial = profile.lastName?.[0] || ''
-        return `${firstInitial}${lastInitial}`.toUpperCase()
+        return `${firstInitial}${lastInitial}`.toUpperCase() || 'U'
     }, [profile])
 
     const displayName = useMemo(() => {
@@ -75,9 +74,9 @@ export default function ProfilePage() {
             saveStoredProfile(next)
             setProfile(next)
             setDraft(next)
-        } catch (error) {
-            console.error('Error loading profile:', error)
-            setError(getApiMessage(error, 'Failed to load profile'))
+        } catch (err) {
+            console.error('Error loading profile:', err)
+            setError(getApiMessage(err, 'Failed to load profile'))
         } finally {
             setLoading(false)
         }
@@ -94,54 +93,43 @@ export default function ProfilePage() {
     const handleProfileImageUpload = async (event) => {
         const file = event.target.files[0]
         if (!file) return
-
         if (!file.type.startsWith('image/')) {
             setError('Please select a valid image file.')
             return
         }
-
         if (file.size > 5 * 1024 * 1024) {
             setError('Image size should not exceed 5MB.')
             return
         }
-
         const previewUrl = URL.createObjectURL(file)
         setSelectedImage(previewUrl)
         setSelectedImageFile(file)
         setShowImagePreview(true)
         setError(null)
-
         event.target.value = ''
     }
-
 
     const closeImagePreview = () => {
         if (selectedImage) {
             URL.revokeObjectURL(selectedImage)
         }
-
         setSelectedImage(null)
         setSelectedImageFile(null)
         setShowImagePreview(false)
     }
-
 
     const confirmProfileImageUpload = async () => {
         if (!selectedImageFile) {
             setError('No image selected for upload.')
             return
         }
-
         const formData = new FormData()
         formData.append('profileImage', selectedImageFile)
-
         try {
             setUploadingImage(true)
-
-            const response = await api.post('/profile/profile/upload-image', formData)
-
+            // Fixed duplicate prefix
+            const response = await api.post('/profile/upload-image', formData)
             const imageUrl = response?.data?.profileImage || ''
-
             const next = saveStoredProfile({ ...profile, profileImage: imageUrl })
             setProfile(next)
             setDraft(next)
@@ -149,37 +137,30 @@ export default function ProfilePage() {
             setSelectedImage(null)
             setSelectedImageFile(null)
             setShowImagePreview(false)
-        } catch (error) {
-            console.error('Error uploading profile image:', error)
-            setError(getApiMessage(error, 'Failed to upload profile image.'))
+        } catch (err) {
+            console.error('Error uploading profile image:', err)
+            setError(getApiMessage(err, 'Failed to upload profile image.'))
         } finally {
             setUploadingImage(false)
         }
-
     }
-
-
 
     const handleSaveChanges = async () => {
         setError(null)
         setMessage(null)
-
         const fields = {
             firstName: draft.firstName.trim(),
             lastName: draft.lastName.trim(),
             email: draft.email.trim(),
         }
-
         if (!fields.firstName || !fields.lastName || !fields.email) {
             setError('Please fill in all required fields.')
             return
         }
-
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
             setError('Please enter a valid email address.')
             return
         }
-
         try {
             setSaving(true)
             const response = await api.put('/profile/user/update', fields)
@@ -196,9 +177,9 @@ export default function ProfilePage() {
             setDraft(storedNext)
             setEditing(false)
             setMessage('Profile updated successfully.')
-        } catch (error) {
-            console.error('Error updating profile:', error)
-            setError(getApiMessage(error, 'Failed to update profile changes.'))
+        } catch (err) {
+            console.error('Error updating profile:', err)
+            setError(getApiMessage(err, 'Failed to update profile changes.'))
         } finally {
             setSaving(false)
         }
@@ -216,11 +197,10 @@ export default function ProfilePage() {
         severity: "success"
     })
 
-
-    const showNotification = (message, severity = "success") => {
+    const showNotification = (msg, severity = "success") => {
         setNotification({
             open: true,
-            message,
+            message: msg,
             severity
         })
     }
@@ -232,113 +212,76 @@ export default function ProfilePage() {
         })))
     }
 
-
     const handleSubmit = async (e) => {
         e.preventDefault()
-
         if (!profile.email) {
             setPasswordError('Email is required.')
             return
         }
-
         try {
             setResendLoading(true)
             setOtpError('')
             await api.post('/profile/change-password/send-otp', { email: profile.email.trim().toLowerCase() })
             setShowOtpModal(true)
-        } catch (error) {
-            console.error('Request password OTP error:', error)
-            setOtpError(error?.response?.data?.message || 'Unabel to send OTP. Please try again.')
+        } catch (err) {
+            console.error('Request password OTP error:', err)
+            setOtpError(err?.response?.data?.message || 'Unable to send OTP. Please try again.')
         } finally {
             setResendLoading(false)
         }
     }
-
 
     const handleVerifyOtp = async () => {
         if (!otp.trim()) {
             setOtpError('Please enter the verification code')
             return
         }
-
         if (!/^\d{6}$/.test(otp.trim())) {
             setOtpError('OTP must be a 6-digit number')
             return
         }
-
         try {
             setResendLoading(true)
             setOtpError('')
-
-            const response = await api.post('/profile/change-password/verify-otp',
-                {
-                    email: profile.email.trim().toLowerCase(),
-                    otp: otp.trim()
-                }
-            )
-
-            showNotification(
-                response.data.message ||
-                'OTP verified successfully.',
-                'success'
-            )
-
+            const response = await api.post('/profile/change-password/verify-otp', {
+                email: profile.email.trim().toLowerCase(),
+                otp: otp.trim()
+            })
+            showNotification(response.data.message || 'OTP verified successfully.', 'success')
             setShowOtpModal(false)
             setShowResetModal(true)
-
-        } catch (error) {
-            setOtpError(
-                error.response?.data?.message ||
-                'Invalid verification code'
-            )
+        } catch (err) {
+            setOtpError(err.response?.data?.message || 'Invalid verification code')
         } finally {
             setResendLoading(false)
         }
     }
-
 
     const handleResendOtp = async () => {
         try {
             setResendLoading(true)
             setOtpError('')
-
-            const response = await api.post('/profile/change-password/resend-otp',
-                {
-                    email: profile.email.trim().toLowerCase(),
-                }
-            )
-
+            const response = await api.post('/profile/change-password/resend-otp', {
+                email: profile.email.trim().toLowerCase(),
+            })
             setOtp('')
-
-            showNotification(
-                response.data.message || 'A new verification code has been sent.',
-                'success'
-            )
-
-        } catch (error) {
-            setOtpError(
-                error.response?.data?.message ||
-                'Unable to resend OTP'
-            )
+            showNotification(response.data.message || 'A new verification code has been sent.', 'success')
+        } catch (err) {
+            setOtpError(err.response?.data?.message || 'Unable to resend OTP')
         } finally {
             setResendLoading(false)
         }
     }
 
-
     const validatePassword = () => {
         if (!password) {
-            setPasswordError(
-                'Password is required'
-            )
+            setPasswordError('Password is required')
             return false
         }
-
         if (password.length < 8) {
             setPasswordError('Password must be at least 8 characters')
             return false
         }
-
         if (
             !/[A-Z]/.test(password) ||
             !/[a-z]/.test(password) ||
@@ -348,19 +291,15 @@ export default function ProfilePage() {
             setPasswordError('Password must include an uppercase, lowercase, a number, and a special character')
             return false
         }
-
         setPasswordError('')
         return true
     }
 
-
     const handleResetPassword = async () => {
         let valid = true
-
         if (!validatePassword()) {
             valid = false
         }
-
         if (!confirmPassword) {
             setConfirmPasswordError('Please confirm your password')
             valid = false
@@ -370,55 +309,58 @@ export default function ProfilePage() {
         } else {
             setConfirmPasswordError('')
         }
-
         if (!valid) return
-
         try {
             setLoading(true)
-
-            const response = await api.post('/profile/change-password/reset',
-                {
-                    email: profile.email.trim().toLowerCase(),
-                    password,
-                    confirmPassword
-                }
-            )
-
+            const response = await api.post('/profile/change-password/reset', {
+                email: profile.email.trim().toLowerCase(),
+                password,
+                confirmPassword
+            })
             setShowResetModal(false)
-
-            showNotification(
-                response.data.message ||
-                'Password reset successfully.',
-                'success'
-            )
+            showNotification(response.data.message || 'Password reset successfully.', 'success')
             setShowOtpModal(false)
             setOtp('')
             setPassword('')
             setConfirmPassword('')
-
-        } catch (error) {
-            showNotification(
-                error.response?.data?.message ||
-                'Password reset successfully.',
-                'error'
-            )
+        } catch (err) {
+            showNotification(err.response?.data?.message || 'Password reset failed.', 'error')
         } finally {
             setLoading(false)
         }
     }
 
+    // Role display format
+    const roleLabel = (profile.role || userRole || 'User').charAt(0).toUpperCase() + (profile.role || userRole || 'User').slice(1)
 
     return (
-        <>
+        <div className='min-h-screen bg-slate-50'>
             <Navbar />
-            {isStudent && <Sidebar />}
-            <div className='min-h-screen bg-slate-50'>
-                <main className={`${isStudent ? 'ml-0 lg:ml-[260px] transition-all' : ''} max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
+
+            {/* Render appropriate sidebar for user role */}
+            {userRole === 'instructor' && (
+                <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+            )}
+            {userRole === 'admin' && (
+                <SidebarAdmin />
+            )}
+            {userRole === 'student' && (
+                <Sidebar />
+            )}
+
+            <div
+                className='transition-all duration-300'
+                style={{
+                    marginLeft: userRole === 'instructor' 
+                        ? (sidebarOpen ? '260px' : '72px') 
+                        : (userRole === 'student' || userRole === 'admin' ? '260px' : '0px')
+                }}
+            >
+                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <div className='mb-6'>
                         <Typography variant='h4' className='!font-bold !text-slate-800'>
                             My Profile
                         </Typography>
-
                         <Typography variant='body2' className='!text-slate-500 !mt-1'>
                             Manage your account information and profile settings
                         </Typography>
@@ -427,7 +369,6 @@ export default function ProfilePage() {
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                         <CardContent className='!p-6'>
                             <div className='flex flex-col sm:flex-row sm:items-center gap-5'>
-
                                 <div className='relative w-fit'>
                                     <Avatar
                                         src={profile.profileImage || ''}
@@ -436,7 +377,6 @@ export default function ProfilePage() {
                                     >
                                         {!profile.profileImage && initials}
                                     </Avatar>
-
                                     <input
                                         id="profile-image-upload"
                                         type="file"
@@ -445,7 +385,6 @@ export default function ProfilePage() {
                                         hidden
                                         disabled={uploadingImage}
                                     />
-
                                     <label htmlFor="profile-image-upload">
                                         <IconButton
                                             component="span"
@@ -471,23 +410,19 @@ export default function ProfilePage() {
                                         </IconButton>
                                     </label>
                                 </div>
-
                                 <div className='flex-1'>
                                     <Typography variant='h5' className='!font-bold !text-slate-800'>
                                         {displayName}
                                     </Typography>
-
                                     <Typography variant='body2' className='!text-slate-500'>
                                         {profile.email}
                                     </Typography>
-
                                     <div className='mt-2'>
                                         <span className='inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold'>
-                                            Administrator
+                                            {roleLabel}
                                         </span>
                                     </div>
                                 </div>
-
                                 <Button
                                     variant='outlined'
                                     startIcon={<Edit />}
@@ -497,35 +432,30 @@ export default function ProfilePage() {
                                         setError(null)
                                         setMessage(null)
                                     }}
-                                    className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'>
+                                    className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
+                                >
                                     Edit Profile
                                 </Button>
                             </div>
-
                             <Divider className='!my-6' />
-
                             <div className='mb-6'>
                                 <Typography variant='h6' className='!font-bold !text-slate-800'>
                                     Personal Information
                                 </Typography>
-
                                 <Typography variant='body2' className='!text-slate-500 !mt-1'>
                                     Update your personal account information
                                 </Typography>
                             </div>
-
                             {error && (
                                 <Alert severity='error' className='!mb-5'>
                                     {error}
                                 </Alert>
                             )}
-
                             {message && (
                                 <Alert severity='success' className='!mb-5'>
                                     {message}
                                 </Alert>
                             )}
-
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
                                 <TextField
                                     fullWidth
@@ -534,10 +464,9 @@ export default function ProfilePage() {
                                     onChange={updateDraft('firstName')}
                                     disabled={!editing || saving}
                                     InputProps={{
-                                        startAdornment:
-                                            (
-                                                <Person className='!text-slate-400 !mr-2' />
-                                            )
+                                        startAdornment: (
+                                            <Person className='!text-slate-400 !mr-2' />
+                                        )
                                     }}
                                 />
                                 <TextField
@@ -547,10 +476,9 @@ export default function ProfilePage() {
                                     onChange={updateDraft('lastName')}
                                     disabled={!editing || saving}
                                     InputProps={{
-                                        startAdornment:
-                                            (
-                                                <Person className='!text-slate-400 !mr-2' />
-                                            )
+                                        startAdornment: (
+                                            <Person className='!text-slate-400 !mr-2' />
+                                        )
                                     }}
                                 />
                                 <TextField
@@ -561,16 +489,14 @@ export default function ProfilePage() {
                                     disabled={!editing || saving}
                                     type='email'
                                     InputProps={{
-                                        startAdornment:
-                                            (
-                                                <Email className='!text-slate-400 !mr-2' />
-                                            )
+                                        startAdornment: (
+                                            <Email className='!text-slate-400 !mr-2' />
+                                        )
                                     }}
                                 />
                             </div>
-
                             {editing && (
-                                <div className='flex justify-end mt-6'>
+                                <div className='flex justify-end mt-6 gap-3'>
                                     <Button
                                         variant='contained'
                                         startIcon={<Close />}
@@ -580,7 +506,6 @@ export default function ProfilePage() {
                                     >
                                         Cancel
                                     </Button>
-
                                     <Button
                                         variant='contained'
                                         startIcon={
@@ -597,9 +522,7 @@ export default function ProfilePage() {
                                         {saving ? 'Saving...' : 'Save Changes'}
                                     </Button>
                                 </div>
-
                             )}
-
                         </CardContent>
                     </Card>
 
@@ -609,7 +532,6 @@ export default function ProfilePage() {
                                 <div className='w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center'>
                                     <Lock />
                                 </div>
-
                                 <div>
                                     <Typography variant='h6' className='!font-bold !text-slate-800'>
                                         Security
@@ -619,7 +541,6 @@ export default function ProfilePage() {
                                     </Typography>
                                 </div>
                             </div>
-
                             <div className='flex justify-end mt-6'>
                                 <Button
                                     variant='outlined'
@@ -635,7 +556,7 @@ export default function ProfilePage() {
                 </main>
             </div>
 
-
+            {/* OTP Modal */}
             <Modal
                 open={showOtpModal}
                 onClose={() => {
@@ -647,20 +568,16 @@ export default function ProfilePage() {
             >
                 <div className='relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
                     <div className='text-center'>
-
                         <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100'>
-                            <span className='text-2xl'>
-                                EduLearn
-                            </span>
+                            <span className='text-2xl font-bold text-blue-600'>EduLearn</span>
                         </div>
                         <Typography variant='h5' className='font-bold text-slate-800'>
                             Verify Your Email
                         </Typography>
                         <Typography variant='body2' className='text-slate-500 mt-2'>
-                            We sent a 6-digits verification code to your email
+                            We sent a 6-digit verification code to your email
                         </Typography>
                     </div>
-
                     <div className='mt-6'>
                         <TextField
                             label="Verification Code"
@@ -668,60 +585,38 @@ export default function ProfilePage() {
                             fullWidth
                             value={otp}
                             onChange={(e) => {
-                                const value = e.target.value
-                                    .replace(/\D/g, '')
-                                    .slice(0, 6)
-
-                                setOtp(value)
+                                const val = e.target.value.replace(/\D/g, '').slice(0, 6)
+                                setOtp(val)
                                 setOtpError('')
                             }}
                             error={Boolean(otpError)}
-                            helperText={
-                                otpError ||
-                                'The code will expire in 5 minutes'
-                            }
-                            inputProps={{
-                                maxLength: 6,
-                                inputMode: 'numeric'
-                            }}
+                            helperText={otpError || 'The code will expire in 5 minutes'}
+                            inputProps={{ maxLength: 6, inputMode: 'numeric' }}
                         />
                     </div>
-
                     <Button
                         fullWidth
                         variant='contained'
                         size='large'
-                        disabled={
-                            otpLoading ||
-                            otp.length !== 6
-                        }
+                        disabled={otpLoading || otp.length !== 6}
                         onClick={handleVerifyOtp}
                         className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-5'
                     >
-                        {otpLoading
-                            ? 'Verifying...'
-                            : 'Verify & Create Account'
-                        }
+                        {otpLoading ? 'Verifying...' : 'Verify OTP'}
                     </Button>
-
                     <div className='text-center mt-5'>
                         <Typography variant='body2' className='text-slate-500'>
                             Didn't receive the code?
                         </Typography>
-
                         <Button
                             variant='text'
                             disabled={resendLoading}
                             onClick={handleResendOtp}
                             className='text-blue-600 normal-case font-bold'
                         >
-                            {resendLoading
-                                ? 'Sending...'
-                                : 'Resend OTP'
-                            }
+                            {resendLoading ? 'Sending...' : 'Resend OTP'}
                         </Button>
                     </div>
-
                     <div className='text-center mt-2'>
                         <Button
                             variant='text'
@@ -739,7 +634,7 @@ export default function ProfilePage() {
                 </div>
             </Modal>
 
-
+            {/* Reset Password Modal */}
             <Modal
                 open={showResetModal}
                 onClose={() => {
@@ -751,7 +646,6 @@ export default function ProfilePage() {
             >
                 <div className='relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
                     <div className='text-center mb-6'>
-
                         <Typography variant='h5' className='font-bold text-slate-800'>
                             Create New Password
                         </Typography>
@@ -759,13 +653,10 @@ export default function ProfilePage() {
                             Enter your new password below
                         </Typography>
                     </div>
-
                     <div className='flex flex-col gap-5'>
                         <TextField
                             label="New Password"
-                            type={
-                                showPassword ? "text" : "password"
-                            }
+                            type={showPassword ? "text" : "password"}
                             fullWidth
                             value={password}
                             onChange={(e) => {
@@ -775,30 +666,19 @@ export default function ProfilePage() {
                             error={Boolean(passwordError)}
                             helperText={passwordError}
                             autoComplete='new-password'
-                            slotProps={{
-                                input: {
-                                    endAdornment: (
-                                        <InputAdornment position='end'>
-                                            <IconButton
-                                                onClick={() =>
-                                                    setShowPassword(!showPassword)
-                                                }
-                                                edge='end'
-                                            >
-                                                {showPassword ? <Visibility /> : <VisibilityOff />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    )
-                                }
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position='end'>
+                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge='end'>
+                                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
                             }}
                         />
-
-
                         <TextField
                             label="Confirm New Password"
-                            type={
-                                showConfirmPassword ? "text" : "password"
-                            }
+                            type={showConfirmPassword ? "text" : "password"}
                             fullWidth
                             value={confirmPassword}
                             onChange={(e) => {
@@ -808,24 +688,16 @@ export default function ProfilePage() {
                             error={Boolean(confirmPasswordError)}
                             helperText={confirmPasswordError}
                             autoComplete='new-password'
-                            slotProps={{
-                                input: {
-                                    endAdornment: (
-                                        <InputAdornment position='end'>
-                                            <IconButton
-                                                onClick={() =>
-                                                    setShowConfirmPassword(!showConfirmPassword)
-                                                }
-                                                edge='end'
-                                            >
-                                                {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    )
-                                }
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position='end'>
+                                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge='end'>
+                                            {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
                             }}
                         />
-
                         <Button
                             fullWidth
                             variant='contained'
@@ -834,16 +706,13 @@ export default function ProfilePage() {
                             onClick={handleResetPassword}
                             className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-5'
                         >
-                            {loading
-                                ? 'Resetting Password...'
-                                : 'Reset Password'
-                            }
+                            {loading ? 'Resetting Password...' : 'Reset Password'}
                         </Button>
                     </div>
                 </div>
             </Modal>
 
-
+            {/* Image Preview Modal */}
             <Modal
                 open={showImagePreview}
                 onClose={() => {
@@ -853,35 +722,29 @@ export default function ProfilePage() {
                 }}
                 className='flex items-center justify-center p-4'
             >
-                <div className='relative w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 outline-none'>
+                <div className='relative w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 outline-none'>
                     <div className='flex items-center justify-between mb-5'>
-                        <Typography variant='h6' className='font-bold text-slate-800'>
-                            Preview Profile Image
-                        </Typography>
-
-                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                            Make sure to click "Confirm Upload" to save the changes
-                        </Typography>
+                        <div>
+                            <Typography variant='h6' className='font-bold text-slate-800'>
+                                Preview Profile Image
+                            </Typography>
+                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                Click "Upload Image" to save changes
+                            </Typography>
+                        </div>
+                        <IconButton onClick={closeImagePreview} disabled={uploadingImage}>
+                            <Close />
+                        </IconButton>
                     </div>
-
-                    <IconButton
-                        onClick={closeImagePreview}
-                        disabled={uploadingImage}
-                    >
-                        <Close />
-                    </IconButton>
-
-
                     <div className='flex justify-center bg-slate-50 rounded-xl p-5'>
                         {selectedImage && (
                             <img
                                 src={selectedImage}
                                 alt="Profile Preview"
-                                className='w-64 h-64 object-cover rounded-full border-4 border-white shadow-md'
+                                className='w-48 h-48 object-cover rounded-full border-4 border-white shadow-md'
                             />
                         )}
                     </div>
-
                     <div className='flex justify-end gap-3 mt-6'>
                         <Button
                             variant='outlined'
@@ -891,7 +754,6 @@ export default function ProfilePage() {
                         >
                             Cancel
                         </Button>
-
                         <Button
                             variant='contained'
                             onClick={confirmProfileImageUpload}
@@ -901,7 +763,6 @@ export default function ProfilePage() {
                         >
                             {uploadingImage ? 'Uploading...' : 'Upload Image'}
                         </Button>
-
                     </div>
                 </div>
             </Modal>
@@ -910,20 +771,12 @@ export default function ProfilePage() {
                 open={notification.open}
                 autoHideDuration={3000}
                 onClose={closeNotification}
-                anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right"
-                }}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
             >
-                <Alert
-                    onClose={closeNotification}
-                    severity={notification.severity}
-                    variant='filled'
-                    sx={{ width: "100%" }}
-                >
+                <Alert onClose={closeNotification} severity={notification.severity} variant='filled' sx={{ width: "100%" }}>
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </>
+        </div>
     )
 }
