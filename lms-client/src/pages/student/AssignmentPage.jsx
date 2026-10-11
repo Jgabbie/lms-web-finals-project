@@ -16,7 +16,6 @@ import {
     Assignment as AssignmentIcon,
     Search,
     CalendarToday,
-    AccessTime,
     CheckCircle,
     PendingActions,
     Grade,
@@ -43,20 +42,19 @@ export default function AssignmentPage() {
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
-    const fetchData = useCallback(async () => {
-        try {
-            setLoading(true)
-            const [asgRes, subRes] = await Promise.all([
+    const fetchData = useCallback(() => {
+        return Promise.all([
                 api.get('/assignments'),
                 api.get('/assignments/submissions')
-            ])
+            ]).then(async ([asgRes, subRes]) => {
             setAssignments(Array.isArray(asgRes.data) ? asgRes.data : [])
             setSubmissions(Array.isArray(subRes.data) ? subRes.data : [])
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Failed to load assignments:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [])
 
     useEffect(() => {

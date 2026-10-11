@@ -1,11 +1,12 @@
 import { Card, CardContent, Typography, Button, Chip, Divider, LinearProgress } from '@mui/material'
-import { MenuBook, TrendingUp, ArrowForward, CheckCircle, AccessTime, PersonAdd, AssignmentTurnedIn, Bookmark, PlayCircle, CalendarMonth, AutoStories } from '@mui/icons-material'
+import { MenuBookOutlined as MenuBook, TrendingUpRounded as TrendingUp, ArrowForwardRounded as ArrowForward, CheckCircleOutlineRounded as CheckCircle, AccessTimeRounded as AccessTime, PersonAddOutlined as PersonAdd, AssignmentTurnedInOutlined as AssignmentTurnedIn, BookmarkBorderRounded as Bookmark, PlayCircleOutlineRounded as PlayCircle, CalendarMonthOutlined as CalendarMonth, AutoStoriesOutlined as AutoStories } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useNavigate } from 'react-router-dom'
 import { getStoredProfile } from '../../utils/profileStorage'
 import { useState, useEffect, useMemo } from 'react'
 import api from '../../api/axiosClient'
+import './DashboardStudent.css'
 
 
 export default function DashboardStudent() {
@@ -120,19 +121,21 @@ export default function DashboardStudent() {
     ].slice(0, 5)
 
     return (
-        <>
+        <div className='edu-dashboard'>
             <Navbar />
             <Sidebar />
-            <div className="min-h-screen bg-slate-50">
-                <main className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8'>
+            <div className="dashboard-surface">
+                <main className='dashboard-content'>
+                    <div className='dashboard-welcome'>
+                        <div className='dashboard-welcome-art' aria-hidden='true'><span /><span /></div>
                         <div>
+                            <p className='dashboard-eyebrow'>YOUR STUDENT DASHBOARD</p>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
-                                Student Dashboard
+                                Welcome back, {displayName}!
                             </Typography>
 
                             <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                Welcome back, {displayName}! Here's what's happening on EduLearn today.
+                                A little learning today. A brighter tomorrow. Pick up where you left off.
                             </Typography>
                         </div>
 
@@ -150,7 +153,7 @@ export default function DashboardStudent() {
 
                     </div>
 
-                    <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6'>
+                    <div className='dashboard-stats'>
                         {statistics.map((stat) => (
                             <Card key={stat.title} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                 <CardContent className='!p-5'>
@@ -177,8 +180,8 @@ export default function DashboardStudent() {
                         ))}
                     </div>
 
-                    <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6'>
-                        <Card className='lg:col-span-2 !rounded-xl !border !border-slate-200 !shadow-sm'>
+                    <div className='dashboard-learning'>
+                        <Card className='dashboard-courses'>
                             <CardContent className='!p-6'>
                                 <div className='flex items-center justify-between mb-6'>
                                     <div>
@@ -198,9 +201,10 @@ export default function DashboardStudent() {
                                 </div>
 
 
-                                <div className='space-y-5'>
+                                <div className='dashboard-course-grid'>
+                                    {studentCourses.length === 0 && <p className='dashboard-empty'>Your next chapter is waiting. Enrolled courses will appear here.</p>}
                                     {studentCourses.map((course) => (
-                                        <div key={course.name} className='border border-slate-100 rounded-xl p-4'>
+                                        <div key={course.name} className='dashboard-course'>
                                             <div className='flex items-start justify-between gap-3 mb-3'>
                                                 <div className='flex items-center gap-3 min-w-0'>
                                                     <div className={`w-11 h-11 rounded-xl ${course.color} text-white flex items-center justify-center shrink-0`}>
@@ -232,7 +236,7 @@ export default function DashboardStudent() {
                             </CardContent>
                         </Card>
 
-                        <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
+                        <Card className='dashboard-deadlines'>
                             <CardContent className='!p-6'>
                                 <div className='flex items-center justify-between mb-4'>
                                     <div>
@@ -248,6 +252,7 @@ export default function DashboardStudent() {
                                 </div>
 
                                 <div className='space-y-3'>
+                                    {upcomingAssignments.length === 0 && <p className='dashboard-empty'>No upcoming assignments to show.</p>}
                                     {upcomingAssignments.map((item) => (
                                         <div key={item.title} className='border border-slate-100 p-3'>
                                             <div className='flex items-start justify-between gap-2'>
@@ -280,8 +285,8 @@ export default function DashboardStudent() {
                     </div>
 
 
-                    <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
-                        <Card className='xl:col-span-2 !rounded-xl !border !border-slate-200 !shadow-sm'>
+                    <div className='dashboard-bottom'>
+                        <Card className='dashboard-activity'>
                             <CardContent className='!p-6'>
 
                                 <div className='flex items-center justify-between mb-5'>
@@ -302,6 +307,7 @@ export default function DashboardStudent() {
                                     </div>
                                 </div>
 
+                                {activity.length === 0 && <p className='dashboard-empty'>Your latest submissions and discussions will appear here.</p>}
                                 {activity.map((item) => (
                                     <div key={item.title} className='flex items-center gap-4 py-4'>
                                         <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${item.bg} ${item.color} `}>
@@ -326,7 +332,7 @@ export default function DashboardStudent() {
                         </Card>
 
 
-                        <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
+                        <Card className='dashboard-tip'>
                             <CardContent className='!p-6'>
                                 <div className='flex items-center gap-3 mb-4'>
                                     <div className='w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center'>
@@ -359,7 +365,7 @@ export default function DashboardStudent() {
                     </div>
                 </main >
             </div >
-        </>
+        </div>
 
     )
 }

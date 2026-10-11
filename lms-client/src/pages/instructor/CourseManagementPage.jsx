@@ -26,7 +26,7 @@ export default function CourseManagementPage() {
     const [search, setSearch] = useState('')
     const [status, setStatus] = useState('All')
     const [courses, setCourses] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const navigate = useNavigate()
 
@@ -43,16 +43,15 @@ export default function CourseManagementPage() {
 
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
 
-    const fetchCourses = useCallback(async () => {
-        try {
-            setLoading(true)
-            const res = await api.get('/courses')
+    const fetchCourses = useCallback(() => {
+        return api.get('/courses').then(async (res) => {
             setCourses(Array.isArray(res.data) ? res.data : [])
-        } catch (err) {
+
+        }).catch((err) => {
             console.error('Fetch courses error:', err)
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
     }, [])
 
     useEffect(() => {
@@ -68,7 +67,7 @@ export default function CourseManagementPage() {
             setDeleteModalOpen(false)
             setCourseToDelete(null)
             setNotification({ open: true, message: 'Course deleted successfully', severity: 'success' })
-        } catch (err) {
+        } catch {
             setNotification({ open: true, message: 'Failed to delete course', severity: 'error' })
         } finally {
             setActionLoading(false)

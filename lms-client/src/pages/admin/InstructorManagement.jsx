@@ -1,6 +1,6 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import api from '../../api/axiosClient'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
@@ -29,13 +29,13 @@ export default function ActivityLogs() {
         severity: 'success'
     })
 
-    const showNotification = (message, severity = 'success') => {
+    const showNotification = useCallback((message, severity = 'success') => {
         setNotification({
             open: true,
             message,
             severity
         })
-    }
+    }, [])
 
     const closeNotification = (_, reason) => {
         if (reason === 'clickaway') {
@@ -60,25 +60,29 @@ export default function ActivityLogs() {
         }
     })
 
-    const fetchInstructors = async () => {
-        try {
-            setLoading(true)
-            const response = await api.get('/instructors/instructors', getAuthConfig())
+    const requestFetchInstructors = useCallback(() => {
+        return api.get('/instructors/instructors', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setInstructors(response.data)
-        } catch (error) {
+
+        }).catch((error) => {
             console.error('Error fetching instructors:', error)
             showNotification(
                 'Failed to fetch instructors. Please try again later.',
                 'error'
             )
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
+    }, [showNotification])
+
+    const fetchInstructors = async () => {
+        setLoading(true)
+        await requestFetchInstructors()
     }
 
     useEffect(() => {
-        fetchInstructors()
-    }, [])
+        requestFetchInstructors()
+    }, [requestFetchInstructors])
 
     const validateInstructorForm = () => {
         const errors = {}

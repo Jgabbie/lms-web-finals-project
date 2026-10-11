@@ -1,15 +1,15 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined } from '@mui/icons-material'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function UserManagementPage() {
     const [users, setUsers] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    const [deleteLoading, setDeleteLoading] = useState(false)
+    const [deleteLoading] = useState(false)
 
     const [openAddUser, setOpenAddUser] = useState(false)
     const [openEditUser, setOpenEditUser] = useState(false)
@@ -28,13 +28,13 @@ export default function UserManagementPage() {
         severity: 'success'
     })
 
-    const showNotification = (message, severity = 'success') => {
+    const showNotification = useCallback((message, severity = 'success') => {
         setNotification({
             open: true,
             message,
             severity
         })
-    }
+    }, [])
 
     const closeNotification = (_, reason) => {
         if (reason === 'clickaway') {
@@ -58,22 +58,26 @@ export default function UserManagementPage() {
         }
     })
 
-    const fetchUsers = async () => {
-        try {
-            setLoading(true)
-            const response = await api.get('/users/accounts', getAuthConfig())
+    const requestFetchUsers = useCallback(() => {
+        return api.get('/users/accounts', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setUsers(response.data)
-        } catch (error) {
+
+        }).catch((error) => {
             console.error('Error fetching users:', error)
             showNotification(error.response?.data?.message || 'Failed to retrieve users', 'error')
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
+    }, [showNotification])
+
+    const fetchUsers = async () => {
+        setLoading(true)
+        await requestFetchUsers()
     }
 
     useEffect(() => {
-        fetchUsers()
-    }, [])
+        requestFetchUsers()
+    }, [requestFetchUsers])
 
     const validateInstructorForm = () => {
         const errors = {}

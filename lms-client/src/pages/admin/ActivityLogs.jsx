@@ -1,6 +1,6 @@
 import { Avatar, Card, CardContent, Typography, IconButton, MenuItem, Chip, TextField, Tooltip, } from '@mui/material'
 import { AssignmentTurnedInOutlined, DeleteOutlined, EditOutlined, HistoryEduOutlined, HistoryOutlined, LoginOutlined, LogoutOutlined, PersonAddAltOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
@@ -12,31 +12,24 @@ export default function ActivityLogs() {
     const [roleFilter, setRoleFilter] = useState('All')
     const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
+    const [, setError] = useState('')
 
-    const fetchLogs = async (showLoading = false) => {
-        try {
-            if (showLoading) {
-                setLoading(true)
-            }
-            setError('')
-
-            const response = await api.get('/logs/logs')
+    const fetchLogs = useCallback(() => {
+        return api.get('/logs/logs').then(async (response) => {
             const data = await response.data
 
             setLogs(data.logs)
-
-        } catch (error) {
+        }).catch((error) => {
             console.error('Error fetching logs:', error)
             setError('Failed to fetch logs. Please try again later.')
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
-    }
+        })
+    }, [])
 
     useEffect(() => {
         fetchLogs()
-    }, [])
+    }, [fetchLogs])
 
     const filteredLogs = useMemo(() => {
         const key = search.toLowerCase()

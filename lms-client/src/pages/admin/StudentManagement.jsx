@@ -1,13 +1,13 @@
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, } from '@mui/icons-material'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function StudentManagement() {
     const [students, setStudents] = useState([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -28,13 +28,13 @@ export default function StudentManagement() {
         severity: 'success'
     })
 
-    const showNotification = (message, severity = 'success') => {
+    const showNotification = useCallback((message, severity = 'success') => {
         setNotification({
             open: true,
             message,
             severity
         })
-    }
+    }, [])
 
     const closeNotification = (_, reason) => {
         if (reason === 'clickaway') {
@@ -60,22 +60,26 @@ export default function StudentManagement() {
         }
     })
 
-    const fetchStudents = async () => {
-        try {
-            setLoading(true)
-            const response = await api.get('/students', getAuthConfig())
+    const requestFetchStudents = useCallback(() => {
+        return api.get('/students', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }).then(async (response) => {
             setStudents(response.data)
-        } catch (error) {
+
+        }).catch((error) => {
             console.error('Error fetching students:', error)
             showNotification(error.response?.data?.message || 'Failed to retrieve students', 'error')
-        } finally {
+        }).finally(() => {
             setLoading(false)
-        }
+        })
+    }, [showNotification])
+
+    const fetchStudents = async () => {
+        setLoading(true)
+        await requestFetchStudents()
     }
 
     useEffect(() => {
-        fetchStudents()
-    }, [])
+        requestFetchStudents()
+    }, [requestFetchStudents])
 
     const validateStudentForm = () => {
         const errors = {}
