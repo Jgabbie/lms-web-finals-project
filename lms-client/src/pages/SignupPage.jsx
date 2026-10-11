@@ -1,5 +1,5 @@
 import { TextField, Button, Checkbox, FormControlLabel, Typography, Link, InputAdornment, IconButton, Modal, Snackbar, Alert } from '@mui/material'
-import { VisibilityOff, Visibility } from '@mui/icons-material'
+import { VisibilityOff, Visibility, School } from '@mui/icons-material'
 import { useState } from 'react'
 import api from '../api/axiosClient'
 import './SignupPage.css'
@@ -523,23 +523,24 @@ export default function SignupPage() {
                     <div className='signup-progress-track' aria-hidden='true'><span style={{ width: '100%' }} /></div>
                     <div className='text-center'>
 
-                        <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100'>
-                            <span className='text-2xl'>
-                                E
-                            </span>
+                        <div className='signup-envelope' aria-hidden='true'>
+                            <div className='signup-envelope-glow' />
+                            <div className='signup-envelope-back' />
+                            <div className='signup-envelope-logo'><School /></div>
+                            <div className='signup-envelope-front' />
                         </div>
-                        <Typography variant='h5' className='font-bold text-slate-800'>
-                            Verify Your Email
+                        <Typography variant='h5' className='signup-verify-title'>
+                            Check your verification code
                         </Typography>
                         <Typography variant='body2' className='text-slate-500 mt-2'>
-                            We sent a 6-digits verification code to
+                            Enter the 6-digit code sent to
                         </Typography>
                         <Typography variant='body2' className='font-bold text-blue-600 mt-1 break-all'>
                             {email}
                         </Typography>
                     </div>
 
-                    <div className='mt-6'>
+                    <div className='signup-code-field'>
                         <TextField
                             label="Verification Code"
                             placeholder='Enter 6-digit OTP'
@@ -574,7 +575,7 @@ export default function SignupPage() {
                             otp.length !== 6
                         }
                         onClick={handleVerifyOtp}
-                        className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-5'
+                        className='signup-verify-button'
                     >
                         {otpLoading
                             ? 'Verifying...'

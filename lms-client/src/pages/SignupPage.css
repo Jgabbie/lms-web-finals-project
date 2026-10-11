@@ -92,3 +92,23 @@
 .edusignup .signup-submit { min-height:48px; }
 .signup-login { margin-top:18px; }
 @media(max-width:650px) { .signup-form-panel { padding-top:28px; padding-bottom:32px; } }
+.signup-otp { padding:28px 32px; border:1px solid #e7ecf5; border-radius:24px; box-shadow:0 24px 80px #17387526; }
+.signup-otp .MuiTypography-root,.signup-otp .MuiInputBase-root,.signup-otp .MuiInputLabel-root,.signup-otp .MuiButton-root,.signup-otp .MuiFormHelperText-root { font-family:inherit; }
+.signup-envelope { position:relative; width:180px; height:160px; margin:10px auto 22px; isolation:isolate; }
+.signup-envelope-glow { position:absolute; inset:-15px -25px 10px; background:radial-gradient(ellipse,#dce7ff 0%,#f2f6ff 45%,transparent 72%); z-index:-1; }
+.signup-envelope-back { position:absolute; left:15px; right:15px; top:18px; height:125px; background:#edf3ff; clip-path:polygon(50% 0,100% 38%,100% 100%,0 100%,0 38%); }
+.signup-envelope-logo { position:absolute; top:46px; left:49px; width:82px; height:82px; border-radius:20px; display:grid; place-items:center; background:linear-gradient(145deg,#407aff,#245de8); box-shadow:0 8px 20px #245de830; color:#fff; }
+.signup-envelope-logo svg { width:44px; height:44px; }
+.signup-envelope-front { position:absolute; left:15px; right:15px; top:65px; height:85px; border-radius:0 0 12px 12px; background:linear-gradient(32deg,#e2e9f4 49%,transparent 50%),linear-gradient(-32deg,#edf2fa 49%,transparent 50%); filter:drop-shadow(0 8px 5px #17387512); }
+.signup-otp .signup-verify-title { color:#202321; font-size:27px; font-weight:700; letter-spacing:-.04em; line-height:1.2; }
+.signup-otp .MuiTypography-body2 { font-size:14px; line-height:1.6; }
+.signup-code-field { margin-top:26px; }
+.signup-code-field .MuiOutlinedInput-root { border-radius:14px; }
+.signup-code-field input { text-align:center; font-size:26px; letter-spacing:.3em; font-variant-numeric:tabular-nums; }
+.signup-code-field input::placeholder { font-size:14px; letter-spacing:normal; }
+.signup-code-field .MuiFormHelperText-root { text-align:center; margin-top:8px; }
+.signup-otp .signup-verify-button { margin-top:20px; min-height:50px; border-radius:99px; background:#245de8; box-shadow:none; text-transform:none; font-size:14px; font-weight:600; }
+.signup-otp .signup-verify-button:hover { background:#184bc9; }
+.signup-otp .signup-verify-button.Mui-disabled { background:#e8edf6; color:#687791; }
+.signup-otp .MuiButton-text { text-transform:none; min-height:44px; border-radius:99px; }
+@media(max-width:480px) { .signup-otp { padding:24px 20px; } .signup-otp .signup-verify-title { font-size:24px; } .signup-envelope { margin-top:0; margin-bottom:14px; } }
