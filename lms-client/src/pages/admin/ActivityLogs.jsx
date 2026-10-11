@@ -1,4 +1,4 @@
-import { Avatar, Card, CardContent, Typography, IconButton, MenuItem, Chip, TextField, Tooltip, Button } from '@mui/material'
+import { Avatar, Card, CardContent, Typography, IconButton, MenuItem, Chip, TextField, Tooltip, } from '@mui/material'
 import { AssignmentTurnedInOutlined, DeleteOutlined, EditOutlined, HistoryEduOutlined, HistoryOutlined, LoginOutlined, LogoutOutlined, PersonAddAltOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
@@ -24,7 +24,7 @@ export default function ActivityLogs() {
             const response = await api.get('/logs/logs')
             const data = await response.data
 
-            setLogs(data.logs || [])
+            setLogs(data.logs)
 
         } catch (error) {
             console.error('Error fetching logs:', error)
@@ -182,118 +182,100 @@ export default function ActivityLogs() {
                                     </TextField>
                                 </div>
 
-                                {!loading && error && (
-                                    <div className='py-14 text-center'>
-                                        <HistoryOutlined className='!text-slate-300 !text-5xl' />
-                                        <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                            Unable to retrieve activity logs
-                                        </Typography>
-                                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                            {error}
-                                        </Typography>
 
-                                        <Button variant='contained' className='!mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700' onClick={fetchLogs}>
-                                            Try Again
-                                        </Button>
-                                    </div>
-                                )}
+                                <div className='overflow-x-auto'>
+                                    <table className='w-full min-w-[900px] text-sm'>
+                                        <thead className='bg-slate-50 text-slate-500'>
+                                            <tr>
+                                                <th className='text-left font-semibold px-6 py-4'>User</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Action</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Activity</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Date & Time</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Status</th>
+                                                <th className='text-left font-semibold px-6 py-4'>Details</th>
+                                            </tr>
+                                        </thead>
 
-                                {!loading && !error && (
-                                    <div className='overflow-x-auto'>
-                                        <table className='w-full min-w-[900px] text-sm'>
-                                            <thead className='bg-slate-50 text-slate-500'>
-                                                <tr>
-                                                    <th className='text-left font-semibold px-6 py-4'>User</th>
-                                                    <th className='text-left font-semibold px-6 py-4'>Action</th>
-                                                    <th className='text-left font-semibold px-6 py-4'>Activity</th>
-                                                    <th className='text-left font-semibold px-6 py-4'>Date & Time</th>
-                                                    <th className='text-left font-semibold px-6 py-4'>Status</th>
-                                                    <th className='text-left font-semibold px-6 py-4'>Details</th>
-                                                </tr>
-                                            </thead>
+                                        <tbody className='divide-y divide-slate-100'>
+                                            {filteredLogs.map(log => (
+                                                <tr key={log.id} className='hover:bg-slate-50'>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center gap-3'>
+                                                            <Avatar className='!bg-blue-600 !w-10 !h-10 !text-sm'>
+                                                                {log.initials}
+                                                            </Avatar>
 
-                                            <tbody className='divide-y divide-slate-100'>
-                                                {filteredLogs.map(log => (
-                                                    <tr key={log.id} className='hover:bg-slate-50'>
-                                                        <td className='px-6 py-4'>
-                                                            <div className='flex items-center gap-3'>
-                                                                <Avatar className='!bg-blue-600 !w-10 !h-10 !text-sm'>
-                                                                    {log.initials}
-                                                                </Avatar>
-
-                                                                <div>
-                                                                    <Typography className='!font-semibold !text-slate-800'>
-                                                                        {log.user}
-                                                                    </Typography>
-                                                                    <Typography variant='caption' className='!text-slate-500'>
-                                                                        {log.role}
-                                                                    </Typography>
-                                                                </div>
+                                                            <div>
+                                                                <Typography className='!font-semibold !text-slate-800'>
+                                                                    {log.user}
+                                                                </Typography>
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {log.role}
+                                                                </Typography>
                                                             </div>
-                                                        </td>
+                                                        </div>
+                                                    </td>
 
-                                                        <td className='px-6 py-4'>
-                                                            <Chip
-                                                                size='small'
-                                                                icon={actionIcon(log.action)}
-                                                                label={log.action}
-                                                                className={actionClass(log.action)}
-                                                            />
-                                                        </td>
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            icon={actionIcon(log.action)}
+                                                            label={log.action}
+                                                            className={actionClass(log.action)}
+                                                        />
+                                                    </td>
 
-                                                        <td className='px-6 py-4'>
-                                                            <Typography variant='body2' className='!text-slate-600 !max-w-[320px]'>
-                                                                {log.description}
-                                                            </Typography>
-                                                        </td>
+                                                    <td className='px-6 py-4'>
+                                                        <Typography variant='body2' className='!text-slate-600 !max-w-[320px]'>
+                                                            {log.description}
+                                                        </Typography>
+                                                    </td>
 
-                                                        <td className='px-6 py-4 whitespace-nowrap'>
-                                                            <Typography variant='body2' className='!text-slate-700'>
-                                                                {log.date}
-                                                            </Typography>
-                                                            <Typography variant='caption' className='!text-slate-500'>
-                                                                {log.time}
-                                                            </Typography>
-                                                        </td>
+                                                    <td className='px-6 py-4 whitespace-nowrap'>
+                                                        <Typography variant='body2' className='!text-slate-700'>
+                                                            {log.date}
+                                                        </Typography>
+                                                        <Typography variant='caption' className='!text-slate-500'>
+                                                            {log.time}
+                                                        </Typography>
+                                                    </td>
 
-                                                        <td className='px-6 py-4'>
-                                                            <Chip
-                                                                size='small'
-                                                                label={log.status}
-                                                                className={
-                                                                    log.status === 'Success'
-                                                                        ? '!bg-green-50 !text-green-700'
-                                                                        : '!bg-red-50 !text-red-700'
-                                                                }
-                                                            />
-                                                        </td>
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={log.status}
+                                                            className={
+                                                                log.status === 'Success'
+                                                                    ? '!bg-green-50 !text-green-700'
+                                                                    : '!bg-red-50 !text-red-700'
+                                                            }
+                                                        />
+                                                    </td>
 
-                                                        <td className='px-6 py-4 text-right'>
-                                                            <Tooltip title='View activity details'>
-                                                                <IconButton size='small'>
-                                                                    <VisibilityOutlined fontSize='small' />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                    <td className='px-6 py-4 text-right'>
+                                                        <Tooltip title='View activity details'>
+                                                            <IconButton size='small'>
+                                                                <VisibilityOutlined fontSize='small' />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
 
-                                        {filteredLogs.length === 0 && (
-                                            <div className='py-14 text-center'>
-                                                <HistoryOutlined className='!text-slate-300 !text-5xl' />
-                                                <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                    {loading ? 'Loading activity logs...' : 'No activity logs found'}
-                                                </Typography>
-                                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                    Try changing your search or filters.
-                                                </Typography>
-                                            </div>
-                                        )}
-
-                                    </div>
-                                )}
+                                    {filteredLogs.length === 0 && (
+                                        <div className='py-14 text-center'>
+                                            <HistoryOutlined className='!text-slate-300 !text-5xl' />
+                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                {loading ? 'Loading activity logs...' : 'No activity logs found'}
+                                            </Typography>
+                                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                                Try changing your search or filters.
+                                            </Typography>
+                                        </div>
+                                    )}
+                                </div>
                             </CardContent>
                         </Card>
                     </main >

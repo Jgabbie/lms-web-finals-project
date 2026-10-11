@@ -6,7 +6,10 @@ import { useEffect, useState } from 'react'
 
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+<<<<<<< HEAD
 import ProfilePage from './pages/admin/ProfilePage'
+=======
+>>>>>>> ec9e86b7b37db71a30c05f22bb7874b5d6b58f35
 import ResetPassword from './pages/ResetPassword'
 import NotificationsPage from './pages/NotificationsPage'
 
@@ -26,6 +29,7 @@ import UserManagementPage from './pages/admin/UserManagementPage'
 import InstructorManagement from './pages/admin/InstructorManagement'
 import CoursesManagementPage from './pages/admin/CoursesManagementPage'
 import StudentManagement from './pages/admin/StudentManagement'
+import ProfilePage from './pages/admin/ProfilePage'
 
 import InstructorAssignmentsPage from './pages/instructor/InstructorAssignmentsPage'
 import DashboardInstructor from './pages/instructor/DashboardInstructor'
@@ -164,7 +168,6 @@ function App() {
           <Route path='/instructor/students' element={<StudentManagementPage />} />
           <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
           <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
-
         </Route>
 
         <Route
