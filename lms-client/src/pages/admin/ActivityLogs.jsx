@@ -24,7 +24,7 @@ export default function ActivityLogs() {
             const response = await api.get('/logs/logs')
             const data = await response.data
 
-            setLogs(data)
+            setLogs(data.logs)
 
         } catch (error) {
             console.error('Error fetching logs:', error)
@@ -275,7 +275,6 @@ export default function ActivityLogs() {
                                             </Typography>
                                         </div>
                                     )}
-
                                 </div>
                             </CardContent>
                         </Card>
