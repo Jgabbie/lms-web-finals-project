@@ -1,4 +1,4 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
@@ -6,6 +6,9 @@ import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function StudentManagement() {
+    const [currentPage, setCurrentPage] = useState(1)
+    const usersPerPage = 10
+
     const [activeTab, setActiveTab] = useState('active')
     const [archivedUsers, setArchivedUsers] = useState([])
 
@@ -303,6 +306,40 @@ export default function StudentManagement() {
         })
     }, [students, search, statusFilter])
 
+    const filteredArchivedStudents = useMemo(() => {
+        const key = search.toLowerCase()
+        return archivedUsers.filter(student => {
+            const firstName = student.firstName || ''
+            const lastName = student.lastName || ''
+            const email = student.email || ''
+            const course = student.course || ''
+            const yearLevel = student.yearLevel || ''
+
+            const matchesSearch =
+                firstName.toLowerCase().includes(key) ||
+                lastName.toLowerCase().includes(key) ||
+                email.toLowerCase().includes(key) ||
+                course.toLowerCase().includes(key) ||
+                yearLevel.toLowerCase().includes(key)
+            const matchesStatus =
+                statusFilter === 'All' || student.status?.toLowerCase() === statusFilter.toLowerCase()
+
+            return matchesSearch && matchesStatus
+        })
+    }, [archivedUsers, search, statusFilter])
+
+
+    const displayedUsers = activeTab === 'active' ? filteredStudents : filteredArchivedStudents
+
+    const indexOfLastUser = currentPage * usersPerPage
+    const indexOfFirstUser = indexOfLastUser - usersPerPage
+    const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
+    const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [search, statusFilter, activeTab])
+
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
@@ -419,113 +456,102 @@ export default function StudentManagement() {
                                             </tr>
                                         </thead>
                                         <tbody className='divide-y divide-slate-100'>
-                                            {(activeTab === 'active' ? filteredStudents : archivedUsers)
-                                                .filter((student) => {
-                                                    const firstName = student.firstName || ''
-                                                    const lastName = student.lastName || ''
-                                                    const email = student.email || ''
-
-                                                    const matchesSearch =
-                                                        `${firstName} ${lastName} `.toLowerCase().includes(search.toLowerCase()) ||
-                                                        email.toLowerCase().includes(search.toLowerCase())
-
-                                                    return matchesSearch
-                                                }).map((student) => (
-                                                    <tr key={student._id || student.id} className='hover:bg-slate-50'>
-                                                        <td className='px-6 py-4'>
-                                                            <div className='flex items-center gap-3'>
-                                                                <Avatar className='!bg-blue-600 !text-sm'>
-                                                                    {student.firstName?.charAt(0) || 'U'}
-                                                                    {student.lastName?.charAt(0) || ''}
-                                                                </Avatar>
-                                                                <Typography className='!font-semibold !text-slate-800'>
-                                                                    {student.firstName || ''} {student.lastName || ''}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {student.email || '—'}
-                                                        </td>
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {student.studentId || '—'}
-                                                        </td>
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {student.course || '—'}
-                                                        </td>
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {student.yearLevel || '—'}
-                                                        </td>
-                                                        <td className='px-6 py-4'>
-                                                            <Chip
+                                            {currentUsers.map((student) => (
+                                                <tr key={student._id || student.id} className='hover:bg-slate-50'>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center gap-3'>
+                                                            <Avatar className='!bg-blue-600 !text-sm'>
+                                                                {student.firstName?.charAt(0) || 'U'}
+                                                                {student.lastName?.charAt(0) || ''}
+                                                            </Avatar>
+                                                            <Typography className='!font-semibold !text-slate-800'>
+                                                                {student.firstName || ''} {student.lastName || ''}
+                                                            </Typography>
+                                                        </div>
+                                                    </td>
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {student.email || '—'}
+                                                    </td>
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {student.studentId || '—'}
+                                                    </td>
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {student.course || '—'}
+                                                    </td>
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {student.yearLevel || '—'}
+                                                    </td>
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={student.status === "active"
+                                                                ? "Active"
+                                                                : "Inactive"
+                                                            }
+                                                            className={
+                                                                student.status === 'active'
+                                                                    ? '!bg-green-50 !text-green-700'
+                                                                    : '!bg-slate-100 !text-slate-600'
+                                                            }
+                                                        />
+                                                    </td>
+                                                    <td className='px-6 py-4 text-right'>
+                                                        {activeTab === 'archived' ? (
+                                                            <IconButton
                                                                 size='small'
-                                                                label={student.status === "active"
-                                                                    ? "Active"
-                                                                    : "Inactive"
-                                                                }
-                                                                className={
-                                                                    student.status === 'active'
-                                                                        ? '!bg-green-50 !text-green-700'
-                                                                        : '!bg-slate-100 !text-slate-600'
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td className='px-6 py-4 text-right'>
-                                                            {activeTab === 'archived' ? (
+                                                                title='Restore'
+                                                                variant='outlined'
+                                                                onClick={() => restoreUser(student._id || student.id)}
+                                                            >
+                                                                <RestoreFromTrash fontSize='small' />
+                                                            </IconButton>
+                                                        ) : (
+                                                            <div>
                                                                 <IconButton
                                                                     size='small'
-                                                                    title='Restore'
-                                                                    variant='outlined'
-                                                                    onClick={() => restoreUser(student._id || student.id)}
+                                                                    title='View'
+                                                                    onClick={() => {
+                                                                        setSelectedStudent(student)
+                                                                        setOpenViewStudent(true)
+                                                                    }}
                                                                 >
-                                                                    <RestoreFromTrash fontSize='small' />
+                                                                    <VisibilityOutlined fontSize='small' />
                                                                 </IconButton>
-                                                            ) : (
-                                                                <div>
-                                                                    <IconButton
-                                                                        size='small'
-                                                                        title='View'
-                                                                        onClick={() => {
-                                                                            setSelectedStudent(student)
-                                                                            setOpenViewStudent(true)
-                                                                        }}
-                                                                    >
-                                                                        <VisibilityOutlined fontSize='small' />
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        size='small'
-                                                                        title='Edit'
-                                                                        onClick={() => {
-                                                                            setSelectedStudent(student)
-                                                                            setFormData({
-                                                                                firstName: student.firstName,
-                                                                                lastName: student.lastName,
-                                                                                email: student.email,
-                                                                                role: student.role,
-                                                                                course: student.course,
-                                                                                yearLevel: student.yearLevel,
-                                                                                status: student.status,
-                                                                            })
-                                                                            setOpenEditStudent(true)
-                                                                        }}
-                                                                    >
-                                                                        <EditOutlined fontSize='small' />
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        size='small'
-                                                                        color='error'
-                                                                        title='Delete'
-                                                                        onClick={() => {
-                                                                            setSelectedStudent(student)
-                                                                            setOpenDeleteStudent(true)
-                                                                        }}
-                                                                    >
-                                                                        <DeleteOutlined fontSize='small' />
-                                                                    </IconButton>
-                                                                </div>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='Edit'
+                                                                    onClick={() => {
+                                                                        setSelectedStudent(student)
+                                                                        setFormData({
+                                                                            firstName: student.firstName,
+                                                                            lastName: student.lastName,
+                                                                            email: student.email,
+                                                                            role: student.role,
+                                                                            course: student.course,
+                                                                            yearLevel: student.yearLevel,
+                                                                            status: student.status,
+                                                                        })
+                                                                        setOpenEditStudent(true)
+                                                                    }}
+                                                                >
+                                                                    <EditOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    color='error'
+                                                                    title='Delete'
+                                                                    onClick={() => {
+                                                                        setSelectedStudent(student)
+                                                                        setOpenDeleteStudent(true)
+                                                                    }}
+                                                                >
+                                                                    <DeleteOutlined fontSize='small' />
+                                                                </IconButton>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
 
@@ -550,6 +576,22 @@ export default function StudentManagement() {
                                             </div>
                                         )}
                                 </div>
+
+                                {displayedUsers.length > 0 && (
+                                    <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Showing {indexOfFirstUser + 1} -
+                                            {Math.min(indexOfLastUser, filteredStudents.length)} of {filteredStudents.length} students
+                                        </Typography>
+                                        <Pagination
+                                            count={totalPages}
+                                            page={currentPage}
+                                            onChange={(event, page) => setCurrentPage(page)}
+                                            color='primary'
+                                            shape='rounded'
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </main>

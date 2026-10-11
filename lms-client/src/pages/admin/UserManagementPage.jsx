@@ -1,4 +1,4 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
@@ -6,6 +6,9 @@ import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function UserManagementPage() {
+    const [currentPage, setCurrentPage] = useState(1)
+    const usersPerPage = 10
+
     const [activeTab, setActiveTab] = useState('active')
     const [archivedUsers, setArchivedUsers] = useState([])
 
@@ -265,6 +268,36 @@ export default function UserManagementPage() {
         })
     }, [users, search, roleFilter])
 
+    const filteredArchivedUsers = useMemo(() => {
+        const key = search.toLowerCase()
+        return archivedUsers.filter(user => {
+            const firstName = user.firstName || ''
+            const lastName = user.lastName || ''
+            const email = user.email || ''
+
+            const matchesSearch =
+                firstName.toLowerCase().includes(key) ||
+                lastName.toLowerCase().includes(key) ||
+                email.toLowerCase().includes(key)
+
+            const matchesRole =
+                roleFilter === 'All' || user.role?.toLowerCase() === roleFilter.toLowerCase()
+
+            return matchesSearch && matchesRole
+        })
+    }, [users, search, roleFilter])
+
+    const displayedUsers = activeTab === 'active' ? filteredUsers : filteredArchivedUsers
+
+    const indexOfLastUser = currentPage * usersPerPage
+    const indexOfFirstUser = indexOfLastUser - usersPerPage
+    const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
+    const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [search, roleFilter, activeTab])
+
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
@@ -387,123 +420,110 @@ export default function UserManagementPage() {
                                             </tr>
                                         </thead>
                                         <tbody className='divide-y divide-slate-100'>
-                                            {(activeTab === 'active' ? filteredUsers : archivedUsers)
-                                                .filter((user) => {
-                                                    const firstName = user.firstName || ''
-                                                    const lastName = user.lastName || ''
-                                                    const email = user.email || ''
+                                            {currentUsers.map((user) => (
+                                                <tr key={user._id || user.id} className='hover:bg-slate-50'>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center gap-3'>
+                                                            <Avatar className='!bg-blue-600 !text-sm'>
+                                                                {user.firstName?.charAt(0) || 'U'}
+                                                                {user.lastName?.charAt(0) || ''}
+                                                            </Avatar>
+                                                            <Typography className='!font-semibold !text-slate-800'>
+                                                                {user.firstName || ''} {user.lastName || ''}
+                                                            </Typography>
+                                                        </div>
+                                                    </td>
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {user.email || '—'}
+                                                    </td>
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={user.role === "admin"
+                                                                ? "Administrator"
+                                                                : user.role === "student"
+                                                                    ? "Student"
+                                                                    : user.role === "instructor"
+                                                                        ? "Instructor"
+                                                                        : user.role
+                                                            }
+                                                            className={roleClass(displayRole(user.role))}
+                                                        />
+                                                    </td>
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={user.status === "active"
+                                                                ? "Active"
+                                                                : "Inactive"
+                                                            }
+                                                            className={
+                                                                user.status === 'active'
+                                                                    ? '!bg-green-50 !text-green-700'
+                                                                    : '!bg-slate-100 !text-slate-600'
+                                                            }
+                                                        />
+                                                    </td>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex justify-end gap-1'>
 
-                                                    const matchesSearch =
-                                                        `${firstName} ${lastName} `.toLowerCase().includes(search.toLowerCase()) ||
-                                                        email.toLowerCase().includes(search.toLowerCase())
-
-                                                    const matchesRole =
-                                                        roleFilter === 'All' || user.role?.toLowerCase() === roleFilter.toLowerCase()
-                                                    return matchesSearch && matchesRole
-                                                }).map((user) => (
-                                                    <tr key={user._id || user.id} className='hover:bg-slate-50'>
-                                                        <td className='px-6 py-4'>
-                                                            <div className='flex items-center gap-3'>
-                                                                <Avatar className='!bg-blue-600 !text-sm'>
-                                                                    {user.firstName?.charAt(0) || 'U'}
-                                                                    {user.lastName?.charAt(0) || ''}
-                                                                </Avatar>
-                                                                <Typography className='!font-semibold !text-slate-800'>
-                                                                    {user.firstName || ''} {user.lastName || ''}
-                                                                </Typography>
-                                                            </div>
-                                                        </td>
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {user.email || '—'}
-                                                        </td>
-                                                        <td className='px-6 py-4'>
-                                                            <Chip
-                                                                size='small'
-                                                                label={user.role === "admin"
-                                                                    ? "Administrator"
-                                                                    : user.role === "student"
-                                                                        ? "Student"
-                                                                        : user.role === "instructor"
-                                                                            ? "Instructor"
-                                                                            : user.role
-                                                                }
-                                                                className={roleClass(displayRole(user.role))}
-                                                            />
-                                                        </td>
-                                                        <td className='px-6 py-4'>
-                                                            <Chip
-                                                                size='small'
-                                                                label={user.status === "active"
-                                                                    ? "Active"
-                                                                    : "Inactive"
-                                                                }
-                                                                className={
-                                                                    user.status === 'active'
-                                                                        ? '!bg-green-50 !text-green-700'
-                                                                        : '!bg-slate-100 !text-slate-600'
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td className='px-6 py-4'>
-                                                            <div className='flex justify-end gap-1'>
-
-                                                                <td className='px-6 py-4 text-right'>
-                                                                    {activeTab === 'archived' ? (
+                                                            <td className='px-6 py-4 text-right'>
+                                                                {activeTab === 'archived' ? (
+                                                                    <IconButton
+                                                                        size='small'
+                                                                        title='Restore'
+                                                                        variant='outlined'
+                                                                        onClick={() => restoreUser(user._id || user.id)}
+                                                                    >
+                                                                        <RestoreFromTrash fontSize='small' />
+                                                                    </IconButton>
+                                                                ) : (
+                                                                    <div>
                                                                         <IconButton
                                                                             size='small'
-                                                                            title='Restore'
-                                                                            variant='outlined'
-                                                                            onClick={() => restoreUser(user._id || user.id)}
+                                                                            title='View'
+                                                                            onClick={() => {
+                                                                                setSelectedUser(user)
+                                                                                setOpenViewUser(true)
+                                                                            }}
                                                                         >
-                                                                            <RestoreFromTrash fontSize='small' />
+                                                                            <VisibilityOutlined fontSize='small' />
                                                                         </IconButton>
-                                                                    ) : (
-                                                                        <div>
-                                                                            <IconButton
-                                                                                size='small'
-                                                                                title='View'
-                                                                                onClick={() => {
-                                                                                    setSelectedUser(user)
-                                                                                    setOpenViewUser(true)
-                                                                                }}
-                                                                            >
-                                                                                <VisibilityOutlined fontSize='small' />
-                                                                            </IconButton>
-                                                                            <IconButton
-                                                                                size='small'
-                                                                                title='Edit'
-                                                                                onClick={() => {
-                                                                                    setSelectedUser(user)
-                                                                                    setFormData({
-                                                                                        firstName: user.firstName,
-                                                                                        lastName: user.lastName,
-                                                                                        email: user.email,
-                                                                                        role: user.role,
-                                                                                        status: user.status,
-                                                                                    })
-                                                                                    setOpenEditUser(true)
-                                                                                }}
-                                                                            >
-                                                                                <EditOutlined fontSize='small' />
-                                                                            </IconButton>
-                                                                            <IconButton
-                                                                                size='small'
-                                                                                color='error'
-                                                                                title='Delete'
-                                                                                onClick={() => {
-                                                                                    setSelectedUser(user)
-                                                                                    setOpenDeleteUser(true)
-                                                                                }}
-                                                                            >
-                                                                                <DeleteOutlined fontSize='small' />
-                                                                            </IconButton>
-                                                                        </div>
-                                                                    )}
-                                                                </td>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                                        <IconButton
+                                                                            size='small'
+                                                                            title='Edit'
+                                                                            onClick={() => {
+                                                                                setSelectedUser(user)
+                                                                                setFormData({
+                                                                                    firstName: user.firstName,
+                                                                                    lastName: user.lastName,
+                                                                                    email: user.email,
+                                                                                    role: user.role,
+                                                                                    status: user.status,
+                                                                                })
+                                                                                setOpenEditUser(true)
+                                                                            }}
+                                                                        >
+                                                                            <EditOutlined fontSize='small' />
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            size='small'
+                                                                            color='error'
+                                                                            title='Delete'
+                                                                            onClick={() => {
+                                                                                setSelectedUser(user)
+                                                                                setOpenDeleteUser(true)
+                                                                            }}
+                                                                        >
+                                                                            <DeleteOutlined fontSize='small' />
+                                                                        </IconButton>
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
 
@@ -531,6 +551,22 @@ export default function UserManagementPage() {
                                             </div>
                                         )}
                                 </div>
+
+                                {displayedUsers.length > 0 && (
+                                    <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Showing {indexOfFirstUser + 1} -
+                                            {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+                                        </Typography>
+                                        <Pagination
+                                            count={totalPages}
+                                            page={currentPage}
+                                            onChange={(event, page) => setCurrentPage(page)}
+                                            color='primary'
+                                            shape='rounded'
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </main>

@@ -199,16 +199,6 @@ export default function Dashboard() {
                                                     {stat.value}
                                                 </Typography>
 
-                                                <div className='flex items-center gap-1 mt-2'>
-                                                    <TrendingUp className='!text-green-600 !text-base' />
-                                                    <span className='text-xs font-semibold text-green-600'>
-                                                        {stat.change}
-                                                    </span>
-
-                                                    <span className='text-xs text-slate-400'>
-                                                        {stat.description}
-                                                    </span>
-                                                </div>
                                             </div>
                                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.iconBg} ${stat.iconColor}`}>
                                                 {stat.icon}

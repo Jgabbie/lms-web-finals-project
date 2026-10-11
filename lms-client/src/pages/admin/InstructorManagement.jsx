@@ -1,4 +1,4 @@
-import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress } from '@mui/material'
+import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
 import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
@@ -6,6 +6,9 @@ import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function ActivityLogs() {
+    const [currentPage, setCurrentPage] = useState(1)
+    const usersPerPage = 10
+
     const [activeTab, setActiveTab] = useState('active')
     const [archivedUsers, setArchivedUsers] = useState([])
 
@@ -292,6 +295,37 @@ export default function ActivityLogs() {
         })
     }, [instructors, search, statusFilter, departmentFilter])
 
+    const filteredArchivedInstructors = useMemo(() => {
+        const key = search.toLowerCase()
+        return archivedUsers.filter(instructor => {
+            const fullName = `${instructor.firstName} ${instructor.lastName}`.toLowerCase()
+
+            const matchesSearch =
+                fullName.includes(key) ||
+                instructor.email.toLowerCase().includes(key) ||
+                instructor.instructorId.toLowerCase().includes(key) ||
+                instructor.specialization.toLowerCase().includes(key)
+
+            const matchesDepartment =
+                departmentFilter === 'All' || instructor.department === departmentFilter
+            const matchesStatus =
+                statusFilter === 'All' || instructor.status?.toLowerCase() === statusFilter.toLowerCase()
+
+            return matchesSearch && matchesDepartment && matchesStatus
+        })
+    }, [archivedUsers, search, statusFilter, departmentFilter])
+
+    const displayedUsers = activeTab === 'active' ? filteredInstructors : filteredArchivedInstructors
+
+    const indexOfLastUser = currentPage * usersPerPage
+    const indexOfFirstUser = indexOfLastUser - usersPerPage
+    const currentUsers = displayedUsers.slice(indexOfFirstUser, indexOfLastUser)
+    const totalPages = Math.ceil(displayedUsers.length / usersPerPage)
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [search, statusFilter, activeTab])
+
     const initials = name =>
         name.replace('Prof. ', '').split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase()
 
@@ -431,113 +465,102 @@ export default function ActivityLogs() {
 
                                         <tbody className='divide-y divide-slate-100'>
 
-                                            {(activeTab === 'active' ? filteredInstructors : archivedUsers)
-                                                .filter((instructor) => {
-                                                    const firstName = instructor.firstName || ''
-                                                    const lastName = instructor.lastName || ''
-                                                    const email = instructor.email || ''
+                                            {currentUsers.map((instructor) =>
+                                                <tr key={instructor.id} className='hover:bg-slate-50'>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center gap-3'>
+                                                            <Avatar className='!bg-blue-600'>
+                                                                {initials(`${instructor.firstName} ${instructor.lastName}`)}
+                                                            </Avatar>
 
-                                                    const matchesSearch =
-                                                        `${firstName} ${lastName} `.toLowerCase().includes(search.toLowerCase()) ||
-                                                        email.toLowerCase().includes(search.toLowerCase())
-
-                                                    return matchesSearch
-                                                }).map((instructor) =>
-                                                    <tr key={instructor.id} className='hover:bg-slate-50'>
-                                                        <td className='px-6 py-4'>
-                                                            <div className='flex items-center gap-3'>
-                                                                <Avatar className='!bg-blue-600'>
-                                                                    {initials(`${instructor.firstName} ${instructor.lastName}`)}
-                                                                </Avatar>
-
-                                                                <div>
-                                                                    <Typography className='!font-semibold !text-slate-800'>
-                                                                        {instructor.firstName} {instructor.lastName}
-                                                                    </Typography>
-                                                                    <Typography variant='caption' className='!text-slate-500'>
-                                                                        {instructor.email}
-                                                                    </Typography>
-                                                                </div>
+                                                            <div>
+                                                                <Typography className='!font-semibold !text-slate-800'>
+                                                                    {instructor.firstName} {instructor.lastName}
+                                                                </Typography>
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {instructor.email}
+                                                                </Typography>
                                                             </div>
-                                                        </td>
+                                                        </div>
+                                                    </td>
 
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {instructor.department}
-                                                        </td>
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {instructor.department}
+                                                    </td>
 
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {instructor.specialization}
-                                                        </td>
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {instructor.specialization}
+                                                    </td>
 
-                                                        <td className='px-6 py-4'>
-                                                            <Chip
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
+                                                            className={
+                                                                instructor.status === 'active'
+                                                                    ? '!bg-green-50 !text-green-700'
+                                                                    : '!bg-slate-100 !text-slate-600'
+                                                            }
+                                                        />
+                                                    </td>
+
+                                                    <td className='px-6 py-4 text-right'>
+                                                        {activeTab === 'archived' ? (
+                                                            <IconButton
                                                                 size='small'
-                                                                label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
-                                                                className={
-                                                                    instructor.status === 'active'
-                                                                        ? '!bg-green-50 !text-green-700'
-                                                                        : '!bg-slate-100 !text-slate-600'
-                                                                }
-                                                            />
-                                                        </td>
-
-                                                        <td className='px-6 py-4 text-right'>
-                                                            {activeTab === 'archived' ? (
+                                                                title='Restore'
+                                                                variant='outlined'
+                                                                onClick={() => restoreUser(instructor._id || instructor.id)}
+                                                            >
+                                                                <RestoreFromTrash fontSize='small' />
+                                                            </IconButton>
+                                                        ) : (
+                                                            <div>
                                                                 <IconButton
                                                                     size='small'
-                                                                    title='Restore'
-                                                                    variant='outlined'
-                                                                    onClick={() => restoreUser(instructor._id || instructor.id)}
+                                                                    title='View'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setOpenViewInstructor(true)
+                                                                    }}
                                                                 >
-                                                                    <RestoreFromTrash fontSize='small' />
+                                                                    <VisibilityOutlined fontSize='small' />
                                                                 </IconButton>
-                                                            ) : (
-                                                                <div>
-                                                                    <IconButton
-                                                                        size='small'
-                                                                        title='View'
-                                                                        onClick={() => {
-                                                                            setSelectedInstructor(instructor)
-                                                                            setOpenViewInstructor(true)
-                                                                        }}
-                                                                    >
-                                                                        <VisibilityOutlined fontSize='small' />
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        size='small'
-                                                                        title='Edit'
-                                                                        onClick={() => {
-                                                                            setSelectedInstructor(instructor)
-                                                                            setFormData({
-                                                                                firstName: instructor.firstName,
-                                                                                lastName: instructor.lastName,
-                                                                                email: instructor.email,
-                                                                                role: instructor.role,
-                                                                                department: instructor.department,
-                                                                                specialization: instructor.specialization,
-                                                                                status: instructor.status,
-                                                                            })
-                                                                            setOpenEditInstructor(true)
-                                                                        }}
-                                                                    >
-                                                                        <EditOutlined fontSize='small' />
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        size='small'
-                                                                        color='error'
-                                                                        title='Delete'
-                                                                        onClick={() => {
-                                                                            setSelectedInstructor(instructor)
-                                                                            setOpenDeleteInstructor(true)
-                                                                        }}
-                                                                    >
-                                                                        <DeleteOutlined fontSize='small' />
-                                                                    </IconButton>
-                                                                </div>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                )}
+                                                                <IconButton
+                                                                    size='small'
+                                                                    title='Edit'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setFormData({
+                                                                            firstName: instructor.firstName,
+                                                                            lastName: instructor.lastName,
+                                                                            email: instructor.email,
+                                                                            role: instructor.role,
+                                                                            department: instructor.department,
+                                                                            specialization: instructor.specialization,
+                                                                            status: instructor.status,
+                                                                        })
+                                                                        setOpenEditInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <EditOutlined fontSize='small' />
+                                                                </IconButton>
+                                                                <IconButton
+                                                                    size='small'
+                                                                    color='error'
+                                                                    title='Delete'
+                                                                    onClick={() => {
+                                                                        setSelectedInstructor(instructor)
+                                                                        setOpenDeleteInstructor(true)
+                                                                    }}
+                                                                >
+                                                                    <DeleteOutlined fontSize='small' />
+                                                                </IconButton>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
 
@@ -562,6 +585,22 @@ export default function ActivityLogs() {
                                             </div>
                                         )}
                                 </div>
+
+                                {displayedUsers.length > 0 && (
+                                    <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Showing {indexOfFirstUser + 1} -
+                                            {Math.min(indexOfLastUser, filteredInstructors.length)} of {filteredInstructors.length} instructors
+                                        </Typography>
+                                        <Pagination
+                                            count={totalPages}
+                                            page={currentPage}
+                                            onChange={(event, page) => setCurrentPage(page)}
+                                            color='primary'
+                                            shape='rounded'
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </main >
