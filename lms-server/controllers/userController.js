@@ -264,7 +264,7 @@ exports.addUser = async (req, res) => {
         console.log('Add user error:', error)
 
         return res.status(500).json({
-            message: 'Unable to create account. Please try again'
+            message: 'Unable to create account. Please try again' + error,
         })
     }
 }
