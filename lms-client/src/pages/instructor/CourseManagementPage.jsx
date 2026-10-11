@@ -206,7 +206,7 @@ export default function CourseManagementPage() {
                                     value={status}
                                     onChange={e => setStatus(e.target.value)}
                                 >
-                                    <MenuItem value='All'>All Statuses</MenuItem>
+                                    <MenuItem value='All'>All Status</MenuItem>
                                     <MenuItem value='Active'>Active</MenuItem>
                                     <MenuItem value='Archived'>Archived</MenuItem>
                                 </TextField>

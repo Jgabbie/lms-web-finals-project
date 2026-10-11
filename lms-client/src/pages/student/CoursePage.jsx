@@ -75,7 +75,7 @@ export default function CoursePage() {
                                     onChange={e => setStatusFilter(e.target.value)}
                                     className='md:!w-48'
                                 >
-                                    <MenuItem value='All'>All Statuses</MenuItem>
+                                    <MenuItem value='All'>All Status</MenuItem>
                                     <MenuItem value='Active'>Active</MenuItem>
                                     <MenuItem value='Archived'>Archived</MenuItem>
                                 </TextField>

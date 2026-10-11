@@ -283,7 +283,7 @@ export default function InstructorAssignmentsPage() {
                                         value={statusFilter}
                                         onChange={e => setStatusFilter(e.target.value)}
                                     >
-                                        <MenuItem value='All'>All Statuses</MenuItem>
+                                        <MenuItem value='All'>All Status</MenuItem>
                                         <MenuItem value='Pending'>Pending Review</MenuItem>
                                         <MenuItem value='Graded'>Graded</MenuItem>
                                     </TextField>

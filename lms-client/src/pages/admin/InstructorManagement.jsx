@@ -492,7 +492,7 @@ export default function ActivityLogs() {
                                         <div className='py-14 text-center'>
                                             <PersonOutlined className='!text-slate-300 !text-5xl' />
                                             <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                                No instructors found
+                                                {loading ? 'Loading instructors...' : 'No instructors found'}
                                             </Typography>
                                             <Typography variant='body2' className='!text-slate-500 !mt-1'>
                                                 Try changing your search or filters.
