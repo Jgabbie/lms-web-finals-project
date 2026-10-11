@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
-import ProfilePage from './pages/ProfilePage'
 import ResetPassword from './pages/ResetPassword'
 import NotificationsPage from './pages/NotificationsPage'
 
@@ -26,15 +25,18 @@ import UserManagementPage from './pages/admin/UserManagementPage'
 import InstructorManagement from './pages/admin/InstructorManagement'
 import CoursesManagementPage from './pages/admin/CoursesManagementPage'
 import StudentManagement from './pages/admin/StudentManagement'
+import ProfilePage from './pages/admin/ProfilePage'
 
 import InstructorAssignmentsPage from './pages/instructor/InstructorAssignmentsPage'
 import DashboardInstructor from './pages/instructor/DashboardInstructor'
 import EnrollStudentPage from './pages/instructor/EnrollStudentPage'
+import ProfileStudent from './pages/student/ProfilePage'
 
 import CourseManagementPage from './pages/instructor/CourseManagementPage'
 import CreateCoursePage from './pages/instructor/CreateCoursePage'
 import UploadMaterialsPage from './pages/instructor/UploadMaterialsPage'
 import StudentManagementPage from './pages/instructor/StudentManagementPage'
+import ProfileInstructor from './pages/instructor/ProfilePage'
 
 
 
@@ -164,7 +166,7 @@ function App() {
           <Route path='/instructor/students' element={<StudentManagementPage />} />
           <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
           <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
-
+          <Route path='/instructor/profile' element={<ProfileInstructor />} />
         </Route>
 
         <Route
@@ -183,6 +185,7 @@ function App() {
           <Route path='/student/courses/details' element={<CourseDetailsPage role={role} />} />
           <Route path='/student/assignments/details' element={<AssignmentDetailsPage role={role} />} />
           <Route path='/student/discussions' element={<DiscussionPage role={role} />} />
+          <Route path='/student/profile' element={<ProfileStudent />} />
         </Route>
 
         <Route
