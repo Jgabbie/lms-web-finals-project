@@ -589,8 +589,7 @@ export default function ActivityLogs() {
                                 {displayedUsers.length > 0 && (
                                     <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
                                         <Typography variant='body2' className='!text-slate-500'>
-                                            Showing {indexOfFirstUser + 1} -
-                                            {Math.min(indexOfLastUser, filteredInstructors.length)} of {filteredInstructors.length} instructors
+                                            Showing {indexOfFirstUser + 1} - {Math.min(indexOfLastUser, filteredInstructors.length)} of {filteredInstructors.length} instructors
                                         </Typography>
                                         <Pagination
                                             count={totalPages}

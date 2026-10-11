@@ -555,8 +555,7 @@ export default function UserManagementPage() {
                                 {displayedUsers.length > 0 && (
                                     <div className='flex flex-col sm:flex-row justify-between items-center gap-4 p-5 border-t border-slate-200'>
                                         <Typography variant='body2' className='!text-slate-500'>
-                                            Showing {indexOfFirstUser + 1} -
-                                            {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+                                            Showing {indexOfFirstUser + 1} - {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
                                         </Typography>
                                         <Pagination
                                             count={totalPages}
