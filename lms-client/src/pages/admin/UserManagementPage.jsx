@@ -6,7 +6,7 @@ import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function UserManagementPage() {
-    const [activeTab, setActiveTab] = useState('users')
+    const [activeTab, setActiveTab] = useState('active')
     const [archivedUsers, setArchivedUsers] = useState([])
 
     const [users, setUsers] = useState([])
