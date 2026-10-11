@@ -483,86 +483,92 @@ exports.deleteUser = async (req, res) => {
             })
         }
 
-        const user = await User.findById(id)
+        const userInformation = await User.findById(id)
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' })
+        if (!userInformation) {
+            return res.status(404).json({
+                message: 'User not found'
+            })
         }
 
         if (
             req.user &&
             req.user.id &&
-            String(user._id) === String(req.user.id)
+            String(userInformation._id) === String(req.user.id)
         ) {
             return res.status(400).json({
                 message: 'You cannot delete your own account'
             })
         }
 
-        const userInformation = await User.findById(id).select()
-
-        if (userInformation && userInformation.role === 'student') {
-            await ArchivedUser.create({
+        await ArchivedUser.findOneAndUpdate(
+            { _id: userInformation._id },
+            {
                 _id: userInformation._id,
                 firstName: userInformation.firstName,
                 lastName: userInformation.lastName,
                 password: userInformation.password,
                 email: userInformation.email,
                 role: userInformation.role
+            },
+            { upsert: true, new: true, runValidators: true }
+        )
+
+        if (userInformation.role === 'student') {
+            const student = await Student.findOne({
+                email: userInformation.email
             })
 
-            await ArchivedStudent.create({
-                _id: userInformation._id,
-                firstName: userInformation.firstName,
-                lastName: userInformation.lastName,
-                email: userInformation.email,
-                password: userInformation.password,
-                course: userInformation.course,
-                yearLevel: userInformation.yearLevel,
-                status: 'inactive'
-            })
+            if (student) {
+                await ArchivedStudent.findOneAndUpdate(
+                    { _id: student._id },
+                    {
+                        _id: student._id,
+                        firstName: student.firstName,
+                        lastName: student.lastName,
+                        email: student.email,
+                        password: student.password,
+                        course: student.course,
+                        yearLevel: student.yearLevel,
+                        status: 'inactive'
+                    },
+                    { upsert: true, new: true, runValidators: true }
+                )
+            }
 
-            await Student.findOneAndDelete(userInformation.email)
-            await User.findByIdAndDelete(id)
+            await Student.findOneAndDelete({
+                email: userInformation.email
+            })
         }
 
-        if (userInformation && userInformation.role === 'instructor') {
-            await ArchivedUser.create({
-                _id: userInformation._id,
-                firstName: userInformation.firstName,
-                lastName: userInformation.lastName,
-                password: userInformation.password,
-                email: userInformation.email,
-                role: userInformation.role
+        if (userInformation.role === 'instructor') {
+            const instructor = await Instructor.findOne({
+                email: userInformation.email
             })
 
-            await ArchivedStudent.create({
-                _id: userInformation._id,
-                firstName: userInformation.firstName,
-                lastName: userInformation.lastName,
-                email: userInformation.email,
-                password: userInformation.password,
-                course: userInformation.course,
-                yearLevel: userInformation.yearLevel,
-                status: 'inactive'
-            })
+            if (instructor) {
+                await ArchivedInstructor.findOneAndUpdate(
+                    { _id: instructor._id },
+                    {
+                        _id: instructor._id,
+                        firstName: instructor.firstName,
+                        lastName: instructor.lastName,
+                        email: instructor.email,
+                        password: instructor.password,
+                        course: instructor.course,
+                        yearLevel: instructor.yearLevel,
+                        status: 'inactive'
+                    },
+                    { upsert: true, new: true, runValidators: true }
+                )
+            }
 
-            await Instructor.findOneAndDelete(userInformation.email)
-            await User.findByIdAndDelete(id)
+            await Instructor.findOneAndDelete({
+                email: userInformation.email
+            })
         }
 
-        if (userInformation && userInformation.role === 'admin') {
-            await ArchivedUser.create({
-                _id: userInformation._id,
-                firstName: userInformation.firstName,
-                lastName: userInformation.lastName,
-                password: userInformation.password,
-                email: userInformation.email,
-                role: userInformation.role
-            })
-
-            await User.findByIdAndDelete(id)
-        }
+        await User.findByIdAndDelete(id)
 
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
