@@ -175,6 +175,10 @@ exports.addUser = async (req, res) => {
                 yearLevel: 'None',
                 status: 'active',
             })
+
+            return res.status(201).json({
+                message: 'User added successfully',
+            })
         }
 
         await User.create({
