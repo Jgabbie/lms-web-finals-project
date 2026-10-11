@@ -530,7 +530,7 @@ exports.deleteUser = async (req, res) => {
                         EduLearn LMS
                     </h2>
 
-                    <p>Hello ${normalizedFirstName} ${normalizedLastName},</p>
+                    <p>Hello ${userInformation.firstName} ${userInformation.lastName},</p>
 
                     <p>
                         Your account has been deleted successfully.
@@ -554,11 +554,11 @@ exports.deleteUser = async (req, res) => {
                         ">
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Email Address:
-                                <strong>${normalizedEmail}</strong>
+                                <strong>${userInformation.email}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Role:
-                                <strong>${normalizedRole}</strong>
+                                <strong>${userInformation.role}</strong>
                             </p>
                         </span>
                     </div>
