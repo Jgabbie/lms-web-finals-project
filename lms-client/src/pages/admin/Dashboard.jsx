@@ -3,6 +3,7 @@ import { People, School, MenuBook, TrendingUp, ArrowForward, MoreVert, CheckCirc
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../../api/axiosClient'
 
 export default function Dashboard() {
@@ -14,6 +15,7 @@ export default function Dashboard() {
     const [loadingStats, setLoadingStats] = useState(true)
     const [statsError, setStatsError] = useState(null)
 
+    const navigate = useNavigate()
     useEffect(() => {
         const fetchDashboardStats = async () => {
             try {
@@ -160,11 +162,21 @@ export default function Dashboard() {
                             </div>
 
                             <div className='flex gap-3'>
-                                <Button variant='outlined' startIcon={<People />} className='!border-slate-300 !text-slate-700 !normal-case !rounded-lg'>
+                                <Button
+                                    variant='outlined'
+                                    startIcon={<People />}
+                                    onClick={() => navigate('/admin/users')}
+                                    className='!border-slate-300 !text-slate-700 !normal-case !rounded-lg'
+                                >
                                     Manage Users
                                 </Button>
 
-                                <Button variant='contained' startIcon={<MenuBook />} className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'>
+                                <Button
+                                    variant='contained'
+                                    startIcon={<MenuBook />}
+                                    onClick={() => navigate('/admin/courses')}
+                                    className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
+                                >
                                     Manage Courses
                                 </Button>
                             </div>
@@ -260,7 +272,11 @@ export default function Dashboard() {
 
                                     <div className='grid grid-cols-2 gap-3'>
 
-                                        <Card elevation={0} className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'>
+                                        <Card
+                                            elevation={0}
+                                            onClick={() => navigate('/admin/users')}
+                                            className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'
+                                        >
                                             <CardContent className='!p-4'>
                                                 <div className='w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mb-3'>
                                                     <People />
@@ -276,7 +292,11 @@ export default function Dashboard() {
                                             </CardContent>
                                         </Card>
 
-                                        <Card elevation={0} className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'>
+                                        <Card
+                                            elevation={0}
+                                            onClick={() => navigate('/admin/courses')}
+                                            className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'
+                                        >
                                             <CardContent className='!p-4'>
                                                 <div className='w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mb-3'>
                                                     <MenuBook />
@@ -292,7 +312,11 @@ export default function Dashboard() {
                                             </CardContent>
                                         </Card>
 
-                                        <Card elevation={0} className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'>
+                                        <Card
+                                            elevation={0}
+                                            onClick={() => navigate('/admin/instructors')}
+                                            className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'
+                                        >
                                             <CardContent className='!p-4'>
                                                 <div className='w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mb-3'>
                                                     <School />
@@ -308,7 +332,11 @@ export default function Dashboard() {
                                             </CardContent>
                                         </Card>
 
-                                        <Card elevation={0} className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'>
+                                        <Card
+                                            elevation={0}
+                                            onClick={() => navigate('/admin/assignments')}
+                                            className='!rounded-xl !bg-blue-50 hover:!bg-blue-100 !cursor-pointer transition-colors'
+                                        >
                                             <CardContent className='!p-4'>
                                                 <div className='w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mb-3'>
                                                     <Assignment />
