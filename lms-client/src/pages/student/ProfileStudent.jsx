@@ -1,12 +1,12 @@
 import { Card, CardContent, Typography, Button, Avatar, Divider, TextField, Alert, CircularProgress, Snackbar, InputAdornment, IconButton, Modal } from '@mui/material'
 import { Person, Email, Lock, Edit, Save, Close, Visibility, VisibilityOff, PhotoCamera } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
-import Navbar from '../components/Navbar'
-import Sidebar from '../components/Sidebar'
-import SidebarInstructor from '../components/SidebarInstructor'
-import SidebarAdmin from '../components/SidebarAdmin'
-import api from '../api/axiosClient'
-import { getStoredProfile, saveStoredProfile } from '../utils/profileStorage'
+import Navbar from '../../components/Navbar'
+import Sidebar from '../../components/Sidebar'
+import SidebarInstructor from '../../components/SidebarInstructor'
+import SidebarAdmin from '../../components/SidebarAdmin'
+import api from '../../api/axiosClient'
+import { getStoredProfile, saveStoredProfile } from '../../utils/profileStorage'
 
 const getApiMessage = (error, fallback) => (
     error?.response?.data?.message
@@ -16,7 +16,7 @@ const getApiMessage = (error, fallback) => (
     || 'Something went wrong'
 )
 
-export default function ProfilePage() {
+export default function ProfileStudent() {
     const userRole = (localStorage.getItem('role') || '').toLowerCase()
     const [sidebarOpen, setSidebarOpen] = useState(true)
 
@@ -351,8 +351,8 @@ export default function ProfilePage() {
             <div
                 className='transition-all duration-300'
                 style={{
-                    marginLeft: userRole === 'instructor' 
-                        ? (sidebarOpen ? '260px' : '72px') 
+                    marginLeft: userRole === 'instructor'
+                        ? (sidebarOpen ? '260px' : '72px')
                         : (userRole === 'student' || userRole === 'admin' ? '260px' : '0px')
                 }}
             >

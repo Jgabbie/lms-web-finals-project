@@ -182,14 +182,6 @@ export default function ActivityLogs() {
                                     </TextField>
                                 </div>
 
-                                {loading && (
-                                    <div className='py-14 text-center'>
-                                        <Typography variant='body' className='!text-slate-500'>
-                                            Loading activity logs...
-                                        </Typography>
-                                    </div>
-                                )}
-
                                 {!loading && error && (
                                     <div className='py-14 text-center'>
                                         <HistoryOutlined className='!text-slate-300 !text-5xl' />

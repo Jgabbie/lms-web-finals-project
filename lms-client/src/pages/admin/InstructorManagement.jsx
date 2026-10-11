@@ -389,102 +389,91 @@ export default function ActivityLogs() {
                                         </thead>
 
                                         <tbody className='divide-y divide-slate-100'>
-                                            {loading ? (
-                                                <tr>
-                                                    <td colSpan={5} className='px-6 py-4 text-center'>
-                                                        <CircularProgress size={24} className='!text-blue-600' />
-                                                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                                            Loading instructors...
-                                                        </Typography>
+
+                                            {filteredInstructors.map(instructor =>
+                                                <tr key={instructor.id} className='hover:bg-slate-50'>
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex items-center gap-3'>
+                                                            <Avatar className='!bg-blue-600'>
+                                                                {initials(`${instructor.firstName} ${instructor.lastName}`)}
+                                                            </Avatar>
+
+                                                            <div>
+                                                                <Typography className='!font-semibold !text-slate-800'>
+                                                                    {instructor.firstName} {instructor.lastName}
+                                                                </Typography>
+                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                    {instructor.email}
+                                                                </Typography>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {instructor.department}
+                                                    </td>
+
+                                                    <td className='px-6 py-4 text-slate-600'>
+                                                        {instructor.specialization}
+                                                    </td>
+
+                                                    <td className='px-6 py-4'>
+                                                        <Chip
+                                                            size='small'
+                                                            label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
+                                                            className={
+                                                                instructor.status === 'active'
+                                                                    ? '!bg-green-50 !text-green-700'
+                                                                    : '!bg-slate-100 !text-slate-600'
+                                                            }
+                                                        />
+                                                    </td>
+
+                                                    <td className='px-6 py-4'>
+                                                        <div className='flex justify-end gap-1'>
+                                                            <IconButton
+                                                                size='small'
+                                                                title='View'
+                                                                onClick={() => {
+                                                                    setSelectedInstructor(instructor)
+                                                                    setOpenViewInstructor(true)
+                                                                }}
+                                                            >
+                                                                <VisibilityOutlined fontSize='small' />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size='small'
+                                                                title='Edit'
+                                                                onClick={() => {
+                                                                    setSelectedInstructor(instructor)
+                                                                    setFormData({
+                                                                        firstName: instructor.firstName,
+                                                                        lastName: instructor.lastName,
+                                                                        email: instructor.email,
+                                                                        department: instructor.department,
+                                                                        specialization: instructor.specialization,
+                                                                        status: instructor.status,
+                                                                    })
+                                                                    setOpenEditInstructor(true)
+                                                                }}
+                                                            >
+                                                                <EditOutlined fontSize='small' />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size='small'
+                                                                color='error'
+                                                                title='Delete'
+                                                                onClick={() => {
+                                                                    setSelectedInstructor(instructor)
+                                                                    setOpenDeleteInstructor(true)
+                                                                }}
+                                                            >
+                                                                <DeleteOutlined fontSize='small' />
+                                                            </IconButton>
+                                                        </div>
                                                     </td>
                                                 </tr>
-                                            ) : (
-                                                filteredInstructors.map(instructor => (
-                                                    <tr key={instructor.id} className='hover:bg-slate-50'>
-                                                        <td className='px-6 py-4'>
-                                                            <div className='flex items-center gap-3'>
-                                                                <Avatar className='!bg-blue-600'>
-                                                                    {initials(`${instructor.firstName} ${instructor.lastName}`)}
-                                                                </Avatar>
-
-                                                                <div>
-                                                                    <Typography className='!font-semibold !text-slate-800'>
-                                                                        {instructor.firstName} {instructor.lastName}
-                                                                    </Typography>
-                                                                    <Typography variant='caption' className='!text-slate-500'>
-                                                                        {instructor.email}
-                                                                    </Typography>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {instructor.department}
-                                                        </td>
-
-                                                        <td className='px-6 py-4 text-slate-600'>
-                                                            {instructor.specialization}
-                                                        </td>
-
-                                                        <td className='px-6 py-4'>
-                                                            <Chip
-                                                                size='small'
-                                                                label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
-                                                                className={
-                                                                    instructor.status === 'active'
-                                                                        ? '!bg-green-50 !text-green-700'
-                                                                        : '!bg-slate-100 !text-slate-600'
-                                                                }
-                                                            />
-                                                        </td>
-
-                                                        <td className='px-6 py-4'>
-                                                            <div className='flex justify-end gap-1'>
-                                                                <IconButton
-                                                                    size='small'
-                                                                    title='View'
-                                                                    onClick={() => {
-                                                                        setSelectedInstructor(instructor)
-                                                                        setOpenViewInstructor(true)
-                                                                    }}
-                                                                >
-                                                                    <VisibilityOutlined fontSize='small' />
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    size='small'
-                                                                    title='Edit'
-                                                                    onClick={() => {
-                                                                        setSelectedInstructor(instructor)
-                                                                        setFormData({
-                                                                            firstName: instructor.firstName,
-                                                                            lastName: instructor.lastName,
-                                                                            email: instructor.email,
-                                                                            department: instructor.department,
-                                                                            specialization: instructor.specialization,
-                                                                            status: instructor.status,
-                                                                        })
-                                                                        setOpenEditInstructor(true)
-                                                                    }}
-                                                                >
-                                                                    <EditOutlined fontSize='small' />
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    size='small'
-                                                                    color='error'
-                                                                    title='Delete'
-                                                                    onClick={() => {
-                                                                        setSelectedInstructor(instructor)
-                                                                        setOpenDeleteInstructor(true)
-                                                                    }}
-                                                                >
-                                                                    <DeleteOutlined fontSize='small' />
-                                                                </IconButton>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
                                             )}
-
                                         </tbody>
                                     </table>
 
