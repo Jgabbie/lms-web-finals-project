@@ -6,10 +6,6 @@ import { useEffect, useState } from 'react'
 
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
-<<<<<<< HEAD
-import ProfilePage from './pages/admin/ProfilePage'
-=======
->>>>>>> ec9e86b7b37db71a30c05f22bb7874b5d6b58f35
 import ResetPassword from './pages/ResetPassword'
 import NotificationsPage from './pages/NotificationsPage'
 
