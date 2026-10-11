@@ -1,8 +1,9 @@
 import { TextField, Button, Checkbox, FormControlLabel, Typography, Link, InputAdornment, IconButton, Snackbar, Alert } from '@mui/material'
-import { VisibilityOff, Visibility } from '@mui/icons-material'
+import { VisibilityOff, Visibility, School, MenuBook, Groups } from '@mui/icons-material'
 import { useState } from 'react'
 import api from '../api/axiosClient'
 import { saveStoredProfile } from '../utils/profileStorage'
+import './LoginPage.css'
 
 export default function LoginPage({ onLogin }) {
 
@@ -110,26 +111,37 @@ export default function LoginPage({ onLogin }) {
 
     return (
         <>
-            <div className=' relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 px-4'>
+            <div className='edulogin'>
 
-                <div className='absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blue-200/60 ' />
-                <div className='absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-indigo-200/60 ' />
-                <div className='absolute top-1/3 -right-20 w-64 h-64 rounded-full bg-blue-200/60 ' />
+                <aside className='login-story' aria-label='Welcome to EduLearn'>
+                    <div className='login-story-art' aria-hidden='true'><span /><span /><span /></div>
+                    <div className='login-story-top'>
+                        <div className='login-brand'><School /> EduLearn.</div>
+                        <p className='login-eyebrow'>YOUR NEXT CHAPTER STARTS HERE</p>
+                        <h2>Learn today.<br />Build your tomorrow.</h2>
+                        <p className='login-story-copy'>A little curiosity can take you a long way. Make room for practical skills, fresh ideas, and your next possibility.</p>
+                    </div>
+                    <div className='login-story-bottom'>
+                        <p>A space for every kind of learner</p>
+                        <div className='login-audiences'><span><School /> Students</span><span><MenuBook /> Instructors</span><span><Groups /> Learning together</span></div>
+                        <span className='login-story-note'>Small steps. Endless possibilities.</span>
+                    </div>
+                </aside>
 
-                <div className='relative z-10 max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-10'>
-                    <div className='text-center mb-8'>
-                        <Typography variant='h5' className='font-bold text-blue-600 tracking-wide mb-2'>
+                <div className='login-form-panel'>
+                    <div className='login-heading'>
+                        <Typography variant='h5' className='login-form-brand'>
                             EduLearn LMS
                         </Typography>
-                        <Typography variant='h5' className='font-bold text-slate-800'>
+                        <Typography variant='h5' className='login-title'>
                             Welcome back
                         </Typography>
-                        <Typography variant='body2' className='text-slate-500 mt-2'>
+                        <Typography variant='body2' className='login-subtitle'>
                             Please enter your details to sign in.
                         </Typography>
                     </div>
 
-                    <form className='flex flex-col gap-5' onSubmit={handleSubmit} noValidate>
+                    <form className='login-form' onSubmit={handleSubmit} noValidate>
                         <TextField
                             label="Email Address"
                             type='email'
@@ -152,7 +164,7 @@ export default function LoginPage({ onLogin }) {
                                 input: {
                                     endAdornment: (
                                         <InputAdornment position='end'>
-                                            <IconButton onClick={() => { setShowPassword(!showPassword) }} edge="end">
+                                            <IconButton aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => { setShowPassword(!showPassword) }} edge="end">
                                                 {showPassword ? <Visibility /> : <VisibilityOff />}
                                             </IconButton>
                                         </InputAdornment>
@@ -164,19 +176,19 @@ export default function LoginPage({ onLogin }) {
 
                         />
 
-                        <div className='flex items-center justify-between -mt-2'>
+                        <div className='login-options'>
                             <FormControlLabel control={<Checkbox size='small' className='text-blue-600' />} label={<Typography variant='body2' className='text-slate-600'>Remember Me</Typography>} />
                             <Link href="#" underline='hover' className='text-sm text-blue-600 font-medium cursor-pointer'>
                                 Forgot password?
                             </Link>
                         </div>
 
-                        <Button type='submit' variant='contained' size='large' className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-2 text-base font-medium'>
+                        <Button type='submit' variant='contained' size='large' className='login-submit'>
                             {loading ? 'Signing In...' : 'Sign In'}
                         </Button>
                     </form>
 
-                    <div className='mt-8 text-center'>
+                    <div className='login-signup'>
                         <Typography variant='body2' className='text-slate-600'>
                             Don't have an account?
 
