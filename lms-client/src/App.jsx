@@ -30,13 +30,13 @@ import ProfilePage from './pages/admin/ProfilePage'
 import InstructorAssignmentsPage from './pages/instructor/InstructorAssignmentsPage'
 import DashboardInstructor from './pages/instructor/DashboardInstructor'
 import EnrollStudentPage from './pages/instructor/EnrollStudentPage'
-import ProfileStudent from './pages/student/ProfilePage'
+import ProfileStudent from './pages/student/ProfileStudent'
 
 import CourseManagementPage from './pages/instructor/CourseManagementPage'
 import CreateCoursePage from './pages/instructor/CreateCoursePage'
 import UploadMaterialsPage from './pages/instructor/UploadMaterialsPage'
 import StudentManagementPage from './pages/instructor/StudentManagementPage'
-import ProfileInstructor from './pages/instructor/ProfilePage'
+import ProfileInstructor from './pages/instructor/ProfileInstructor'
 
 
 
