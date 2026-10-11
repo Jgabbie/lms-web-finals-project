@@ -501,14 +501,67 @@ exports.deleteUser = async (req, res) => {
 
         const userInformation = await User.findById(id).select()
 
-        if (userInformation) {
+        if (userInformation && userInformation.role === 'student') {
             await ArchivedUser.create({
                 _id: userInformation._id,
                 firstName: userInformation.firstName,
                 lastName: userInformation.lastName,
+                password: userInformation.password,
                 email: userInformation.email,
                 role: userInformation.role
             })
+
+            await ArchivedStudent.create({
+                _id: userInformation._id,
+                firstName: userInformation.firstName,
+                lastName: userInformation.lastName,
+                email: userInformation.email,
+                password: userInformation.password,
+                course: userInformation.course,
+                yearLevel: userInformation.yearLevel,
+                status: 'inactive'
+            })
+
+            await Student.findOneAndDelete(userInformation.email)
+            await User.findByIdAndDelete(id)
+        }
+
+        if (userInformation && userInformation.role === 'instructor') {
+            await ArchivedUser.create({
+                _id: userInformation._id,
+                firstName: userInformation.firstName,
+                lastName: userInformation.lastName,
+                password: userInformation.password,
+                email: userInformation.email,
+                role: userInformation.role
+            })
+
+            await ArchivedStudent.create({
+                _id: userInformation._id,
+                firstName: userInformation.firstName,
+                lastName: userInformation.lastName,
+                email: userInformation.email,
+                password: userInformation.password,
+                course: userInformation.course,
+                yearLevel: userInformation.yearLevel,
+                status: 'inactive'
+            })
+
+            await Instructor.findOneAndDelete(userInformation.email)
+            await User.findByIdAndDelete(id)
+        }
+
+        if (userInformation && userInformation.role === 'admin') {
+            await ArchivedUser.create({
+                _id: userInformation._id,
+                firstName: userInformation.firstName,
+                lastName: userInformation.lastName,
+                password: userInformation.password,
+                email: userInformation.email,
+                role: userInformation.role
+            })
+
+            await User.findByIdAndDelete(id)
         }
 
         await transporter.sendMail({
@@ -588,10 +641,6 @@ exports.deleteUser = async (req, res) => {
                 </div>
             `
         })
-
-        await Student.findOneAndDelete(userInformation.email)
-        await Instructor.findOneAndDelete(userInformation.email)
-        await User.findByIdAndDelete(id)
 
         res.status(200).json({ message: 'User deleted successfully' })
 
