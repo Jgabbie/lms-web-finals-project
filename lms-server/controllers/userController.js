@@ -620,24 +620,6 @@ exports.updateUser = async (req, res) => {
             })
         }
 
-        if
-
-
-
-        await Student.findByIdAndUpdate(user._id, {
-            firstName: normalizedFirstName,
-            lastName: normalizedLastName,
-            email: normalizedEmail,
-            role: normalizedRole
-        }).exec()
-
-        await Instructor.findByIdAndUpdate(user._id, {
-            firstName: normalizedFirstName,
-            lastName: normalizedLastName,
-            email: normalizedEmail,
-            role: normalizedRole
-        }).exec()
-
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
             to: normalizedEmail,
