@@ -15,7 +15,8 @@ import {
     Alert,
     Tabs,
     Tab,
-    IconButton
+    IconButton,
+    Tooltip
 } from '@mui/material'
 import {
     RateReviewRounded as RateReviewOutlined,
@@ -24,9 +25,12 @@ import {
     AddRounded as Add,
     MenuBookRounded as MenuBookOutlined,
     EditRounded as EditOutlined,
-    DeleteRounded as DeleteOutline
+    DeleteRounded as DeleteOutline,
+    AttachFileRounded as AttachFile,
+    VisibilityRounded as VisibilityOutlined,
+    CheckCircleRounded as CheckCircle
 } from '@mui/icons-material'
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import NavbarInstructor from '../../components/NavbarInstructor'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import api from '../../api/axiosClient'
@@ -39,11 +43,15 @@ export default function InstructorAssignmentsPage() {
     const [courseFilter, setCourseFilter] = useState('All')
     const [courses, setCourses] = useState([])
     const [, setLoading] = useState(false)
+    const [uploading, setUploading] = useState(false)
 
     const [assignments, setAssignments] = useState([])
     const [submissions, setSubmissions] = useState([])
 
+    // Create Assignment State
     const [createDialogOpen, setCreateDialogOpen] = useState(false)
+    const [selectedCreateFile, setSelectedCreateFile] = useState(null)
+    const createFileInputRef = useRef(null)
     const [assignmentForm, setAssignmentForm] = useState({
         title: '',
         course: '',
@@ -52,16 +60,21 @@ export default function InstructorAssignmentsPage() {
         description: ''
     })
 
+    // Edit Assignment State
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [editingAssignmentId, setEditingAssignmentId] = useState(null)
+    const [selectedEditFile, setSelectedEditFile] = useState(null)
+    const editFileInputRef = useRef(null)
     const [editForm, setEditForm] = useState({
         title: '',
         course: '',
         dueDate: '',
         points: 100,
-        description: ''
+        description: '',
+        fileName: ''
     })
 
+    // Grading State
     const [selectedSubmission, setSelectedSubmission] = useState(null)
     const [gradingModalOpen, setGradingModalOpen] = useState(false)
     const [gradeScore, setGradeScore] = useState('')
@@ -99,6 +112,7 @@ export default function InstructorAssignmentsPage() {
 
     const courseOptions = ['All', ...new Set([...courses.map(c => c.courseName), ...assignments.map(a => a.course)].filter(Boolean))]
 
+    // CREATE ASSIGNMENT HANDLER
     const handleCreateAssignment = async (e) => {
         e.preventDefault()
         if (!assignmentForm.title.trim() || !assignmentForm.course) {
@@ -106,14 +120,25 @@ export default function InstructorAssignmentsPage() {
             return
         }
         try {
-            await api.post('/assignments/create', {
-                title: assignmentForm.title.trim(),
-                course: assignmentForm.course,
-                dueDate: assignmentForm.dueDate || 'No Due Date',
-                points: Number(assignmentForm.points) || 100,
-                description: assignmentForm.description.trim()
+            setUploading(true)
+            const formData = new FormData()
+            formData.append('title', assignmentForm.title.trim())
+            formData.append('course', assignmentForm.course)
+            formData.append('dueDate', assignmentForm.dueDate || 'No Due Date')
+            formData.append('points', Number(assignmentForm.points) || 100)
+            formData.append('description', assignmentForm.description.trim())
+
+            if (selectedCreateFile) {
+                formData.append('attachment', selectedCreateFile)
+            }
+
+            await api.post('/assignments/create', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             })
+
             setCreateDialogOpen(false)
+            setSelectedCreateFile(null)
+            if (createFileInputRef.current) createFileInputRef.current.value = ''
             setAssignmentForm({
                 title: '',
                 course: courses[0]?.courseName || '',
@@ -121,7 +146,7 @@ export default function InstructorAssignmentsPage() {
                 points: 100,
                 description: ''
             })
-            setNotification({ open: true, message: 'Assignment saved to database!', severity: 'success' })
+            setNotification({ open: true, message: 'Assignment published with attachment!', severity: 'success' })
             fetchData()
         } catch (err) {
             setNotification({
@@ -129,21 +154,27 @@ export default function InstructorAssignmentsPage() {
                 message: err.response?.data?.message || 'Failed to create assignment',
                 severity: 'error'
             })
+        } finally {
+            setUploading(false)
         }
     }
 
+    // OPEN EDIT MODAL
     const handleOpenEdit = (asg) => {
         setEditingAssignmentId(asg._id)
+        setSelectedEditFile(null)
         setEditForm({
             title: asg.title,
             course: asg.course,
             dueDate: asg.dueDate || '',
             points: asg.points || 100,
-            description: asg.description || ''
+            description: asg.description || '',
+            fileName: asg.fileName || ''
         })
         setEditDialogOpen(true)
     }
 
+    // UPDATE ASSIGNMENT HANDLER
     const handleUpdateAssignment = async (e) => {
         e.preventDefault()
         if (!editForm.title.trim() || !editForm.course) {
@@ -151,15 +182,25 @@ export default function InstructorAssignmentsPage() {
             return
         }
         try {
-            await api.put(`/assignments/${editingAssignmentId}`, {
-                title: editForm.title.trim(),
-                course: editForm.course,
-                dueDate: editForm.dueDate || 'No Due Date',
-                points: Number(editForm.points) || 100,
-                description: editForm.description.trim()
+            setUploading(true)
+            const formData = new FormData()
+            formData.append('title', editForm.title.trim())
+            formData.append('course', editForm.course)
+            formData.append('dueDate', editForm.dueDate || 'No Due Date')
+            formData.append('points', Number(editForm.points) || 100)
+            formData.append('description', editForm.description.trim())
+
+            if (selectedEditFile) {
+                formData.append('attachment', selectedEditFile)
+            }
+
+            await api.put(`/assignments/${editingAssignmentId}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             })
+
             setEditDialogOpen(false)
             setEditingAssignmentId(null)
+            setSelectedEditFile(null)
             setNotification({ open: true, message: 'Assignment updated successfully!', severity: 'success' })
             fetchData()
         } catch (err) {
@@ -168,9 +209,12 @@ export default function InstructorAssignmentsPage() {
                 message: err.response?.data?.message || 'Failed to update assignment',
                 severity: 'error'
             })
+        } finally {
+            setUploading(false)
         }
     }
 
+    // DELETE ASSIGNMENT HANDLER
     const handleDeleteAssignment = async (id, title) => {
         if (!window.confirm(`Are you sure you want to delete "${title}"? This will also remove any student submissions for it.`)) return
         try {
@@ -186,6 +230,7 @@ export default function InstructorAssignmentsPage() {
         }
     }
 
+    // GRADE HANDLER
     const handleSaveGrade = async () => {
         if (!selectedSubmission) return
         const scoreNum = Number(gradeScore)
@@ -257,7 +302,7 @@ export default function InstructorAssignmentsPage() {
                                     Course Assignments
                                 </Typography>
                                 <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                    Create assignments and evaluate submitted student deliverables.
+                                    Create assignments, attach guidelines, and evaluate student work.
                                 </Typography>
                             </div>
                             <Button
@@ -395,25 +440,41 @@ export default function InstructorAssignmentsPage() {
                                                         <td className='px-6 py-4 font-semibold text-slate-700'>
                                                             {item.score !== null ? `${item.score} / ${item.maxScore}` : '—'}
                                                         </td>
-                                                        <td className='px-6 py-4 text-right'>
-                                                            <Button
-                                                                size='small'
-                                                                variant={item.status === 'Graded' ? 'outlined' : 'contained'}
-                                                                onClick={() => {
-                                                                    setSelectedSubmission(item)
-                                                                    setGradeScore(item.score !== null ? String(item.score) : '')
-                                                                    setGradeFeedback(item.feedback || '')
-                                                                    setGradingModalOpen(true)
-                                                                }}
-                                                                className={
-                                                                    item.status === 'Graded'
-                                                                        ? '!normal-case !rounded-lg !border-slate-300 !text-slate-700'
-                                                                        : '!normal-case !rounded-lg !bg-blue-600 hover:!bg-blue-700 !shadow-none'
-                                                                }
-                                                            >
-                                                                {item.status === 'Graded' ? 'Edit Grade' : 'Grade'}
-                                                            </Button>
-                                                        </td>
+                                                                    <td className='px-6 py-4 text-right'>
+                                                                        <div className='flex items-center justify-end gap-2'>
+                                                                            {item.fileUrl ? (
+                                                                                <Button
+                                                                                    size='small'
+                                                                                    variant='outlined'
+                                                                                    startIcon={<VisibilityOutlined fontSize='small' />}
+                                                                                    onClick={() => window.open(item.fileUrl, '_blank', 'noopener,noreferrer')}
+                                                                                    className='!normal-case !rounded-lg !border-blue-200 !text-blue-700 !bg-blue-50/50 hover:!bg-blue-50'
+                                                                                >
+                                                                                    View Work
+                                                                                </Button>
+                                                                            ) : (
+                                                                                <span className='text-xs text-slate-400 italic mr-2'>No File</span>
+                                                                            )}
+
+                                                                            <Button
+                                                                                size='small'
+                                                                                variant={item.status === 'Graded' ? 'outlined' : 'contained'}
+                                                                                onClick={() => {
+                                                                                    setSelectedSubmission(item)
+                                                                                    setGradeScore(item.score !== null ? String(item.score) : '')
+                                                                                    setGradeFeedback(item.feedback || '')
+                                                                                    setGradingModalOpen(true)
+                                                                                }}
+                                                                                className={
+                                                                                    item.status === 'Graded'
+                                                                                        ? '!normal-case !rounded-lg !border-slate-300 !text-slate-700'
+                                                                                        : '!normal-case !rounded-lg !bg-blue-600 hover:!bg-blue-700 !shadow-none'
+                                                                                }
+                                                                            >
+                                                                                {item.status === 'Graded' ? 'Edit Grade' : 'Grade'}
+                                                                            </Button>
+                                                                        </div>
+                                                                    </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -423,13 +484,14 @@ export default function InstructorAssignmentsPage() {
 
                                 {activeTab === 1 && (
                                     <div className='overflow-x-auto'>
-                                        <table className='w-full min-w-[800px] text-sm'>
+                                        <table className='w-full min-w-[850px] text-sm'>
                                             <thead className='bg-slate-50 text-slate-500'>
                                                 <tr>
                                                     <th className='text-left font-semibold px-6 py-4'>Title</th>
                                                     <th className='text-left font-semibold px-6 py-4'>Course</th>
                                                     <th className='text-left font-semibold px-6 py-4'>Due Date</th>
                                                     <th className='text-left font-semibold px-6 py-4'>Points</th>
+                                                    <th className='text-left font-semibold px-6 py-4'>Attached File</th>
                                                     <th className='text-right font-semibold px-6 py-4'>Actions</th>
                                                 </tr>
                                             </thead>
@@ -447,6 +509,20 @@ export default function InstructorAssignmentsPage() {
                                                         <td className='px-6 py-4 text-slate-600'>{asg.course}</td>
                                                         <td className='px-6 py-4 text-slate-600'>{asg.dueDate}</td>
                                                         <td className='px-6 py-4 font-semibold text-slate-700'>{asg.points} pts</td>
+                                                        <td className='px-6 py-4'>
+                                                            {asg.fileUrl ? (
+                                                                <Button
+                                                                    size='small'
+                                                                    startIcon={<VisibilityOutlined fontSize='small' />}
+                                                                    onClick={() => window.open(asg.fileUrl, '_blank')}
+                                                                    className='!normal-case !text-xs !bg-blue-50 hover:!bg-blue-100 !text-blue-700 !rounded-lg'
+                                                                >
+                                                                    {asg.fileName || 'View Attachment'}
+                                                                </Button>
+                                                            ) : (
+                                                                <span className='text-xs text-slate-400 italic'>None</span>
+                                                            )}
+                                                        </td>
                                                         <td className='px-6 py-4 text-right'>
                                                             <div className='flex justify-end gap-1'>
                                                                 <IconButton
@@ -478,10 +554,10 @@ export default function InstructorAssignmentsPage() {
                     </main>
                 </div>
 
-              
+                {/* CREATE ASSIGNMENT MODAL */}
                 <Dialog 
                     open={createDialogOpen} 
-                    onClose={() => setCreateDialogOpen(false)} 
+                    onClose={() => !uploading && setCreateDialogOpen(false)} 
                     fullWidth 
                     maxWidth='sm'
                     slotProps={{ paper: { className: '!rounded-2xl !p-2' } }}
@@ -519,9 +595,7 @@ export default function InstructorAssignmentsPage() {
                                         fullWidth
                                         type='date'
                                         label='Due Date'
-                                        slotProps={{
-                                            inputLabel: { shrink: true }
-                                        }}
+                                        slotProps={{ inputLabel: { shrink: true } }}
                                         value={assignmentForm.dueDate}
                                         onChange={e => setAssignmentForm(p => ({ ...p, dueDate: e.target.value }))}
                                     />
@@ -542,27 +616,55 @@ export default function InstructorAssignmentsPage() {
                                     value={assignmentForm.description}
                                     onChange={e => setAssignmentForm(p => ({ ...p, description: e.target.value }))}
                                 />
+                                {/* ATTACH FILE INPUT */}
+                                <Button
+                                    component='label'
+                                    variant='outlined'
+                                    fullWidth
+                                    startIcon={<AttachFile />}
+                                    className='!normal-case !rounded-xl !border-slate-300 !text-slate-700 !py-3'
+                                >
+                                    {selectedCreateFile ? selectedCreateFile.name : 'Attach Reference File (Optional)'}
+                                    <input
+                                        ref={createFileInputRef}
+                                        hidden
+                                        type='file'
+                                        accept='.pdf, .doc, .docx, .ppt, .pptx, .zip, .rar, .png, .jpg, .jpeg'
+                                        onChange={e => setSelectedCreateFile(e.target.files?.[0] || null)}
+                                    />
+                                </Button>
+                                {selectedCreateFile && (
+                                    <div className='flex items-center gap-2 text-emerald-600 text-sm font-medium'>
+                                        <CheckCircle fontSize='small' />
+                                        <span>{selectedCreateFile.name} ({(selectedCreateFile.size / (1024 * 1024)).toFixed(2)} MB)</span>
+                                    </div>
+                                )}
                             </div>
                         </DialogContent>
                         <DialogActions className='!px-6 !pb-4 !pt-2'>
-                            <Button onClick={() => setCreateDialogOpen(false)} className='!normal-case !text-slate-600'>
+                            <Button 
+                                onClick={() => setCreateDialogOpen(false)} 
+                                disabled={uploading} 
+                                className='!normal-case !text-slate-600'
+                            >
                                 Cancel
                             </Button>
                             <Button
                                 type='submit'
                                 variant='contained'
+                                disabled={uploading}
                                 className='!bg-slate-900 hover:!bg-slate-800 !normal-case !rounded-xl !px-5 !py-2 !shadow-none'
                             >
-                                Publish Assignment
+                                {uploading ? 'Publishing & Uploading...' : 'Publish Assignment'}
                             </Button>
                         </DialogActions>
                     </form>
                 </Dialog>
 
-              
+                {/* EDIT ASSIGNMENT MODAL */}
                 <Dialog 
                     open={editDialogOpen} 
-                    onClose={() => setEditDialogOpen(false)} 
+                    onClose={() => !uploading && setEditDialogOpen(false)} 
                     fullWidth 
                     maxWidth='sm'
                     slotProps={{ paper: { className: '!rounded-2xl !p-2' } }}
@@ -599,9 +701,7 @@ export default function InstructorAssignmentsPage() {
                                         fullWidth
                                         type='date'
                                         label='Due Date'
-                                        slotProps={{
-                                            inputLabel: { shrink: true }
-                                        }}
+                                        slotProps={{ inputLabel: { shrink: true } }}
                                         value={editForm.dueDate}
                                         onChange={e => setEditForm(p => ({ ...p, dueDate: e.target.value }))}
                                     />
@@ -621,56 +721,102 @@ export default function InstructorAssignmentsPage() {
                                     value={editForm.description}
                                     onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))}
                                 />
+                                <Button
+                                    component='label'
+                                    variant='outlined'
+                                    fullWidth
+                                    startIcon={<AttachFile />}
+                                    className='!normal-case !rounded-xl !border-slate-300 !text-slate-700 !py-3'
+                                >
+                                    {selectedEditFile ? selectedEditFile.name : (editForm.fileName ? `Replace: ${editForm.fileName}` : 'Attach Reference File')}
+                                    <input
+                                        ref={editFileInputRef}
+                                        hidden
+                                        type='file'
+                                        accept='.pdf, .doc, .docx, .ppt, .pptx, .zip, .rar, .png, .jpg, .jpeg'
+                                        onChange={e => setSelectedEditFile(e.target.files?.[0] || null)}
+                                    />
+                                </Button>
+                                {selectedEditFile && (
+                                    <div className='flex items-center gap-2 text-emerald-600 text-sm font-medium'>
+                                        <CheckCircle fontSize='small' />
+                                        <span>{selectedEditFile.name} ({(selectedEditFile.size / (1024 * 1024)).toFixed(2)} MB)</span>
+                                    </div>
+                                )}
                             </div>
                         </DialogContent>
                         <DialogActions className='!px-6 !pb-4 !pt-2'>
-                            <Button onClick={() => setEditDialogOpen(false)} className='!normal-case !text-slate-600'>
+                            <Button 
+                                onClick={() => setEditDialogOpen(false)} 
+                                disabled={uploading} 
+                                className='!normal-case !text-slate-600'
+                            >
                                 Cancel
                             </Button>
                             <Button
                                 type='submit'
                                 variant='contained'
+                                disabled={uploading}
                                 className='!bg-slate-900 hover:!bg-slate-800 !normal-case !rounded-xl !px-5 !py-2 !shadow-none'
                             >
-                                Save Changes
+                                {uploading ? 'Updating...' : 'Save Changes'}
                             </Button>
                         </DialogActions>
                     </form>
                 </Dialog>
 
-               
+                {/* GRADING MODAL */}
                 <Dialog open={gradingModalOpen} onClose={() => setGradingModalOpen(false)} fullWidth maxWidth='sm'>
                     <DialogTitle className='!font-bold !text-slate-800'>
                         Grade Submission
                     </DialogTitle>
                     <DialogContent>
-                        {selectedSubmission && (
-                            <div className='flex flex-col gap-4 mt-2 pt-1'>
-                                <div className='p-4 bg-slate-50 rounded-xl border border-slate-200'>
-                                    <Typography className='!font-bold !text-slate-800'>
-                                        {selectedSubmission.studentName}
-                                    </Typography>
-                                    <Typography variant='body2' className='!text-slate-600'>
-                                        {selectedSubmission.assignmentTitle} ({selectedSubmission.course})
-                                    </Typography>
+                                        {selectedSubmission && (
+                        <div className='flex flex-col gap-4 mt-2 pt-1'>
+                            <div className='p-4 bg-slate-50 rounded-xl border border-slate-200'>
+                                <div className='flex items-center justify-between'>
+                                    <div>
+                                        <Typography className='!font-bold !text-slate-800'>
+                                            {selectedSubmission.studentName}
+                                        </Typography>
+                                        <Typography variant='body2' className='!text-slate-600'>
+                                            {selectedSubmission.assignmentTitle} ({selectedSubmission.course})
+                                        </Typography>
+                                    </div>
+                                    {selectedSubmission.fileUrl && (
+                                        <Button
+                                            size='small'
+                                            startIcon={<VisibilityOutlined fontSize='small' />}
+                                            onClick={() => window.open(selectedSubmission.fileUrl, '_blank', 'noopener,noreferrer')}
+                                            className='!normal-case !text-xs !bg-blue-50 hover:!bg-blue-100 !text-blue-700 !rounded-lg'
+                                        >
+                                            View Deliverable
+                                        </Button>
+                                    )}
                                 </div>
-                                <TextField
-                                    fullWidth
-                                    label={`Score (Max ${selectedSubmission.maxScore})`}
-                                    type='number'
-                                    value={gradeScore}
-                                    onChange={e => setGradeScore(e.target.value)}
-                                />
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    minRows={3}
-                                    label='Feedback'
-                                    value={gradeFeedback}
-                                    onChange={e => setGradeFeedback(e.target.value)}
-                                />
+                                {selectedSubmission.file && (
+                                    <Typography variant='caption' className='!text-slate-400 !mt-2 block'>
+                                        Attached file: {selectedSubmission.file}
+                                    </Typography>
+                                )}
                             </div>
-                        )}
+                            <TextField
+                                fullWidth
+                                label={`Score (Max ${selectedSubmission.maxScore})`}
+                                type='number'
+                                value={gradeScore}
+                                onChange={e => setGradeScore(e.target.value)}
+                            />
+                            <TextField
+                                fullWidth
+                                multiline
+                                minRows={3}
+                                label='Feedback'
+                                value={gradeFeedback}
+                                onChange={e => setGradeFeedback(e.target.value)}
+                            />
+                        </div>
+                    )}
                     </DialogContent>
                     <DialogActions className='!px-6 !pb-5'>
                         <Button onClick={() => setGradingModalOpen(false)} className='!normal-case !text-slate-600'>
