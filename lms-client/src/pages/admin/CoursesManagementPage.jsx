@@ -19,8 +19,8 @@ import {
 import { AddRounded as Add, DeleteRounded as DeleteOutlined, PeopleRounded as PeopleOutlined, SearchRounded as Search, PersonRemoveRounded as PersonRemoveOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
-import SidebarInstructor from '../../components/SidebarInstructor'
+import NavbarAdmin from '../../components/NavbarAdmin'
+import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function CoursesManagementPage() {
@@ -145,8 +145,8 @@ export default function CoursesManagementPage() {
     return (
         <RoleScreen page="coursemanagementpage" role="admin">
             <div className='min-h-screen bg-slate-50'>
-                <Navbar />
-                <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+                <NavbarAdmin />
+                <SidebarAdmin open={sidebarOpen} setOpen={setSidebarOpen} />
                 <div
                     className='transition-all duration-300'
                     style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
@@ -164,7 +164,7 @@ export default function CoursesManagementPage() {
                             <Button
                                 variant='contained'
                                 startIcon={<Add />}
-                                onClick={() => navigate('/instructor/courses/create')}
+                                onClick={() => navigate('/admin/courses/create')}
                                 className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
                             >
                                 Create Course

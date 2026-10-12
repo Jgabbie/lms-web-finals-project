@@ -3,8 +3,8 @@ import { Card, CardContent, Typography, Button, FormControl, InputLabel, MenuIte
 import { SaveRounded as SaveOutlined, SchoolRounded as SchoolOutlined, ArrowBackRounded as ArrowBack } from '@mui/icons-material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
-import SidebarInstructor from '../../components/SidebarInstructor'
+import NavbarAdmin from '../../components/NavbarAdmin'
+import SidebarAdmin from '../../components/SidebarAdmin'
 import api from '../../api/axiosClient'
 
 export default function CreateCoursesPage() {
@@ -51,8 +51,8 @@ export default function CreateCoursesPage() {
     return (
         <RoleScreen page="createcoursepage" role="admin">
             <div className='min-h-screen bg-slate-50'>
-                <Navbar />
-                <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+                <NavbarAdmin />
+                <SidebarAdmin open={sidebarOpen} setOpen={setSidebarOpen} />
                 <div
                     className='transition-all duration-300'
                     style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
