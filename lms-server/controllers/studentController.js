@@ -646,7 +646,7 @@ exports.deleteStudent = async (req, res) => {
         })
 
         await Student.findByIdAndDelete(id)
-        await User.findByIdAndDelete(id)
+        await User.findOneAndDelete({ email: studentInformation.email })
 
         res.status(200).json({ message: 'Student deleted successfully' })
     } catch (error) {
@@ -675,8 +675,9 @@ exports.restoreStudent = async (req, res) => {
             })
         }
 
-        const archivedUser = await ArchivedUser.findById(id)
         const archivedStudent = await ArchivedStudent.findById(id)
+        const archivedUser = await ArchivedUser.findOne({ email: archivedStudent.email })
+
 
         if (!archivedUser) {
             return res.status(404).json({ message: 'Archived student not found' })
@@ -721,7 +722,7 @@ exports.restoreStudent = async (req, res) => {
         await restoredStudentInStudent.save()
 
         await ArchivedStudent.findByIdAndDelete(id)
-        await ArchivedUser.findByIdAndDelete(id)
+        await ArchivedUser.findOneAndDelete({ email: archivedStudent.email })
 
         res.status(200).json({ message: 'Student restored successfully' })
 

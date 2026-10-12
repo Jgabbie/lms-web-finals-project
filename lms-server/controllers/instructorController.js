@@ -629,7 +629,7 @@ exports.deleteInstructor = async (req, res) => {
         })
 
         await Instructor.findByIdAndDelete(id)
-        await User.findByIdAndDelete(id)
+        await User.findOneAndDelete({ email: instructorInformation.email })
 
         res.status(200).json({ message: 'Instructor deleted successfully' })
     } catch (error) {
@@ -658,8 +658,11 @@ exports.restoreInstructor = async (req, res) => {
             })
         }
 
-        const archivedUser = await ArchivedUser.findById(id)
+
+
         const archivedInstructor = await ArchivedInstructor.findById(id)
+        const archivedUser = await ArchivedUser.findOne({ email: archivedInstructor.email })
+
 
         if (!archivedUser) {
             return res.status(404).json({ message: 'Archived user not found' })
@@ -705,7 +708,7 @@ exports.restoreInstructor = async (req, res) => {
         await restoredInstructorInInstructor.save()
 
         await ArchivedInstructor.findByIdAndDelete(id)
-        await ArchivedUser.findByIdAndDelete(id)
+        await ArchivedUser.findOneAndDelete({ email: archivedInstructor.email })
 
         res.status(200).json({ message: 'Instructor restored successfully' })
     } catch (error) {
