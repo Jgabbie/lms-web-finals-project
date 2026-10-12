@@ -494,7 +494,7 @@ export default function ActivityLogs() {
                                                     <td className='px-6 py-4'>
                                                         <Chip
                                                             size='small'
-                                                            label={instructor.status === 'Active' ? 'Active' : 'Inactive'}
+                                                            label={instructor.status === 'active' ? 'Active' : 'Inactive'}
                                                             className={
                                                                 instructor.status === 'active'
                                                                     ? '!bg-green-50 !text-green-700'

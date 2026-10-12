@@ -871,6 +871,7 @@ exports.deleteUser = async (req, res) => {
                     { _id: instructor._id },
                     {
                         _id: instructor._id,
+                        instructorId: instructor.instructorId,
                         firstName: instructor.firstName,
                         lastName: instructor.lastName,
                         email: instructor.email,
