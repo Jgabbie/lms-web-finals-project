@@ -819,7 +819,7 @@ exports.deleteUser = async (req, res) => {
 
     } catch (error) {
         console.error('Delete user error:', error)
-        res.status(500).json({ message: 'Failed to delete user' })
+        res.status(500).json({ message: 'Failed to delete user' + error })
     }
 }
 
