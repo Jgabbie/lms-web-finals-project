@@ -524,7 +524,7 @@ exports.deleteInstructor = async (req, res) => {
                 password: instructorInformation.password,
                 department: instructorInformation.department,
                 specialization: instructorInformation.specialization,
-                status: instructorInformation.status,
+                status: 'inactive',
                 email: instructorInformation.email,
                 role: instructorInformation.role
             },
@@ -538,7 +538,7 @@ exports.deleteInstructor = async (req, res) => {
                 firstName: instructorInformation.firstName,
                 lastName: instructorInformation.lastName,
                 password: instructorInformation.password,
-                status: instructorInformation.status,
+                status: 'inactive',
                 email: instructorInformation.email,
                 role: instructorInformation.role
             },
@@ -685,6 +685,7 @@ exports.restoreInstructor = async (req, res) => {
             _id: archivedInstructor._id,
             firstName: archivedInstructor.firstName,
             lastName: archivedInstructor.lastName,
+            password: archivedInstructor.password,
             email: archivedInstructor.email,
             role: archivedInstructor.role,
             status: 'active'
@@ -696,6 +697,7 @@ exports.restoreInstructor = async (req, res) => {
             instructorId: archivedInstructor.instructorId,
             firstName: archivedInstructor.firstName,
             lastName: archivedInstructor.lastName,
+            password: archivedInstructor.password,
             email: archivedInstructor.email,
             specialization: archivedInstructor.specialization,
             department: archivedInstructor.department,

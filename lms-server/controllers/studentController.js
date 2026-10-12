@@ -538,7 +538,7 @@ exports.deleteStudent = async (req, res) => {
                 password: studentInformation.password,
                 course: studentInformation.course,
                 yearLevel: studentInformation.yearLevel,
-                status: studentInformation.status,
+                status: 'inactive',
                 email: studentInformation.email,
                 role: studentInformation.role
             },
@@ -552,7 +552,7 @@ exports.deleteStudent = async (req, res) => {
                 firstName: studentInformation.firstName,
                 lastName: studentInformation.lastName,
                 password: studentInformation.password,
-                status: studentInformation.status,
+                status: 'inactive',
                 email: studentInformation.email,
                 role: studentInformation.role
             },
@@ -700,6 +700,7 @@ exports.restoreStudent = async (req, res) => {
             _id: archivedUser._id,
             firstName: archivedUser.firstName,
             lastName: archivedUser.lastName,
+            password: archivedUser.password,
             email: archivedUser.email,
             role: archivedUser.role,
             status: 'active'
@@ -710,6 +711,7 @@ exports.restoreStudent = async (req, res) => {
             studentId: archivedStudent.studentId,
             firstName: archivedStudent.firstName,
             lastName: archivedStudent.lastName,
+            password: archivedStudent.password,
             email: archivedStudent.email,
             course: archivedStudent.course,
             yearLevel: archivedStudent.yearLevel,
