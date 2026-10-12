@@ -3,6 +3,7 @@ import '../App.css'
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Avatar, Badge, Button } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import { useNavigate } from "react-router-dom"
 
 
 const pages = [
