@@ -379,7 +379,7 @@ export default function ActivityLogs() {
                             {[
                                 ['Total Instructors', instructors.length],
                                 ['Active', instructors.filter(instructor => instructor.status?.toLowerCase() === 'active').length,],
-                                ['Inactive', instructors.filter(instructor => instructor.status?.toLowerCase() === 'inactive').length,],
+                                ['Inactive', archivedUsers.filter(instructor => instructor.status?.toLowerCase() === 'inactive').length,],
                                 ['Specializations', new Set(instructors.map(instructor => instructor.specialization?.trim()).filter(Boolean)).size],
                             ].map(([label, value]) => (
                                 <Card key={label} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
@@ -484,11 +484,11 @@ export default function ActivityLogs() {
                                                     </td>
 
                                                     <td className='px-6 py-4 text-slate-600'>
-                                                        {instructor.department}
+                                                        {instructor.department || 'None'}
                                                     </td>
 
                                                     <td className='px-6 py-4 text-slate-600'>
-                                                        {instructor.specialization}
+                                                        {instructor.specialization || 'None'}
                                                     </td>
 
                                                     <td className='px-6 py-4'>

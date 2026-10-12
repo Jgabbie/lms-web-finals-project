@@ -384,7 +384,7 @@ export default function StudentManagement() {
                             {[
                                 ['Total Students', students.length],
                                 ['Active Students', students.filter(student => student.status?.toLowerCase() === 'active').length,],
-                                ['Inactive Students', students.filter(student => student.status?.toLowerCase() === 'inactive').length,],
+                                ['Inactive Students', archivedUsers.filter(student => student.status?.toLowerCase() === 'inactive').length,],
                             ].map(([label, value]) => (
                                 <Card key={label} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                     <CardContent className='!p-5'>
