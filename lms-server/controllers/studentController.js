@@ -20,9 +20,19 @@ const transporter = nodemailer.createTransport({
 })
 
 const logActivity = async (action, description, req) => {
-    const actorId = req.user?.id
+    const actorId = req.user?.id || req.user?._id
+
+    console.log('Actor ID:', actorId)
+
+    if (!actorId) {
+        throw new Error('Actor ID is missing in the request')
+    }
 
     const actor = await User.findById(actorId).select('firstName lastName role')
+
+    if (!actor) {
+        throw new Error('Actor not found')
+    }
 
     await Log.create({
         firstName: actor.firstName,
