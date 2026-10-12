@@ -605,10 +605,16 @@ exports.deleteUser = async (req, res) => {
             })
 
             if (student) {
+                const archivedStudentId =
+                    student.studentId && student.studentId !== 'None'
+                        ? student.studentId
+                        : `STU-${student._id}`
+
                 await ArchivedStudent.findOneAndUpdate(
                     { _id: student._id },
                     {
                         _id: student._id,
+                        studentId: archivedStudentId,
                         firstName: student.firstName,
                         lastName: student.lastName,
                         email: student.email,
