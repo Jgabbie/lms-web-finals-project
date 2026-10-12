@@ -591,16 +591,11 @@ exports.deleteUser = async (req, res) => {
             })
 
             if (student) {
-                const archivedStudentId =
-                    student.studentId && student.studentId !== 'None'
-                        ? student.studentId
-                        : `STU-${student._id}`
-
                 await ArchivedStudent.findOneAndUpdate(
                     { _id: student._id },
                     {
                         _id: student._id,
-                        studentId: archivedStudentId,
+                        studentId: student.studentId,
                         firstName: student.firstName,
                         lastName: student.lastName,
                         email: student.email,
@@ -953,6 +948,11 @@ exports.restoreUser = async (req, res) => {
                 })
                 await ArchivedStudent.findByIdAndDelete(id)
             }
+
+            res.status(200).json({
+                message: 'User restored successfully',
+                user: restoredUser
+            })
         }
 
         if (archivedUser.role === 'instructor') {
@@ -970,6 +970,11 @@ exports.restoreUser = async (req, res) => {
                 })
                 await ArchivedInstructor.findByIdAndDelete(id)
             }
+
+            res.status(200).json({
+                message: 'User restored successfully',
+                user: restoredUser
+            })
         }
 
         await ArchivedUser.findByIdAndDelete(id)
@@ -978,6 +983,8 @@ exports.restoreUser = async (req, res) => {
             message: 'User restored successfully',
             user: restoredUser
         })
+
+
     } catch (error) {
         console.error('Restore user error:', error)
         res.status(500).json({ message: 'Failed to restore user' })

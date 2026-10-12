@@ -44,8 +44,6 @@ exports.getStudent = async (req, res) => {
     }
 }
 
-
-
 exports.addStudent = async (req, res) => {
     try {
         const {
@@ -169,7 +167,7 @@ exports.addStudent = async (req, res) => {
             email: email.toLowerCase().trim(),
             password: hashedPassword,
             status: status || 'active',
-            role: role || 'instructor',
+            role: 'student',
         })
 
         await transporter.sendMail({

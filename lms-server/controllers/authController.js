@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const nodemailer = require('nodemailer')
 const crypto = require('crypto')
 const User = require('../models/User')
+const Student = require('../models/Student')
 const Log = require('../models/Log')
 
 const pendingRegistrations = new Map()
@@ -283,6 +284,17 @@ exports.verifyRegistrationOtp = async (req, res) => {
             email: normalizedEmail,
             password: hashedPassword,
             role: 'student'
+        })
+
+        await Student.create({
+            studentId: "None",
+            firstName: registration.firstName,
+            lastName: registration.lastName,
+            email: normalizedEmail,
+            password: hashedPassword,
+            course: "None",
+            yearLevel: "None",
+            status: 'active'
         })
 
         await Log.create({

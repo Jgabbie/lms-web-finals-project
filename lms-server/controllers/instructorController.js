@@ -166,7 +166,7 @@ exports.addInstructor = async (req, res) => {
             email: email.toLowerCase().trim(),
             password: hashedPassword,
             status: status || 'active',
-            role: role || 'instructor',
+            role: 'instructor',
         })
 
         await transporter.sendMail({
@@ -250,7 +250,7 @@ exports.addInstructor = async (req, res) => {
             department: department.trim(),
             specialization: specialization.trim(),
             status: status || 'active',
-            role: role || 'instructor',
+            role: 'instructor',
         })
 
         await instructor.save()
