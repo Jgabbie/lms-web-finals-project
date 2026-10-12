@@ -526,8 +526,6 @@ exports.updateUser = async (req, res) => {
             })
         }
 
-        const previousRole = String(user.role).toLowerCase()
-
         user.firstName = normalizedFirstName
         user.lastName = normalizedLastName
         user.email = normalizedEmail
@@ -535,127 +533,77 @@ exports.updateUser = async (req, res) => {
 
         await user.save()
 
-        if (previousRole === 'student' && normalizedRole === 'instructor') {
-            const student = await Student.findOne({
+        if (normalizedRole === 'student') {
+            await Instructor.deleteMany({
                 $or: [
                     { _id: user._id },
                     { email: normalizedEmail }
                 ]
             })
-
-            const studentData = student
-                ? student.toObject()
-                : {
-                    id: user._id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                }
-
-            const lastInstructor = await Instructor.findOne().sort({ instructorId: -1 })
-
-            let nextIdNumber = 1
-
-            if (lastInstructor && lastInstructor.instructorId) {
-                const lastIdNumber = parseInt(lastInstructor.instructorId.replace('INST', ''))
-                nextIdNumber = lastIdNumber + 1
-            }
-
-            const newInstructorId = `INST${nextIdNumber.toString().padStart(3, '0')}`
-
-            await Instructor.findOneAndUpdate(
-                { _id: user._id },
-                {
-                    $set: {
-                        ...studentData,
-                        instructorId: newInstructorId,
-                        _id: user._id,
-                        firstName: normalizedFirstName,
-                        lastName: normalizedLastName,
-                        email: normalizedEmail,
-                        department: 'None',
-                        specialization: 'None',
-                        role: 'instructor',
-                    }
-                },
-                { upsert: true, new: true, runValidators: true }
-            )
-
-            await Student.deleteMany({
-                $or: [
-                    { _id: user._id },
-                    { email: normalizedEmail }
-                ]
-            })
-        } else if (previousRole === 'instructor' && normalizedRole === 'student') {
-            const instructor = await Instructor.findOne({
-                $or: [
-                    { _id: user._id },
-                    { email: normalizedEmail }
-                ]
-            })
-
-            const instructorData = instructor
-                ? instructor.toObject()
-                : {
-                    id: user._id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                }
 
             await Student.findOneAndUpdate(
-                { _id: user._id },
+                { id: user._id },
                 {
                     $set: {
-                        ...instructorData,
                         _id: user._id,
                         studentId: 'None',
                         firstName: normalizedFirstName,
                         lastName: normalizedLastName,
                         email: normalizedEmail,
-                        coure: 'None',
+                        course: 'None',
                         yearLevel: 'None',
-                        role: 'student',
+                        status: user.status || 'active',
+                        role: 'student'
                     }
                 },
                 { upsert: true, new: true, runValidators: true }
             )
-
+        } else if (normalizedRole === 'instructor') {
             await Student.deleteMany({
                 $or: [
                     { _id: user._id },
                     { email: normalizedEmail }
                 ]
             })
-        } else if (normalizedRole === 'student') {
-            await Student.findOneAndUpdate(
-                { id: user._id },
-                {
-                    $set: {
-                        firstName: normalizedFirstName,
-                        lastName: normalizedLastName,
-                        email: normalizedEmail,
-                        role: 'student'
+
+            let instructor = await Instructor.findById(user._id)
+
+            if (!instructor) {
+                const lastInstructor = await Instructor.findOne().sort({ instructorId: -1 })
+                let nextIdNumber = 1
+
+                if (lastInstructor && lastInstructor.instructorId) {
+                    const lastIdNumber = parseInt(lastInstructor.instructorId.replace('INST', ''), 10)
+                    if (!isNaN(lastIdNumber)) {
+                        nextIdNumber = lastIdNumber + 1
                     }
-                },
-                { upsert: true, new: true, runValidators: true }
-            )
-            await Instructor.deleteMany({ _id: user._id })
-        } else if (normalizedRole === 'instructor') {
-            await Instructor.findOneAndUpdate(
-                { id: user._id },
-                {
-                    $set: {
-                        firstName: normalizedFirstName,
-                        lastName: normalizedLastName,
-                        email: normalizedEmail,
-                        role: 'instructor'
-                    }
-                },
-                { upsert: true, new: true, runValidators: true }
-            )
-            await Student.deleteMany({ _id: user._id })
+                }
+
+                const newInstructorId = `INST${nextIdNumber.toString().padStart(3, '0')}`
+                await Instructor.findOneAndUpdate(
+                    { _id: user._id },
+                    {
+                        $set: {
+                            _id: user._id,
+                            instructorId: newInstructorId,
+                            firstName: normalizedFirstName,
+                            lastName: normalizedLastName,
+                            email: normalizedEmail,
+                            department: 'None',
+                            specialization: 'None',
+                            status: user.status || 'active',
+                            role: 'instructor'
+                        }
+                    },
+                    { upsert: true, new: true, runValidators: true }
+                )
+            } else {
+                instructor.firstName = normalizedFirstName
+                instructor.lastName = normalizedLastName
+                instructor.email = normalizedEmail
+                instructor.role = 'instructor'
+                await instructor.save()
+            }
         } else if (normalizedRole === 'admin') {
             await Student.deleteMany({
                 $or: [
@@ -671,6 +619,8 @@ exports.updateUser = async (req, res) => {
                 ]
             })
         }
+
+        if
 
 
 

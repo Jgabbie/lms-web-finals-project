@@ -53,7 +53,6 @@ exports.addStudent = async (req, res) => {
             email,
             course,
             yearLevel,
-            status,
         } = req.body;
 
         const normalizedStudentId = String(studentId).trim().toUpperCase()
@@ -166,7 +165,7 @@ exports.addStudent = async (req, res) => {
             lastName: lastName.trim(),
             email: email.toLowerCase().trim(),
             password: hashedPassword,
-            status: status || 'active',
+            status: 'active',
             role: 'student',
         })
 
@@ -250,7 +249,7 @@ exports.addStudent = async (req, res) => {
             password: hashedPassword,
             course: normalizedCourse,
             yearLevel: normalizedYearLevel,
-            status: status || 'active',
+            status: 'active',
             role: 'student',
         })
 

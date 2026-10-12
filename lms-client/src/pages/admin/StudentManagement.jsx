@@ -214,7 +214,6 @@ export default function StudentManagement() {
                 email: formData.email.trim(),
                 course: formData.course.trim(),
                 yearLevel: formData.yearLevel.trim(),
-                status: formData.status.toLowerCase()
             }, getAuthConfig())
 
             setOpenAddStudent(false)
@@ -249,7 +248,6 @@ export default function StudentManagement() {
                 email: formData.email.trim(),
                 course: formData.course.trim(),
                 yearLevel: formData.yearLevel.trim(),
-                status: formData.status.toLowerCase()
             }
             await api.put(`/students/${id}`, payload, getAuthConfig())
             setOpenEditStudent(false)
@@ -425,9 +423,11 @@ export default function StudentManagement() {
                                         placeholder='Search by name or email...'
                                         value={search}
                                         onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
-                                        slotProps={{ input: {
-                                            startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                        } }}
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: <Search className='!text-slate-400 !mr-2' />
+                                            }
+                                        }}
                                     />
                                     <TextField
                                         select
@@ -675,17 +675,6 @@ export default function StudentManagement() {
                             helperText={fieldErrors.yearLevel}
                             slotProps={{ htmlInput: { maxLength: 10 } }}
                         />
-                        <TextField
-                            select
-                            fullWidth
-                            label='Status'
-                            name='status'
-                            value={formData.status}
-                            onChange={handleFormChange}
-                        >
-                            <MenuItem value='active'>Active</MenuItem>
-                            <MenuItem value='inactive'>Inactive</MenuItem>
-                        </TextField>
                     </div>
                 </DialogContent>
                 <DialogActions className='!px-6 !pb-5'>
@@ -864,17 +853,6 @@ export default function StudentManagement() {
                             helperText={fieldErrors.yearLevel}
                             slotProps={{ htmlInput: { maxLength: 10 } }}
                         />
-                        <TextField
-                            select
-                            fullWidth
-                            label='Status'
-                            name='status'
-                            value={formData.status}
-                            onChange={handleFormChange}
-                        >
-                            <MenuItem value='active'>Active</MenuItem>
-                            <MenuItem value='inactive'>Inactive</MenuItem>
-                        </TextField>
                     </div>
                 </DialogContent>
                 <DialogActions className='!px-6 !pb-5'>

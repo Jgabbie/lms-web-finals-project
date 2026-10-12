@@ -54,8 +54,6 @@ exports.addInstructor = async (req, res) => {
             email,
             department,
             specialization,
-            status,
-            role
         } = req.body;
 
         const normalizedFirstName = String(firstName).trim()
@@ -165,7 +163,7 @@ exports.addInstructor = async (req, res) => {
             lastName: lastName.trim(),
             email: email.toLowerCase().trim(),
             password: hashedPassword,
-            status: status || 'active',
+            status: 'active',
             role: 'instructor',
         })
 
@@ -249,7 +247,7 @@ exports.addInstructor = async (req, res) => {
             password: hashedPassword,
             department: department.trim(),
             specialization: specialization.trim(),
-            status: status || 'active',
+            status: 'active',
             role: 'instructor',
         })
 

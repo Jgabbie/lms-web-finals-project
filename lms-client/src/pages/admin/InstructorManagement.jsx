@@ -207,7 +207,6 @@ export default function ActivityLogs() {
                 email: formData.email.trim().toLowerCase(),
                 department: formData.department.trim(),
                 specialization: formData.specialization.trim(),
-                status: formData.status
             }, getAuthConfig())
 
             setOpenAddInstructor(false)
@@ -239,7 +238,6 @@ export default function ActivityLogs() {
                 email: formData.email.trim().toLowerCase(),
                 department: formData.department.trim(),
                 specialization: formData.specialization.trim(),
-                status: formData.status
             }
             await api.put(`/instructors/update/instructors/${selectedInstructor._id}`, payload, getAuthConfig())
             setOpenEditInstructor(false)
@@ -686,21 +684,6 @@ export default function ActivityLogs() {
                             slotProps={{ maxLength: 100 }}
                         />
 
-                        <TextField
-                            required
-                            select
-                            fullWidth
-                            label='Status'
-                            name='status'
-                            value={formData.status}
-                            onChange={handleFormChange}
-                            error={Boolean(fieldErrors.status)}
-                            helperText={fieldErrors.status}
-                        >
-                            <MenuItem value='active'>Active</MenuItem>
-                            <MenuItem value='inactive'>Inactive</MenuItem>
-                        </TextField>
-
                     </div>
                 </DialogContent>
 
@@ -886,21 +869,6 @@ export default function ActivityLogs() {
                             helperText={fieldErrors.specialization}
                             slotProps={{ maxLength: 50 }}
                         />
-
-                        <TextField
-                            required
-                            select
-                            fullWidth
-                            label='Status'
-                            name='status'
-                            value={formData.status}
-                            onChange={handleFormChange}
-                            error={Boolean(fieldErrors.status)}
-                            helperText={fieldErrors.status}
-                        >
-                            <MenuItem value='active'>Active</MenuItem>
-                            <MenuItem value='inactive'>Inactive</MenuItem>
-                        </TextField>
 
                     </div>
                 </DialogContent>
