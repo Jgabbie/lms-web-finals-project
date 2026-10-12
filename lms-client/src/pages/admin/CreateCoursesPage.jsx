@@ -49,7 +49,7 @@ export default function CreateCoursesPage() {
     }
 
     return (
-        <RoleScreen page="createcoursepage" role="instructor">
+        <RoleScreen page="createcoursepage" role="admin">
             <div className='min-h-screen bg-slate-50'>
                 <Navbar />
                 <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />

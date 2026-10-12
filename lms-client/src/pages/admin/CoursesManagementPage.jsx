@@ -143,7 +143,7 @@ export default function CoursesManagementPage() {
     }, [courses, search, status])
 
     return (
-        <RoleScreen page="coursemanagementpage" role="instructor">
+        <RoleScreen page="coursemanagementpage" role="admin">
             <div className='min-h-screen bg-slate-50'>
                 <Navbar />
                 <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
