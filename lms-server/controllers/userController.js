@@ -542,7 +542,7 @@ exports.updateUser = async (req, res) => {
             })
 
             await Student.findOneAndUpdate(
-                { id: user._id },
+                { _id: user._id },
                 {
                     $set: {
                         _id: user._id,

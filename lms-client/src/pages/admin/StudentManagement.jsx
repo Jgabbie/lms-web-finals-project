@@ -485,7 +485,7 @@ export default function StudentManagement() {
                                                     <td className='px-6 py-4'>
                                                         <Chip
                                                             size='small'
-                                                            label={student.status === "active"
+                                                            label={student.status.trim().toLowerCase() === "active"
                                                                 ? "Active"
                                                                 : "Inactive"
                                                             }
@@ -875,9 +875,11 @@ export default function StudentManagement() {
                 onClose={() => setOpenDeleteStudent(false)}
                 fullWidth
                 maxWidth='xs'
-                slotProps={{ paper: {
-                    className: '!rounded-2xl'
-                } }}
+                slotProps={{
+                    paper: {
+                        className: '!rounded-2xl'
+                    }
+                }}
             >
                 <DialogContent className='!px-6 !pt-7 !pb-3'>
                     <div className='flex flex-col items-center text-center'>
