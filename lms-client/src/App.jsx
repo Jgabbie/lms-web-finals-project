@@ -24,6 +24,7 @@ import ActivityLogs from './pages/admin/ActivityLogs'
 import UserManagementPage from './pages/admin/UserManagementPage'
 import InstructorManagement from './pages/admin/InstructorManagement'
 import CoursesManagementPage from './pages/admin/CoursesManagementPage'
+import CreateCoursesPage from './pages/instructor/CreateCoursesPage'
 import StudentManagement from './pages/admin/StudentManagement'
 import ProfilePage from './pages/admin/ProfilePage'
 
@@ -145,6 +146,7 @@ function App() {
           <Route path='/admin/instructors' element={<InstructorManagement />} />
           <Route path='/admin/logs' element={<ActivityLogs />} />
           <Route path='/admin/courses' element={<CoursesManagementPage />} />
+          <Route path='/admin/courses/create' element={<CreateCoursesPage />} />
           <Route path='/admin/students' element={<StudentManagement />} />
         </Route>
 
