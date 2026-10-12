@@ -5,9 +5,16 @@ import MenuIcon from '@mui/icons-material/Menu'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 
 
-const pages = ['Dashboard', 'My Courses', 'Assignments', 'Grades']
+const pages = [
+    { name: 'Users', path: '/admin/users' },
+    { name: 'Courses', path: '/admin/courses' },
+    { name: 'Students', path: '/admin/students' },
+    { name: 'Instructors', path: '/admin/instructors' }
+]
 
 export default function NavbarAdmin() {
+    const navigate = useNavigate()
+
     const [anchorElNav, setAnchorElNav] = useState(null)
     const [anchorElUser, setAnchorElUser] = useState(null)
     const [sidebarOpen] = useState(true)
@@ -19,6 +26,20 @@ export default function NavbarAdmin() {
 
     const user = JSON.parse(localStorage.getItem('profile')) || {}
     const initials = user.firstName && user.lastName ? `${user.firstName[0]}${user.lastName[0]}` : 'U'
+
+    const handleNavigate = (path) => {
+        setAnchorElNav(null)
+        setAnchorElUser(null)
+        setAnchorElNotifications(null)
+        navigate(path)
+    }
+
+    const handleLogout = () => {
+        setAnchorElUser(null)
+        localStorage.removeItem('profile')
+        localStorage.removeItem('role')
+        navigate('/login')
+    }
 
     return (
         <>
@@ -51,7 +72,11 @@ export default function NavbarAdmin() {
 
                     <div className="hidden md:flex gap-6 items-center">
                         {pages.map((page) => (
-                            <Button key={page} onClick={handleCloseNavMenu} className="text-slate-600 font-medium hover:text-blue-600 transition-colors duration-200">
+                            <Button
+                                key={page}
+                                onClick={() => handleNavigate(page.path)}
+                                className="text-slate-600 font-medium hover:text-blue-600 transition-colors duration-200"
+                            >
                                 {page}
                             </Button>
                         ))}
