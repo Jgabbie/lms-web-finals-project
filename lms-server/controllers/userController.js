@@ -140,7 +140,6 @@ exports.addUser = async (req, res) => {
 
         let instructorId
 
-
         if (normalizedRole === 'instructor') {
             const lastInstructor = await Instructor.findOne().sort({ instructorId: -1 })
 
@@ -163,41 +162,19 @@ exports.addUser = async (req, res) => {
                 status: 'active',
             })
 
-            return res.status(201).json({
-                message: 'User added successfully',
-            })
-        }
-
-        if (normalizedRole === 'student') {
-            await Student.create({
-                studentId: 'None',
+            await User.create({
                 firstName: normalizedFirstName,
                 lastName: normalizedLastName,
                 email: normalizedEmail,
                 password: hashedPassword,
-                course: 'None',
-                yearLevel: 'None',
-                status: 'active',
+                role: normalizedRole
             })
 
-            return res.status(201).json({
-                message: 'User added successfully',
-            })
-        }
-
-        await User.create({
-            firstName: normalizedFirstName,
-            lastName: normalizedLastName,
-            email: normalizedEmail,
-            password: hashedPassword,
-            role: normalizedRole
-        })
-
-        await transporter.sendMail({
-            from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
-            to: normalizedEmail,
-            subject: 'EduLearn LMS - Account Created',
-            html: `
+            await transporter.sendMail({
+                from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
+                to: normalizedEmail,
+                subject: 'EduLearn LMS - Account Created',
+                html: `
                 <div
                     style="
                     font-family: Arial, sans-serif;
@@ -263,7 +240,110 @@ exports.addUser = async (req, res) => {
                     </div>
                 </div>
             `
-        })
+            })
+
+            return res.status(201).json({
+                message: 'User added successfully',
+            })
+        }
+
+        if (normalizedRole === 'student') {
+            await Student.create({
+                studentId: 'None',
+                firstName: normalizedFirstName,
+                lastName: normalizedLastName,
+                email: normalizedEmail,
+                password: hashedPassword,
+                course: 'None',
+                yearLevel: 'None',
+                status: 'active',
+            })
+
+            await User.create({
+                firstName: normalizedFirstName,
+                lastName: normalizedLastName,
+                email: normalizedEmail,
+                password: hashedPassword,
+                role: normalizedRole
+            })
+
+            await transporter.sendMail({
+                from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
+                to: normalizedEmail,
+                subject: 'EduLearn LMS - Account Created',
+                html: `
+                <div
+                    style="
+                    font-family: Arial, sans-serif;
+                    max-width: 600px;
+                    margin: auto;
+                    padding: 30px;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    "
+                >
+                    <h2 style="color: #2563eb;">
+                        EduLearn LMS
+                    </h2>
+
+                    <p>Hello ${normalizedFirstName} ${normalizedLastName},</p>
+
+                    <p>
+                        Your account has been created successfully.
+                        Here is your temporary password.
+                    </p>
+
+                    <div
+                    style="
+                        text-align: center;
+                        margin: 30px 0;
+                    ">
+                        <span style="
+                            display: inline-block;
+                            background: #eff6ff;
+                            color: #2563eb;
+                            font-size: 32px;
+                            font-weight: bold;
+                            letter-spacing: 8px;
+                            padding: 15px 25px;
+                            border-radius: 10px;
+                        ">
+                            ${generatedPassword}
+                        </span>
+                    </div>
+
+                    <p>
+                        Please use this temporary password to log in and change your password immediately.
+                    </p>
+
+                    <p>
+                        If you did not request a account creation for an EduLearn LMS
+                        account, you can safely ignore this email.
+                    </p>
+
+                    <div style="
+                        background: #f3f4f6;
+                        border-top: 1px solid #e5e7eb;
+                        padding: 20px;
+                        text-align: center;
+                    "
+                    >
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                            &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                        This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
+                        </p>
+                    </div>
+                </div>
+            `
+            })
+
+            return res.status(201).json({
+                message: 'User added successfully',
+            })
+        }
+
 
         return res.status(201).json({
             message: 'User added successfully',
@@ -453,7 +533,7 @@ exports.updateUser = async (req, res) => {
                         <p style="margin: 0; font-size: 12px; color: #6b7280;">
                             &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
                         </p>
-                        <p style=""margin: 0; font-size: 12px; color: #6b7280;">
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
                         This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
                         </p>
                     </div>
@@ -616,12 +696,14 @@ exports.deleteUser = async (req, res) => {
                         <p style="margin: 0; font-size: 12px; color: #6b7280;">
                             &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
                         </p>
-                        <p style=""margin: 0; font-size: 12px; color: #6b7280;">
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
                         This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
                         </p>
                     </div>
                 </div>
             `
+                }).catch((error) => {
+                    console.error('Error sending email:', error)
                 })
 
                 res.status(200).json({ message: 'User deleted successfully' })
@@ -725,7 +807,7 @@ exports.deleteUser = async (req, res) => {
                         <p style="margin: 0; font-size: 12px; color: #6b7280;">
                             &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
                         </p>
-                        <p style=""margin: 0; font-size: 12px; color: #6b7280;">
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
                         This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
                         </p>
                     </div>
@@ -810,12 +892,14 @@ exports.deleteUser = async (req, res) => {
                         <p style="margin: 0; font-size: 12px; color: #6b7280;">
                             &copy; ${new Date().getFullYear()} EduLearn LMS. All rights reserved.
                         </p>
-                        <p style=""margin: 0; font-size: 12px; color: #6b7280;">
+                        <p style="margin: 0; font-size: 12px; color: #6b7280;">
                         This is an automated message. Please do not reply to this email. If you have any questions or concerns, please contact our support team.
                         </p>
                     </div>
                 </div>
             `
+        }).catch((error) => {
+            console.error('Error sending email:', error)
         })
 
         res.status(200).json({ message: 'User deleted successfully' })
