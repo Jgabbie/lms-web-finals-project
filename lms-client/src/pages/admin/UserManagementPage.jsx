@@ -237,6 +237,11 @@ export default function UserManagementPage() {
 
             setOpenDeleteUser(false)
             setSelectedUser(null)
+            setCurrentPage(1)
+
+            await fetchUsers()
+            await fetchArchivedUsers()
+
             showNotification('User deleted successfully', 'success')
         } catch (error) {
             console.error('Error deleting user:', error)
@@ -392,9 +397,11 @@ export default function UserManagementPage() {
                                         placeholder='Search by name or email...'
                                         value={search}
                                         onChange={(e) => { setSearch(e.target.value); setCurrentPage(1) }}
-                                        slotProps={{ input: {
-                                            startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                        } }}
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: <Search className='!text-slate-400 !mr-2' />
+                                            }
+                                        }}
                                     />
                                     <TextField
                                         select

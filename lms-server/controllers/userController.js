@@ -162,6 +162,10 @@ exports.addUser = async (req, res) => {
                 specialization: 'None',
                 status: 'active',
             })
+
+            return res.status(201).json({
+                message: 'User added successfully',
+            })
         }
 
         if (normalizedRole === 'student') {
@@ -618,6 +622,7 @@ exports.deleteUser = async (req, res) => {
                 </div>
             `
             })
+            await User.findByIdAndDelete(id)
 
             res.status(200).json({ message: 'User deleted successfully' })
         }
@@ -725,6 +730,7 @@ exports.deleteUser = async (req, res) => {
                 </div>
             `
             })
+            await User.findByIdAndDelete(id)
 
             res.status(200).json({ message: 'User deleted successfully' })
         }
