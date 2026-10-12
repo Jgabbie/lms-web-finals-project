@@ -550,6 +550,7 @@ exports.updateUser = async (req, res) => {
                         firstName: normalizedFirstName,
                         lastName: normalizedLastName,
                         email: normalizedEmail,
+                        password: user.password,
                         course: 'None',
                         yearLevel: 'None',
                         status: user.status || 'active',
@@ -589,6 +590,7 @@ exports.updateUser = async (req, res) => {
                             firstName: normalizedFirstName,
                             lastName: normalizedLastName,
                             email: normalizedEmail,
+                            password: user.password,
                             department: 'None',
                             specialization: 'None',
                             status: user.status || 'active',
@@ -601,6 +603,7 @@ exports.updateUser = async (req, res) => {
                 instructor.firstName = normalizedFirstName
                 instructor.lastName = normalizedLastName
                 instructor.email = normalizedEmail
+                instructor.password = user.password
                 instructor.role = 'instructor'
                 await instructor.save()
             }
