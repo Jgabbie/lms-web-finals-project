@@ -1,6 +1,6 @@
 import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, Divider, TextField, Snackbar, Alert } from '@mui/material'
-import { ArrowBack, CalendarToday, CloudUpload, CheckCircle, AssignmentTurnedIn } from '@mui/icons-material'
+import { ArrowBackRounded as ArrowBack, CalendarTodayRounded as CalendarToday, CloudUploadRounded as CloudUpload, CheckCircleRounded as CheckCircle, AssignmentTurnedInRounded as AssignmentTurnedIn } from '@mui/icons-material'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'

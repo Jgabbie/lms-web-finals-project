@@ -1,3 +1,4 @@
+@import './StudentNavigationIcons.css';
 @layer utilities {
     .edu-student-screen {
         --student-navy: #073342;
@@ -226,4 +227,33 @@
  .edu-role-student.student-discussions { --header-photo-position:.4% 99.6%; }
  .edu-role-student.student-profile { --header-photo-position:99.6% 99.6%; }
  .edu-role-student:is(.student-courses,.student-assignments,.student-materials,.student-discussions,.student-profile) .student-page-heading::after { display:none; }
+}
+
+/* Matching icon tiles for Student screens only. */
+@layer utilities {
+ .edu-role-student .MuiDrawer-paper .MuiListItemIcon-root,
+ .edu-role-student main div:is([class*="w-10"],[class*="w-11"],[class*="w-12"]):has(> .MuiSvgIcon-root) {
+  --icon-top:#0d99a6; --icon-bottom:#073342;
+  position:relative; isolation:isolate; flex-shrink:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:13px!important; color:#fff!important;
+  background:linear-gradient(145deg,var(--icon-top),var(--icon-bottom))!important;
+  box-shadow:inset 0 1px 1px #ffffff65,inset 0 -2px 3px #00000012,0 4px 10px #07334216;
+ }
+ .edu-role-student .MuiDrawer-paper .MuiListItemIcon-root { width:44px!important; height:44px!important; min-width:44px!important; margin-right:12px!important; }
+ .edu-role-student .MuiDrawer-paper .MuiListItemIcon-root::before,
+ .edu-role-student main div:is([class*="w-10"],[class*="w-11"],[class*="w-12"]):has(> .MuiSvgIcon-root)::before {
+  content:''; position:absolute; inset:3px 3px 50%; border-radius:10px 10px 6px 6px; background:linear-gradient(#ffffff20,#ffffff00); pointer-events:none;
+ }
+ .edu-role-student .MuiDrawer-paper .MuiListItemIcon-root svg,
+ .edu-role-student main div:is([class*="w-10"],[class*="w-11"],[class*="w-12"]) > .MuiSvgIcon-root { color:#fff!important; width:25px; height:25px; filter:drop-shadow(0 1px 1px #00000015); }
+ .edu-role-student .MuiDrawer-paper .MuiListItemIcon-root:has([data-testid*='Dashboard']) { --icon-top:#ffca3a; --icon-bottom:#ffba00; }
+ .edu-role-student .MuiDrawer-paper .MuiListItemIcon-root:has([data-testid*='Dashboard']) svg { color:#073342!important; }
+ .edu-role-student :is(.MuiListItemIcon-root,main div[class*="w-"]):has(> svg:is([data-testid*='Assignment'],[data-testid*='CheckCircle'],[data-testid*='DoneAll'])) { --icon-top:#0d99a6; --icon-bottom:#009b71; }
+ .edu-role-student :is(.MuiListItemIcon-root,main div[class*="w-"]):has(> svg:is([data-testid*='Folder'],[data-testid*='Calendar'],[data-testid*='Notifications'])) { --icon-top:#00b4c6; --icon-bottom:#0d99a6; }
+ .edu-role-student :is(.MuiListItemIcon-root,main div[class*="w-"]):has(> svg:is([data-testid*='Forum'],[data-testid*='ChatBubble'],[data-testid*='Announcement'])) { --icon-top:#00b4c6; --icon-bottom:#0d99a6; }
+ .edu-role-student :is(.MuiListItemIcon-root,main div[class*="w-"]):has(> svg:is([data-testid*='Person'],[data-testid*='Lock'])) { --icon-top:#00b4c6; --icon-bottom:#0d99a6; }
+ .edu-role-student main div[class*="w-"]:has(> svg:is([data-testid*='Schedule'],[data-testid*='AccessTime'],[data-testid*='TrendingUp'])) { --icon-top:#ffca3a; --icon-bottom:#ffba00; }
+ .edu-role-student:has(.MuiDrawer-paper > .justify-center) .MuiDrawer-paper .MuiListItemIcon-root { width:40px!important; height:40px!important; min-width:40px!important; margin-right:0!important; }
+ @media(max-width:650px) { .edu-role-student .MuiDrawer-paper .MuiListItemIcon-root { width:38px!important; height:38px!important; min-width:38px!important; margin-right:0!important; } }
 }

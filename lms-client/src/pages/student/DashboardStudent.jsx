@@ -1,5 +1,5 @@
 import { Card, CardContent, Typography, Button, Chip, Divider, LinearProgress } from '@mui/material'
-import { MenuBookOutlined as MenuBook, TrendingUpRounded as TrendingUp, ArrowForwardRounded as ArrowForward, CheckCircleOutlineRounded as CheckCircle, AccessTimeRounded as AccessTime, PersonAddOutlined as PersonAdd, AssignmentTurnedInOutlined as AssignmentTurnedIn, BookmarkBorderRounded as Bookmark, PlayCircleOutlineRounded as PlayCircle, CalendarMonthOutlined as CalendarMonth, AutoStoriesOutlined as AutoStories } from '@mui/icons-material'
+import { MenuBookRounded as MenuBook, TrendingUpRounded as TrendingUp, ArrowForwardRounded as ArrowForward, CheckCircleRounded as CheckCircle, AccessTimeRounded as AccessTime, ForumRounded as PersonAdd, AssignmentTurnedInRounded as AssignmentTurnedIn, BookmarkBorderRounded as Bookmark, PlayCircleOutlineRounded as PlayCircle, CalendarMonthRounded as CalendarMonth, LightbulbRounded as AutoStories } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useNavigate } from 'react-router-dom'
@@ -248,7 +248,7 @@ export default function DashboardStudent() {
                                             Stay on top of your work
                                         </Typography>
                                     </div>
-                                    <CalendarMonth className='!text-slate-400' />
+                                    <span className='dashboard-calendar-icon' aria-hidden='true'><CalendarMonth /></span>
                                 </div>
 
                                 <div className='space-y-3'>

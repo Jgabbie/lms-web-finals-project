@@ -1,3 +1,4 @@
+@import '../components/PublicPageIcons.css';
 .edusignup { display:grid; grid-template-columns:1fr 1fr; gap:36px; padding:18px; min-height:100svh; background:#fff; color:#202321; font-family:Arial,Helvetica,sans-serif; }
 .edusignup * { box-sizing:border-box; }
 .edusignup .MuiTypography-root,.edusignup .MuiInputBase-root,.edusignup .MuiInputLabel-root,.edusignup .MuiButton-root,.edusignup .MuiFormHelperText-root { font-family:inherit; }
