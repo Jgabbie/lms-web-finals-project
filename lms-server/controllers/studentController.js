@@ -185,7 +185,7 @@ exports.addStudent = async (req, res) => {
             })
         }
 
-        const selectedCourse = await Course.findOne({ name: normalizedCourse })
+        const selectedCourse = await Course.findOne({ courseName: normalizedCourse })
         if (!selectedCourse) {
             return res.status(400).json({
                 message: 'The selected course does not exist'
@@ -432,7 +432,7 @@ exports.updateStudent = async (req, res) => {
             })
         }
 
-        const selectedCourse = await Course.findOne({ name: normalizedCourse })
+        const selectedCourse = await Course.findOne({ courseName: normalizedCourse })
         if (!selectedCourse) {
             return res.status(400).json({
                 message: 'The specified course does not exist'
