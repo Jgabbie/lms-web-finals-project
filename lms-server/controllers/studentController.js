@@ -532,6 +532,7 @@ exports.deleteStudent = async (req, res) => {
             { _id: studentInformation._id },
             {
                 _id: studentInformation._id,
+                studentId: studentInformation.studentId,
                 firstName: studentInformation.firstName,
                 lastName: studentInformation.lastName,
                 password: studentInformation.password,

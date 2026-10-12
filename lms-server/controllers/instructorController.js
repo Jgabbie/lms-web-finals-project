@@ -518,6 +518,7 @@ exports.deleteInstructor = async (req, res) => {
             { _id: instructorInformation._id },
             {
                 _id: instructorInformation._id,
+                instructorId: instructorInformation.instructorId,
                 firstName: instructorInformation.firstName,
                 lastName: instructorInformation.lastName,
                 password: instructorInformation.password,
