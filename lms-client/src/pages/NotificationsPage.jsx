@@ -1,25 +1,26 @@
-import StudentScreen from '../components/StudentScreen'
 import { Avatar, Badge, Card, CardContent, Typography, Button, Menu, MenuItem, Chip, TextField, IconButton } from '@mui/material'
-import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
+import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, ForumOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import NavbarInstructor from '../components/NavbarInstructor'
 import Sidebar from '../components/Sidebar'
+import SidebarInstructor from '../components/SidebarInstructor'
+import SidebarAdmin from '../components/SidebarAdmin'
 import api from '../api/axiosClient'
 
 export default function NotificationsPage() {
+    const userRole = (localStorage.getItem('role') || 'student').toLowerCase()
+    const [sidebarOpen, setSidebarOpen] = useState(true)
 
-    const isStudent = localStorage.getItem('role') === 'student'
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState('All')
     const [anchorEl, setAnchorEl] = useState(null)
-    const [selectedNotifcation, setSelectedNotifcation] = useState(null)
+    const [selectedNotification, setSelectedNotification] = useState(null)
     const [markingAllRead, setMarkingAllRead] = useState(false)
-
     const [notifications, setNotifications] = useState([])
 
     useEffect(() => {
         let active = true
-
         const fetchNotifications = async () => {
             try {
                 const response = await api.get('/notifications')
@@ -33,10 +34,8 @@ export default function NotificationsPage() {
                 console.error('Unable to load notifications:', error)
             }
         }
-
         fetchNotifications()
         const interval = window.setInterval(fetchNotifications, 30000)
-
         return () => {
             active = false
             window.clearInterval(interval)
@@ -49,15 +48,13 @@ export default function NotificationsPage() {
         const key = search.toLowerCase()
         return notifications.filter(item => {
             const matchesSearch =
-                item.title.toLowerCase().includes(key) ||
-                item.message.toLowerCase().includes(key) ||
-                item.course.toLowerCase().includes(key)
-
+                item.title?.toLowerCase().includes(key) ||
+                item.message?.toLowerCase().includes(key) ||
+                item.course?.toLowerCase().includes(key)
             const matchesFilter =
                 filter === 'All' ||
                 (filter === 'Unread' && item.unread) ||
                 item.type === filter
-
             return matchesSearch && matchesFilter
         })
     }, [notifications, search, filter])
@@ -70,6 +67,8 @@ export default function NotificationsPage() {
                 return <AnnouncementOutlined />
             case 'Grade':
                 return <CheckCircleOutlined />
+            case 'Discussion':
+                return <ForumOutlined />
             case 'Quiz':
                 return <QuizOutlined />
             case 'Schedule':
@@ -87,6 +86,8 @@ export default function NotificationsPage() {
                 return 'bg-amber-50 text-amber-600'
             case 'Grade':
                 return 'bg-green-50 text-green-600'
+            case 'Discussion':
+                return 'bg-indigo-50 text-indigo-600'
             case 'Quiz':
                 return 'bg-purple-50 text-purple-600'
             case 'Schedule':
@@ -98,7 +99,6 @@ export default function NotificationsPage() {
 
     const markAllAsRead = async () => {
         if (markingAllRead || unreadCount === 0) return
-
         try {
             setMarkingAllRead(true)
             await api.patch('/notifications/read-all')
@@ -132,33 +132,55 @@ export default function NotificationsPage() {
             console.error('Unable to delete notification:', error)
         } finally {
             setAnchorEl(null)
-            setSelectedNotifcation(null)
+            setSelectedNotification(null)
         }
     }
 
     const handleMenuOpen = (e, notification) => {
         setAnchorEl(e.currentTarget)
-        setSelectedNotifcation(notification)
+        setSelectedNotification(notification)
     }
 
     const handleMenuClose = () => {
         setAnchorEl(null)
-        setSelectedNotifcation(null)
+        setSelectedNotification(null)
     }
 
     return (
-        <StudentScreen page="notifications" role={localStorage.getItem('role') || 'student'}>
-            <Navbar />
-            {isStudent && <Sidebar />}
-            <div className='min-h-screen bg-slate-50'>
-                <main className={`${isStudent ? 'ml-0 lg:ml-[260px] transition-all' : ''} max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
-                    <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
-                        <div >
+        <div className='min-h-screen bg-slate-50'>
+            {/* Top Navbar */}
+            {userRole === 'instructor' ? (
+                <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+            ) : (
+                <Navbar />
+            )}
+
+            {/* Sidebar per role */}
+            {userRole === 'instructor' && (
+                <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+            )}
+            {userRole === 'admin' && (
+                <SidebarAdmin />
+            )}
+            {userRole === 'student' && (
+                <Sidebar />
+            )}
+
+            <div
+                className='transition-all duration-300'
+                style={{
+                    marginLeft: userRole === 'instructor'
+                        ? (sidebarOpen ? '260px' : '72px')
+                        : (userRole === 'student' || userRole === 'admin' ? '260px' : '0px')
+                }}
+            >
+                <main className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                        <div>
                             <div className='flex items-center gap-3'>
                                 <Typography variant='h4' className='!font-bold !text-slate-800'>
                                     Notifications
                                 </Typography>
-
                                 {unreadCount > 0 && (
                                     <Chip
                                         size='small'
@@ -167,12 +189,10 @@ export default function NotificationsPage() {
                                     />
                                 )}
                             </div>
-
-                            <Typography variant='body2' className=' !text-slate-500 !mt-1'>
+                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
                                 Stay updated with your courses, assignments, grades, and announcements
                             </Typography>
                         </div>
-
                         <Button
                             variant='outlined'
                             startIcon={<DoneAllOutlined />}
@@ -184,7 +204,7 @@ export default function NotificationsPage() {
                         </Button>
                     </div>
 
-                    <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
+                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-5'>
                                 <div className='flex items-center gap-4'>
@@ -202,7 +222,6 @@ export default function NotificationsPage() {
                                 </div>
                             </CardContent>
                         </Card>
-
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-5'>
                                 <div className='flex items-center gap-4'>
@@ -222,7 +241,6 @@ export default function NotificationsPage() {
                                 </div>
                             </CardContent>
                         </Card>
-
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-5'>
                                 <div className='flex items-center gap-4'>
@@ -251,13 +269,14 @@ export default function NotificationsPage() {
                                     placeholder='Search notifications...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    slotProps={{ input: {
-                                        startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                    } }}
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <Search className='!text-slate-400 !mr-2' />
+                                        }
+                                    }}
                                 />
-
                                 <div className='flex flex-wrap gap-2 lg:justify-end lg:shrink-0'>
-                                    {['All', 'Unread', 'Assignment', 'Announcement', 'Grade', 'Quiz'].map(item => (
+                                    {['All', 'Unread', 'Assignment', 'Announcement', 'Grade', 'Discussion', 'Quiz'].map(item => (
                                         <Button
                                             key={item}
                                             size='small'
@@ -277,8 +296,7 @@ export default function NotificationsPage() {
                         </CardContent>
                     </Card>
 
-
-                    <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mb-6'>
+                    <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mt-6 !mb-6'>
                         <CardContent className='!p-0'>
                             {filteredNotifications.length > 0 ? (
                                 <div className='divide-y divide-slate-100'>
@@ -286,48 +304,44 @@ export default function NotificationsPage() {
                                         <div
                                             key={notification.id}
                                             onClick={() => markAsRead(notification.id)}
-                                            className={`relative px-5 sm:px-6 py-5 cursor-pointer transition-colors ${notification.unread
-                                                ? 'bg-blue-50/50 hover:bg-blue-50'
-                                                : 'bg-white hover:bg-slate-50'
-                                                } `}
+                                            className={`relative px-5 sm:px-6 py-5 cursor-pointer transition-colors ${
+                                                notification.unread
+                                                    ? 'bg-blue-50/50 hover:bg-blue-50'
+                                                    : 'bg-white hover:bg-slate-50'
+                                            }`}
                                         >
                                             {notification.unread && (
                                                 <div className='absolute left-0 top-0 bottom-0 w-1 bg-blue-600' />
                                             )}
-
                                             <div className='flex items-start gap-4'>
                                                 <Avatar className={`!w-11 !h-11 ${getIconClass(notification.type)}`}>
                                                     {getNotificationIcon(notification.type)}
                                                 </Avatar>
-
                                                 <div className='flex-1 min-w-0'>
                                                     <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2'>
                                                         <div>
                                                             <div className='flex flex-wrap items-center gap-2'>
                                                                 <Typography
-                                                                    className={`!text-slate-800 ${notification.unread
-                                                                        ? '!font-bold'
-                                                                        : '!font-semibold'
-                                                                        }`}
+                                                                    className={`!text-slate-800 ${
+                                                                        notification.unread
+                                                                            ? '!font-bold'
+                                                                            : '!font-semibold'
+                                                                    }`}
                                                                 >
                                                                     {notification.title}
                                                                 </Typography>
-
                                                                 {notification.unread && (
                                                                     <span className='w-2 h-2 rounded-full bg-blue-600' />
                                                                 )}
                                                             </div>
-
                                                             <Typography variant='body2' className='!text-slate-600 !mt-1.5 !leading-6'>
                                                                 {notification.message}
                                                             </Typography>
                                                         </div>
-
                                                         <div className='flex items-center gap-1 shrink-0'>
                                                             <Typography variant='caption' className='!text-slate-400'>
                                                                 {notification.time}
                                                             </Typography>
-
                                                             <IconButton
                                                                 size='small'
                                                                 onClick={e => {
@@ -339,14 +353,12 @@ export default function NotificationsPage() {
                                                             </IconButton>
                                                         </div>
                                                     </div>
-
                                                     <div className='flex flex-wrap items-center gap-2 mt-3'>
                                                         <Chip
                                                             size='small'
                                                             label={notification.type}
                                                             variant='outlined'
                                                         />
-
                                                         <Typography variant='caption' className='!text-slate-500'>
                                                             {notification.course}
                                                         </Typography>
@@ -361,7 +373,6 @@ export default function NotificationsPage() {
                                     <div className='w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto'>
                                         <NotificationsNoneOutlined fontSize='large' />
                                     </div>
-
                                     <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-4'>
                                         No notifications found
                                     </Typography>
@@ -372,18 +383,18 @@ export default function NotificationsPage() {
                             )}
                         </CardContent>
                     </Card>
-                </main >
-            </div >
+                </main>
+            </div>
 
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
             >
-                {selectedNotifcation?.unread && (
+                {selectedNotification?.unread && (
                     <MenuItem
                         onClick={() => {
-                            markAsRead(selectedNotifcation.id)
+                            markAsRead(selectedNotification.id)
                             handleMenuClose()
                         }}
                     >
@@ -391,11 +402,10 @@ export default function NotificationsPage() {
                         Mark as read
                     </MenuItem>
                 )}
-
-                {selectedNotifcation && (
+                {selectedNotification && (
                     <MenuItem
                         onClick={() => {
-                            deleteNotification(selectedNotifcation.id)
+                            deleteNotification(selectedNotification.id)
                         }}
                         className='!text-red-600'
                     >
@@ -404,6 +414,6 @@ export default function NotificationsPage() {
                     </MenuItem>
                 )}
             </Menu>
-        </StudentScreen>
+        </div>
     )
 }

@@ -8,6 +8,7 @@ const submissionSchema = new mongoose.Schema({
     studentName: { type: String, required: true },
     studentEmail: { type: String, required: true },
     file: { type: String, default: 'submission.zip' },
+    fileUrl: { type: String, default: '' },
     status: { type: String, enum: ['Pending', 'Graded'], default: 'Pending' },
     score: { type: Number, default: null },
     maxScore: { type: Number, default: 100 },

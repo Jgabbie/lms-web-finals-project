@@ -3,6 +3,7 @@ import { Avatar, Card, CardContent, Typography, Button, Chip, Divider, LinearPro
 import { AnnouncementRounded as AnnouncementOutlined, AssignmentRounded as AssignmentOutlined, CalendarTodayRounded as CalendarTodayOutlined, CheckCircleRounded as CheckCircleOutlined, MenuBookRounded as MenuBookOutlined, PersonRounded as PersonOutlined, PlayCircleRounded as PlayCircleOutlined, ScheduleRounded as Schedule, SchoolRounded as SchoolOutlined } from '@mui/icons-material'
 import { useState } from 'react'
 import Navbar from '../../components/Navbar'
+import Sidebar from '../../components/Sidebar'
 
 export default function CourseDetailsPage() {
     const [tabs, setTabs] = useState(0)
@@ -94,8 +95,9 @@ export default function CourseDetailsPage() {
     return (
         <StudentScreen page="course-details" role={localStorage.getItem('role')?.toLowerCase() || 'student'}>
             <Navbar />
+            <Sidebar />
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <main className='ml-0 lg:ml-[260px] transition-all max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <Card className='!rounded-2xl !border !border-slate-200 !shadow-sm !overflow-hidden !mb-6'>
                         <div className='student-detail-banner bg-gradient-to-r from-blue-700 to-blue-500 px-6 sm:px-8 py-8 text-white'>
                             <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>

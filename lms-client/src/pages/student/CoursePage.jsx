@@ -2,11 +2,13 @@ import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, TextField, InputAdornment, Chip, MenuItem, CircularProgress } from '@mui/material'
 import { SearchRounded as Search, MenuBookRounded as MenuBook } from '@mui/icons-material'
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import api from '../../api/axiosClient'
 
 export default function CoursePage() {
+    const navigate = useNavigate()
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('All')
     const [courses, setCourses] = useState([])
@@ -103,7 +105,20 @@ export default function CoursePage() {
                     ) : filteredCourses.length > 0 ? (
                         <div className='student-course-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5'>
                             {filteredCourses.map((course) => (
-                                <Card key={course._id} className='!rounded-xl !border !border-slate-200 !shadow-sm hover:!shadow-md transition-shadow'>
+                                <Card
+                                    key={course._id}
+                                    component='button'
+                                    type='button'
+                                    onClick={() => navigate('/student/courses/details', { state: { course } })}
+                                    onKeyDown={event => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault()
+                                            navigate('/student/courses/details', { state: { course } })
+                                        }
+                                    }}
+                                    aria-label={`Open ${course.courseName} course details`}
+                                    className='!block !w-full !p-0 !text-left !rounded-xl !border !border-slate-200 !shadow-sm hover:!shadow-md hover:!-translate-y-0.5 focus-visible:!outline focus-visible:!outline-2 focus-visible:!outline-blue-600 transition-all'
+                                >
                                     <div className='h-32 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center'>
                                         <MenuBook sx={{ fontSize: 56 }} className='!text-white' />
                                     </div>

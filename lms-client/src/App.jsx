@@ -31,7 +31,7 @@ import ProfilePage from './pages/admin/ProfilePage'
 import InstructorAssignmentsPage from './pages/instructor/InstructorAssignmentsPage'
 import DashboardInstructor from './pages/instructor/DashboardInstructor'
 import EnrollStudentPage from './pages/instructor/EnrollStudentPage'
-
+import ProfileInstructorPage from './pages/instructor/ProfileInstructorPage'
 import CourseManagementPage from './pages/instructor/CourseManagementPage'
 import CreateCoursePage from './pages/instructor/CreateCoursePage'
 import UploadMaterialsPage from './pages/instructor/UploadMaterialsPage'
@@ -151,21 +151,22 @@ function App() {
         </Route>
 
         <Route
-          element={
-            <ProtectedRoute
-              role={role}
-              allowedRoles={['instructor']}
-            />
-          }
-        >
-          <Route path='/instructor/dashboard' element={<DashboardInstructor role={role} />} />
-          <Route path='/instructor/courses' element={<CourseManagementPage />} />
-          <Route path='/instructor/courses/create' element={<CreateCoursePage />} />
-          <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
-          <Route path='/instructor/students' element={<StudentManagementPage />} />
-          <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
-          <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
-        </Route>
+        element={
+          <ProtectedRoute
+            role={role}
+            allowedRoles={['instructor']}
+          />
+        }
+      >
+        <Route path='/instructor/dashboard' element={<DashboardInstructor role={role} />} />
+        <Route path='/instructor/courses' element={<CourseManagementPage />} />
+        <Route path='/instructor/courses/create' element={<CreateCoursePage />} />
+        <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
+        <Route path='/instructor/students' element={<StudentManagementPage />} />
+        <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
+        <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
+        <Route path='/instructor/profile' element={<ProfileInstructorPage />} />
+      </Route>
 
         <Route
           element={

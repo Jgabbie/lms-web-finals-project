@@ -7,7 +7,10 @@ const assignmentSchema = new mongoose.Schema({
     instructorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     dueDate: { type: String, default: 'No Due Date' },
     points: { type: Number, default: 100 },
-    description: { type: String, default: '' }
+    description: { type: String, default: '' },
+    fileUrl: { type: String, default: '' },
+    fileName: { type: String, default: '' },
+    fileSize: { type: String, default: '' }
 }, { timestamps: true })
 
 module.exports = mongoose.model('Assignment', assignmentSchema)

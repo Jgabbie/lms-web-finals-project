@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Course = require('../models/Course')
 const Discussion = require('../models/Discussion')
 const DiscussionReply = require('../models/DiscussionReply')
+const Notification = require('../models/Notification')
 
 exports.getDiscussions = async (req, res) => {
     try {
@@ -100,6 +101,40 @@ exports.createReply = async (req, res) => {
         await Discussion.findByIdAndUpdate(discussion._id, {
             $inc: { replies: 1 }
         })
+
+        const previousReplies = await DiscussionReply.find({
+            discussion: discussion._id,
+            _id: { $ne: reply._id }
+        }).select('author').lean()
+
+        const recipientIds = new Set([
+            String(discussion.author),
+            ...previousReplies.map(previousReply => String(previousReply.author))
+        ])
+        recipientIds.delete(String(req.user.id))
+
+        await Promise.all([...recipientIds].map(userId =>
+            Notification.updateOne(
+                {
+                    userId,
+                    sourceType: 'DiscussionReply',
+                    sourceId: reply._id
+                },
+                {
+                    $setOnInsert: {
+                        userId,
+                        type: 'Discussion',
+                        title: 'New Discussion Reply',
+                        message: `A new reply was posted in "${discussion.title}".`,
+                        course: discussion.course || '',
+                        sourceType: 'DiscussionReply',
+                        sourceId: reply._id,
+                        read: false
+                    }
+                },
+                { upsert: true }
+            )
+        ))
 
         const populatedReply = await reply.populate('author', 'firstName lastName')
         res.status(201).json(populatedReply)

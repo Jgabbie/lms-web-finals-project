@@ -15,9 +15,8 @@ export default function LearningMaterialsPage() {
     const [loading, setLoading] = useState(true)
 
     const fetchMaterials = useCallback(() => {
-        return api.get('/materials').then(async (res) => {
+        return api.get('/materials').then((res) => {
             setMaterials(Array.isArray(res.data) ? res.data : [])
-
         }).catch((err) => {
             console.error('Failed to fetch materials:', err)
         }).finally(() => {
@@ -28,6 +27,35 @@ export default function LearningMaterialsPage() {
     useEffect(() => {
         fetchMaterials()
     }, [fetchMaterials])
+
+    const handleView = (material) => {
+        if (!material.fileUrl) {
+            alert('No online file available for this material.')
+            return
+        }
+        window.open(material.fileUrl, '_blank', 'noopener,noreferrer')
+    }
+
+    const handleDownload = async (material) => {
+        if (!material.fileUrl) {
+            alert('No file available for download.')
+            return
+        }
+        try {
+            const res = await fetch(material.fileUrl)
+            const blob = await res.blob()
+            const blobUrl = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = blobUrl
+            a.download = material.fileName || `${material.title}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            window.URL.revokeObjectURL(blobUrl)
+        } catch {
+            window.open(material.fileUrl, '_blank')
+        }
+    }
 
     const filteredMaterials = useMemo(() => {
         const key = search.toLowerCase()
@@ -78,11 +106,10 @@ export default function LearningMaterialsPage() {
                                 Learning Materials
                             </Typography>
                             <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                View and download learning resources from your enrolled courses.
+                                View and download learning resources hosted on Cloudinary.
                             </Typography>
                         </div>
                     </div>
-
                     <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
                         {[
                             ['Total Materials', materials.length],
@@ -98,7 +125,6 @@ export default function LearningMaterialsPage() {
                             </Card>
                         ))}
                     </div>
-
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                         <CardContent className='!p-5'>
                             <div className='grid grid-cols-1 lg:grid-cols-[1fr_220px_220px] gap-4'>
@@ -138,7 +164,6 @@ export default function LearningMaterialsPage() {
                             </div>
                         </CardContent>
                     </Card>
-
                     {loading ? (
                         <div className='py-20 flex justify-center'>
                             <CircularProgress />
@@ -184,7 +209,8 @@ export default function LearningMaterialsPage() {
                                                 variant='outlined'
                                                 startIcon={<VisibilityOutlined />}
                                                 className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
-                                                onClick={() => alert(`Opening preview for ${material.fileName || material.title}`)}
+                                                onClick={() => handleView(material)}
+                                                disabled={!material.fileUrl}
                                             >
                                                 View
                                             </Button>
@@ -192,7 +218,8 @@ export default function LearningMaterialsPage() {
                                                 variant='contained'
                                                 startIcon={<DownloadOutlined />}
                                                 className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
-                                                onClick={() => alert(`Downloading ${material.fileName || 'file'}...`)}
+                                                onClick={() => handleDownload(material)}
+                                                disabled={!material.fileUrl}
                                             >
                                                 Download
                                             </Button>

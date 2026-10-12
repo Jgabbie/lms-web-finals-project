@@ -1,6 +1,15 @@
 import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, Divider, TextField, Snackbar, Alert } from '@mui/material'
-import { ArrowBackRounded as ArrowBack, CalendarTodayRounded as CalendarToday, CloudUploadRounded as CloudUpload, CheckCircleRounded as CheckCircle, AssignmentTurnedInRounded as AssignmentTurnedIn } from '@mui/icons-material'
+import {
+    ArrowBackRounded as ArrowBack,
+    CalendarTodayRounded as CalendarToday,
+    CloudUploadRounded as CloudUpload,
+    CheckCircleRounded as CheckCircle,
+    AssignmentTurnedInRounded as AssignmentTurnedIn,
+    AttachFileRounded as AttachFile,
+    VisibilityRounded as VisibilityOutlined,
+    DownloadRounded as DownloadOutlined
+} from '@mui/icons-material'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
@@ -11,7 +20,6 @@ export default function AssignmentDetailsPage() {
     const location = useLocation()
     const navigate = useNavigate()
     const profile = getStoredProfile()
-
     const assignment = location.state?.assignment || {
         _id: 'default',
         title: 'React Component Development',
@@ -19,7 +27,9 @@ export default function AssignmentDetailsPage() {
         dueDate: 'Oct 15, 2026',
         points: 100,
         status: 'upcoming',
-        description: 'Implement the modular architecture and pass props down to child components.'
+        description: 'Implement the modular architecture and pass props down to child components.',
+        fileUrl: '',
+        fileName: ''
     }
 
     const [selectedFile, setSelectedFile] = useState(null)
@@ -34,16 +44,18 @@ export default function AssignmentDetailsPage() {
 
     const handleSubmit = async () => {
         if (!selectedFile) return
-
         try {
             setSubmitting(true)
-            await api.post('/assignments/submissions/submit', {
-                assignmentId: assignment._id,
-                assignmentTitle: assignment.title,
-                course: assignment.course,
-                studentName: [profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'Student User',
-                studentEmail: profile.email || 'student@portal.com',
-                file: selectedFile.name
+            const formData = new FormData()
+            formData.append('assignmentId', assignment._id)
+            formData.append('assignmentTitle', assignment.title)
+            formData.append('course', assignment.course)
+            formData.append('studentName', [profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'Student User')
+            formData.append('studentEmail', profile.email || 'student@portal.com')
+            formData.append('file', selectedFile) // binary file attachment
+
+            await api.post('/assignments/submissions/submit', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             })
 
             setNotification({
@@ -51,7 +63,6 @@ export default function AssignmentDetailsPage() {
                 message: 'Assignment submitted to instructor successfully!',
                 severity: 'success'
             })
-
             setTimeout(() => {
                 navigate('/student/assignments')
             }, 1200)
@@ -63,6 +74,24 @@ export default function AssignmentDetailsPage() {
             })
         } finally {
             setSubmitting(false)
+        }
+    }
+
+    const handleDownloadAttachment = async () => {
+        if (!assignment.fileUrl) return
+        try {
+            const res = await fetch(assignment.fileUrl)
+            const blob = await res.blob()
+            const blobUrl = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = blobUrl
+            link.download = assignment.fileName || 'Assignment_Guidelines.pdf'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(blobUrl)
+        } catch {
+            window.open(assignment.fileUrl, '_blank')
         }
     }
 
@@ -129,7 +158,9 @@ export default function AssignmentDetailsPage() {
                                             </div>
                                         </div>
                                     </div>
+
                                     <Divider className='!my-7' />
+
                                     <section>
                                         <Typography variant='h6' className='!font-bold !text-slate-800 !mb-2'>
                                             Assignment Description
@@ -138,6 +169,46 @@ export default function AssignmentDetailsPage() {
                                             {assignment.description || 'Follow all course criteria and submit before the scheduled due date.'}
                                         </Typography>
                                     </section>
+
+                                    {/* ATTACHED REFERENCE FILE SECTION */}
+                                    {assignment.fileUrl && (
+                                        <section className='mt-7 p-4 bg-slate-50 border border-slate-200 rounded-xl'>
+                                            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+                                                <div className='flex items-center gap-3'>
+                                                    <div className='w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center'>
+                                                        <AttachFile />
+                                                    </div>
+                                                    <div>
+                                                        <Typography variant='body2' className='!font-semibold !text-slate-800'>
+                                                            {assignment.fileName || 'Attached Guidelines / Template'}
+                                                        </Typography>
+                                                        <Typography variant='caption' className='!text-slate-400'>
+                                                            {assignment.fileSize || 'Reference Resource'}
+                                                        </Typography>
+                                                    </div>
+                                                </div>
+                                                <div className='flex items-center gap-2'>
+                                                    <Button
+                                                        size='small'
+                                                        startIcon={<VisibilityOutlined fontSize='small' />}
+                                                        onClick={() => window.open(assignment.fileUrl, '_blank')}
+                                                        className='!normal-case !text-xs !bg-blue-50 hover:!bg-blue-100 !text-blue-700 !rounded-lg'
+                                                    >
+                                                        View
+                                                    </Button>
+                                                    <Button
+                                                        size='small'
+                                                        variant='outlined'
+                                                        startIcon={<DownloadOutlined fontSize='small' />}
+                                                        onClick={handleDownloadAttachment}
+                                                        className='!normal-case !text-xs !border-slate-300 !text-slate-700 !rounded-lg'
+                                                    >
+                                                        Download
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    )}
 
                                     {isGraded && (
                                         <section className='mt-7 p-4 bg-emerald-50 border border-emerald-200 rounded-xl'>
@@ -154,7 +225,6 @@ export default function AssignmentDetailsPage() {
                                 </CardContent>
                             </Card>
                         </div>
-
                         <div className='w-full lg:w-96 shrink-0'>
                             <Card className='!rounded-xl !border !border-slate-200 !shadow-sm lg:!sticky lg:!top-6'>
                                 <CardContent className='!p-6'>
@@ -173,7 +243,6 @@ export default function AssignmentDetailsPage() {
                                             ? 'Deliverable turned in for grading.'
                                             : 'Upload your completed assignment before the deadline.'}
                                     </Typography>
-
                                     {!isSubmitted && (
                                         <>
                                             <label className='block border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition'>
@@ -191,7 +260,6 @@ export default function AssignmentDetailsPage() {
                                                     PDF, DOCX, or ZIP
                                                 </Typography>
                                             </label>
-
                                             {selectedFile && (
                                                 <div className='mt-4 flex items-center gap-3 border border-emerald-200 bg-emerald-50 rounded-lg p-3'>
                                                     <CheckCircle className='!text-emerald-600' fontSize='small' />
@@ -205,7 +273,6 @@ export default function AssignmentDetailsPage() {
                                                     </div>
                                                 </div>
                                             )}
-
                                             <TextField
                                                 fullWidth
                                                 multiline
@@ -215,7 +282,6 @@ export default function AssignmentDetailsPage() {
                                                 onChange={(e) => setComment(e.target.value)}
                                                 className='!mt-5'
                                             />
-
                                             <Button
                                                 fullWidth
                                                 variant='contained'
@@ -228,7 +294,6 @@ export default function AssignmentDetailsPage() {
                                             </Button>
                                         </>
                                     )}
-
                                     {isSubmitted && (
                                         <div className='p-4 bg-slate-50 border border-slate-200 rounded-xl text-center text-slate-600 text-sm'>
                                             Work submitted. You will receive notifications once graded.
@@ -240,7 +305,6 @@ export default function AssignmentDetailsPage() {
                     </div>
                 </main>
             </div>
-
             <Snackbar
                 open={notification.open}
                 autoHideDuration={3000}
