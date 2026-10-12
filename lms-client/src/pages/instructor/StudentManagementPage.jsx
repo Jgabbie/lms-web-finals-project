@@ -13,7 +13,7 @@ import {
     DialogActions,
     Divider
 } from '@mui/material'
-import { Search, MenuBookOutlined, EmailOutlined } from '@mui/icons-material'
+import { SearchRounded as Search, MenuBookRounded as MenuBookOutlined, EmailRounded as EmailOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'

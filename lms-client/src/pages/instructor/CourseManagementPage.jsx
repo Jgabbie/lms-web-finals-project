@@ -16,7 +16,7 @@ import {
     Snackbar,
     Alert
 } from '@mui/material'
-import { Add, DeleteOutlined, PeopleOutlined, Search, PersonRemoveOutlined } from '@mui/icons-material'
+import { AddRounded as Add, DeleteRounded as DeleteOutlined, PeopleRounded as PeopleOutlined, SearchRounded as Search, PersonRemoveRounded as PersonRemoveOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'

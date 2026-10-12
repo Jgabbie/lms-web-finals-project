@@ -1,6 +1,6 @@
 import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, FormControl, InputLabel, MenuItem, Select, TextField, Alert, Snackbar } from '@mui/material'
-import { SaveOutlined, SchoolOutlined, ArrowBack } from '@mui/icons-material'
+import { SaveRounded as SaveOutlined, SchoolRounded as SchoolOutlined, ArrowBackRounded as ArrowBack } from '@mui/icons-material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'

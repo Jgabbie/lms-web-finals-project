@@ -220,6 +220,7 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
                         <Tooltip title={!open ? 'Logout' : ''} placement='right'>
                             <Button
                                 fullWidth
+                                aria-label='Logout'
                                 onClick={() => setLogoutDialogOpen(true)}
                                 startIcon={<Logout />}
                                 className={`!normal-case !text-slate-500 hover:!bg-red-50 hover:!text-red-600 !rounded-lg ${open ? '!justify-start' : '!justify-center'
@@ -238,9 +239,9 @@ export default function SidebarInstructor({ open: controlledOpen, setOpen: setCo
                 onClose={() => setLogoutDialogOpen(false)}
                 maxWidth="xs"
                 fullWidth
-                PaperProps={{
+                slotProps={{ paper: {
                     className: '!rounded-2xl !p-2'
-                }}
+                } }}
             >
                 <DialogTitle className='!font-bold !text-slate-800'>
                     Confirm Logout

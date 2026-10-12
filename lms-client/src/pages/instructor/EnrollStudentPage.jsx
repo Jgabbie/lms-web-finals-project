@@ -15,7 +15,7 @@ import {
     Snackbar,
     Alert
 } from '@mui/material'
-import { GroupAddOutlined, Search, SchoolOutlined } from '@mui/icons-material'
+import { GroupAddRounded as GroupAddOutlined, SearchRounded as Search, SchoolRounded as SchoolOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
