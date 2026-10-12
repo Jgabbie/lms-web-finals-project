@@ -79,3 +79,19 @@
  }
  :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper button[aria-label='Logout'] svg { color:#fff!important; }
 }
+
+/* Compact, consistently aligned sidebar branding for all roles. */
+@layer utilities {
+ :is(.edu-dashboard,.edu-student-screen) .MuiDrawer-paper > div:first-child > div {
+  display:flex; flex-direction:column; align-items:flex-start; gap:4px;
+  width:100%; min-width:0;
+ }
+ :is(.edu-dashboard,.edu-student-screen) .MuiDrawer-paper > div:first-child > div .MuiTypography-h6 {
+  margin:0!important; font-size:24px!important; line-height:1.15!important;
+  letter-spacing:-.025em; padding:0;
+ }
+ :is(.edu-dashboard,.edu-student-screen) .MuiDrawer-paper > div:first-child > div .MuiTypography-caption {
+  display:block; margin:0!important; padding:0; font-size:12px!important;
+  line-height:1.35!important; letter-spacing:0; white-space:nowrap;
+ }
+}
