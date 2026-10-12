@@ -61,6 +61,7 @@ export default function Navbar() {
         handleCloseUserMenu()
         navigate(path)
     }
+
     const handleLogout = async () => {
         handleCloseUserMenu()
 
@@ -125,11 +126,6 @@ export default function Navbar() {
                             </Avatar>
                         </IconButton>
 
-                        <Menu anchorEl={anchorElUser} open={Boolean(anchorElUser)} onClose={handleCloseUserMenu} className="mt-1">
-                            <MenuItem onClick={() => navigateTo('/profile')}>Profile</MenuItem>
-                            <MenuItem onClick={() => navigateTo('/settings')}>Settings</MenuItem>
-                            <MenuItem onClick={handleLogout} className="text-red-500">Logout</MenuItem>
-                        </Menu>
                     </div>
                 </Toolbar>
             </AppBar>

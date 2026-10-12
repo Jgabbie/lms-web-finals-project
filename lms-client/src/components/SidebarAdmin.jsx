@@ -73,7 +73,7 @@ export default function SidebarAdmin() {
         {
             label: 'Profile',
             icon: <Person />,
-            path: '/admin/profile'
+            path: '/profile'
         },
     ]
 
@@ -165,10 +165,12 @@ export default function SidebarAdmin() {
                                         {open && (
                                             <ListItemText
                                                 primary={item.label}
-                                                slotProps={{ primary: {
-                                                    fontSize: 14,
-                                                    fontWeight: 500
-                                                } }}
+                                                slotProps={{
+                                                    primary: {
+                                                        fontSize: 14,
+                                                        fontWeight: 500
+                                                    }
+                                                }}
                                             />
                                         )}
 
@@ -221,10 +223,12 @@ export default function SidebarAdmin() {
                                         {open && (
                                             <ListItemText
                                                 primary={item.label}
-                                                slotProps={{ primary: {
-                                                    fontSize: 14,
-                                                    fontWeight: 500
-                                                } }}
+                                                slotProps={{
+                                                    primary: {
+                                                        fontSize: 14,
+                                                        fontWeight: 500
+                                                    }
+                                                }}
                                             />
                                         )}
 
@@ -303,7 +307,7 @@ export default function SidebarAdmin() {
                         Cancel
                     </Button>
                     <Button aria-label='Logout'
-                                onClick={handleLogout} color="primary" variant="contained">
+                        onClick={handleLogout} color="primary" variant="contained">
                         Logout
                     </Button>
                 </DialogActions>

@@ -140,7 +140,6 @@ function App() {
             />
           }
         >
-          <Route path='/admin/profile' element={<ProfilePage />} />
           <Route path='/admin/dashboard' element={<Dashboard />} />
           <Route path='/admin/users' element={<UserManagementPage />} />
           <Route path='/admin/instructors' element={<InstructorManagement />} />
