@@ -512,7 +512,7 @@ exports.deleteStudent = async (req, res) => {
             })
         }
 
-        const studentInformation = await User.findByIdAndDelete(id)
+        const studentInformation = await Student.findOne({ _id: id })
 
         if (!studentInformation) {
             return res.status(404).json({ message: 'Student not found' })
