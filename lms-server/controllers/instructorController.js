@@ -547,7 +547,7 @@ exports.deleteInstructor = async (req, res) => {
 
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
-            to: normalizedEmail,
+            to: instructorInformation.email,
             subject: 'EduLearn LMS - Account Deleted',
             html: `
                 <div
