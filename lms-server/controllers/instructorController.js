@@ -265,7 +265,6 @@ exports.addInstructor = async (req, res) => {
                 specialization: instructor.specialization,
                 status: instructor.status,
                 role: instructor.role,
-                temporaryPassword: temporaryPassword
             }
         })
     } catch (error) {
