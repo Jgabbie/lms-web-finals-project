@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import '../App.css'
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Avatar, Badge, Button } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import { useNavigate } from "react-router-dom"
+import api from "../api/axiosClient"
 
 
 const pages = [
@@ -15,6 +16,8 @@ const pages = [
 
 export default function NavbarAdmin() {
     const navigate = useNavigate()
+
+    const [unreadCount, setUnreadCount] = useState(0)
 
     const [anchorElNotifications, setAnchorElNotifications] = useState(null)
     const [anchorElNav, setAnchorElNav] = useState(null)
@@ -28,6 +31,35 @@ export default function NavbarAdmin() {
 
     const user = JSON.parse(localStorage.getItem('profile')) || {}
     const initials = user.firstName && user.lastName ? `${user.firstName[0]}${user.lastName[0]}` : 'U'
+
+    useEffect(() => {
+        let active = true
+        const fetchNotifications = async () => {
+            try {
+                const response = await api.get('/notifications/unread-count')
+                const notifications = response.data.notifications || []
+                if (active) {
+                    setUnreadCount(
+                        notifications.filter(notification => !notification.read).length
+                    )
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error)
+            }
+        }
+
+        fetchNotifications()
+
+        const interval = window.setInterval(fetchNotifications, 30000)
+
+        window.addEventListener('notification:updated', fetchNotifications)
+
+        return () => {
+            active = false
+            window.clearInterval(interval)
+            window.removeEventListener('notification:updated', fetchNotifications)
+        }
+    }, [])
 
     const handleNavigate = (path) => {
         setAnchorElNav(null)
@@ -88,7 +120,10 @@ export default function NavbarAdmin() {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <IconButton color="inherit" className="text-slate-600 hover:bg-slate-100">
+                        <IconButton
+                            color="inherit"
+                            onClick={() => handleNavigate('/notifications')}
+                            className="text-slate-600 hover:bg-slate-100">
                             <Badge badgeContent={3} color="error">
                                 <NotificationsIcon />
                             </Badge>

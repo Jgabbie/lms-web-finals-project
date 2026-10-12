@@ -16,6 +16,18 @@ const transporter = nodemailer.createTransport({
     }
 })
 
+const logActivity = async (user, action, description) => {
+    const actor = req.user
+    await Log.create({
+        firstName: actor.firstName,
+        lastName: actor.lastName,
+        role: actor.role,
+        action: action,
+        description: description,
+        status: 'Success'
+    })
+}
+
 exports.getInstructors = async (req, res) => {
     try {
         const instructors = await Instructor.find()
@@ -238,6 +250,12 @@ exports.addInstructor = async (req, res) => {
                 </div>
             `
         })
+
+        await logActivity(
+            req,
+            'Create',
+            `Created instructor account for ${normalizedFirstName} ${normalizedLastName}`
+        )
 
         const instructor = new Instructor({
             instructorId: instructorId.trim(),
@@ -475,6 +493,12 @@ exports.updateInstructor = async (req, res) => {
 
         await instructor.save()
 
+        await logActivity(
+            req,
+            'Update',
+            `Updated instructor account for ${normalizedFirstName} ${normalizedLastName}`
+        )
+
         res.status(200).json({
             message: 'Instructor updated successfully'
         })
@@ -628,6 +652,12 @@ exports.deleteInstructor = async (req, res) => {
         await Instructor.findByIdAndDelete(id)
         await User.findOneAndDelete({ email: instructorInformation.email })
 
+        await logActivity(
+            req,
+            'Delete',
+            `Deleted instructor account for ${normalizedFirstName} ${normalizedLastName}`
+        )
+
         res.status(200).json({ message: 'Instructor deleted successfully' })
     } catch (error) {
         console.error('Delete instructor error: ', error)
@@ -654,8 +684,6 @@ exports.restoreInstructor = async (req, res) => {
                 message: 'Instructor ID is required'
             })
         }
-
-
 
         const archivedInstructor = await ArchivedInstructor.findById(id)
         const archivedUser = await ArchivedUser.findOne({ email: archivedInstructor.email })
@@ -702,12 +730,17 @@ exports.restoreInstructor = async (req, res) => {
             role: 'instructor',
         })
 
-
         await restoredInstructor.save()
         await restoredInstructorInInstructor.save()
 
         await ArchivedInstructor.findByIdAndDelete(id)
         await ArchivedUser.findOneAndDelete({ email: archivedInstructor.email })
+
+        await logActivity(
+            req,
+            'Restore',
+            `Restored instructor account for ${normalizedFirstName} ${normalizedLastName}`
+        )
 
         res.status(200).json({ message: 'Instructor restored successfully' })
     } catch (error) {

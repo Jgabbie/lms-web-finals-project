@@ -2,6 +2,7 @@ import { Avatar, Badge, Card, CardContent, Typography, Button, Menu, MenuItem, C
 import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, ForumOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
+import NavbarAdmin from '../components/NavbarAdmin'
 import NavbarInstructor from '../components/NavbarInstructor'
 import Sidebar from '../components/Sidebar'
 import SidebarInstructor from '../components/SidebarInstructor'
@@ -150,10 +151,16 @@ export default function NotificationsPage() {
         <div className='min-h-screen bg-slate-50'>
             {/* Top Navbar */}
             {userRole === 'instructor' ? (
-                <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-            ) : (
-                <Navbar />
-            )}
+                <NavbarAdmin />
+            ) :
+                userRole === 'instructor' ? (
+                    <NavbarInstructor
+                        sidebarOpen={sidebarOpen}
+                        setSidebarOpen={setSidebarOpen}
+                    />
+                ) : (
+                    <Navbar />
+                )}
 
             {/* Sidebar per role */}
             {userRole === 'instructor' && (
@@ -304,11 +311,10 @@ export default function NotificationsPage() {
                                         <div
                                             key={notification.id}
                                             onClick={() => markAsRead(notification.id)}
-                                            className={`relative px-5 sm:px-6 py-5 cursor-pointer transition-colors ${
-                                                notification.unread
-                                                    ? 'bg-blue-50/50 hover:bg-blue-50'
-                                                    : 'bg-white hover:bg-slate-50'
-                                            }`}
+                                            className={`relative px-5 sm:px-6 py-5 cursor-pointer transition-colors ${notification.unread
+                                                ? 'bg-blue-50/50 hover:bg-blue-50'
+                                                : 'bg-white hover:bg-slate-50'
+                                                }`}
                                         >
                                             {notification.unread && (
                                                 <div className='absolute left-0 top-0 bottom-0 w-1 bg-blue-600' />
@@ -322,11 +328,10 @@ export default function NotificationsPage() {
                                                         <div>
                                                             <div className='flex flex-wrap items-center gap-2'>
                                                                 <Typography
-                                                                    className={`!text-slate-800 ${
-                                                                        notification.unread
-                                                                            ? '!font-bold'
-                                                                            : '!font-semibold'
-                                                                    }`}
+                                                                    className={`!text-slate-800 ${notification.unread
+                                                                        ? '!font-bold'
+                                                                        : '!font-semibold'
+                                                                        }`}
                                                                 >
                                                                     {notification.title}
                                                                 </Typography>

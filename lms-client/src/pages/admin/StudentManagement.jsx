@@ -10,6 +10,9 @@ export default function StudentManagement() {
     const [currentPage, setCurrentPage] = useState(1)
     const usersPerPage = 10
 
+    const [courses, setCourses] = useState([])
+    const [coursesLoading, setCoursesLoading] = useState(true)
+
     const [activeTab, setActiveTab] = useState('active')
     const [archivedUsers, setArchivedUsers] = useState([])
 
@@ -66,6 +69,31 @@ export default function StudentManagement() {
             Authorization: `Bearer ${localStorage.getItem('token')}`
         }
     })
+
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                setCoursesLoading(true)
+
+                const response = await api.get('/courses', getAuthConfig())
+
+                const coursesData = Array.isArray(response.data)
+                    ? response.data
+                    : response.data.courses || []
+
+                setCourses(coursesData)
+
+            } catch (error) {
+                console.error('Error fetching courses:', error)
+                showNotification('Failed to retrieve courses', 'error')
+            } finally {
+                setCoursesLoading(false)
+            }
+        }
+
+        fetchCourses()
+    }, [showNotification])
 
     const fetchArchivedUsers = useCallback(() => {
         return api.get('/students/archived', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
@@ -663,7 +691,20 @@ export default function StudentManagement() {
                             error={Boolean(fieldErrors.course)}
                             helperText={fieldErrors.course}
                             slotProps={{ htmlInput: { maxLength: 100 } }}
-                        />
+                        >
+                            <MenuItem value='' disabled>
+                                {coursesLoading ? 'Loading courses...' : 'Select a course'}
+                            </MenuItem>
+
+                            {courses.map((course) => (
+                                <MenuItem
+                                    key={course._id}
+                                    value={course.courseName}
+                                >
+                                    {course.courseName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                         <TextField
                             fullWidth
                             label='Year Level'
@@ -841,7 +882,20 @@ export default function StudentManagement() {
                             error={Boolean(fieldErrors.course)}
                             helperText={fieldErrors.course}
                             slotProps={{ htmlInput: { maxLength: 100 } }}
-                        />
+                        >
+                            <MenuItem value='' disabled>
+                                {coursesLoading ? 'Loading courses...' : 'Select a course'}
+                            </MenuItem>
+
+                            {courses.map((course) => (
+                                <MenuItem
+                                    key={course._id}
+                                    value={course.courseName}
+                                >
+                                    {course.courseName}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                         <TextField
                             fullWidth
                             label='Year Level'

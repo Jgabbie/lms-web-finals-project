@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer')
 const User = require('../models/User')
 const Instructor = require('../models/Instructor')
 const Student = require('../models/Student')
+const Log = require('../models/Log')
 const ArchivedStudent = require('../models/ArchivedStudent')
 const ArchivedInstructor = require('../models/ArchivedInstructor')
 const ArchivedUser = require('../models/ArchivedUser')
@@ -17,6 +18,18 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS,
     }
 })
+
+const logActivity = async (user, action, description) => {
+    const actor = req.user
+    await Log.create({
+        firstName: actor.firstName,
+        lastName: actor.lastName,
+        role: actor.role,
+        action: action,
+        description: description,
+        status: 'Success'
+    })
+}
 
 exports.getAllUsers = async (req, res) => {
     try {
@@ -237,6 +250,12 @@ exports.addUser = async (req, res) => {
             `
             })
 
+            await logActivity(
+                req,
+                'Create',
+                `Created instructor account for ${normalizedFirstName} ${normalizedLastName}`
+            )
+
             return res.status(201).json({
                 message: 'User added successfully',
             })
@@ -334,6 +353,12 @@ exports.addUser = async (req, res) => {
             `
             })
 
+            await logActivity(
+                req,
+                'Create',
+                `Created student account for ${normalizedFirstName} ${normalizedLastName}`
+            )
+
             return res.status(201).json({
                 message: 'User added successfully',
             })
@@ -419,6 +444,12 @@ exports.addUser = async (req, res) => {
                 </div>
             `
             })
+
+            await logActivity(
+                req,
+                'Create',
+                `Created admin account for ${normalizedFirstName} ${normalizedLastName}`
+            )
 
             return res.status(201).json({
                 message: 'User added successfully',
@@ -559,6 +590,12 @@ exports.updateUser = async (req, res) => {
                 },
                 { upsert: true, new: true, runValidators: true }
             )
+
+            await logActivity(
+                req,
+                'Update',
+                `Updated student account for ${normalizedFirstName} ${normalizedLastName}`
+            )
         } else if (normalizedRole === 'instructor') {
             await Student.deleteMany({
                 $or: [
@@ -581,6 +618,7 @@ exports.updateUser = async (req, res) => {
                 }
 
                 const newInstructorId = `INST${nextIdNumber.toString().padStart(3, '0')}`
+
                 await Instructor.findOneAndUpdate(
                     { _id: user._id },
                     {
@@ -598,6 +636,12 @@ exports.updateUser = async (req, res) => {
                         }
                     },
                     { upsert: true, new: true, runValidators: true }
+                )
+
+                await logActivity(
+                    req,
+                    'Update',
+                    `Updated instructor account for ${normalizedFirstName} ${normalizedLastName}`
                 )
             } else {
                 instructor.firstName = normalizedFirstName
@@ -621,6 +665,12 @@ exports.updateUser = async (req, res) => {
                     { email: normalizedEmail }
                 ]
             })
+
+            await logActivity(
+                req,
+                'Update',
+                `Updated admin account for ${normalizedFirstName} ${normalizedLastName}`
+            )
         }
 
         await transporter.sendMail({
@@ -860,6 +910,12 @@ exports.deleteUser = async (req, res) => {
                 `
                 })
 
+                await logActivity(
+                    req,
+                    'Delete',
+                    `Deleted student account for ${normalizedFirstName} ${normalizedLastName}`
+                )
+
                 res.status(200).json({ message: 'User deleted successfully' })
             }
         }
@@ -967,6 +1023,12 @@ exports.deleteUser = async (req, res) => {
                 `
                 })
 
+                await logActivity(
+                    req,
+                    'Delete',
+                    `Deleted student account for ${normalizedFirstName} ${normalizedLastName}`
+                )
+
                 res.status(200).json({ message: 'User deleted successfully' })
 
             }
@@ -1049,6 +1111,12 @@ exports.deleteUser = async (req, res) => {
             `
         })
 
+        await logActivity(
+            req,
+            'Delete',
+            `Deleted admin account for ${normalizedFirstName} ${normalizedLastName}`
+        )
+
         res.status(200).json({ message: 'User deleted successfully' })
 
     } catch (error) {
@@ -1122,6 +1190,12 @@ exports.restoreUser = async (req, res) => {
                 await ArchivedStudent.findByIdAndDelete(id)
             }
 
+            await logActivity(
+                req,
+                'Restore',
+                `Restored student account for ${normalizedFirstName} ${normalizedLastName}`
+            )
+
             res.status(200).json({
                 message: 'User restored successfully',
                 user: restoredUser
@@ -1144,6 +1218,12 @@ exports.restoreUser = async (req, res) => {
                 await ArchivedInstructor.findByIdAndDelete(id)
             }
 
+            await logActivity(
+                req,
+                'Restore',
+                `Restored instructor account for ${normalizedFirstName} ${normalizedLastName}`
+            )
+
             res.status(200).json({
                 message: 'User restored successfully',
                 user: restoredUser
@@ -1151,6 +1231,12 @@ exports.restoreUser = async (req, res) => {
         }
 
         await ArchivedUser.findByIdAndDelete(id)
+
+        await logActivity(
+            req,
+            'Restore',
+            `Restored admin account for ${normalizedFirstName} ${normalizedLastName}`
+        )
 
         res.status(200).json({
             message: 'User restored successfully',

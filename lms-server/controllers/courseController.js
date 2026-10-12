@@ -20,7 +20,7 @@ exports.getMyEnrolledCourses = async (req, res) => {
         const courses = await Course.find({
             enrolledStudents: studentObjectId
         }).sort({ createdAt: -1 })
-        
+
         res.status(200).json(courses)
     } catch (err) {
         console.error('Fetch enrolled courses error:', err)
@@ -80,12 +80,12 @@ exports.unenrollStudent = async (req, res) => {
 
         const course = await Course.findByIdAndUpdate(
             courseId,
-            { 
-                $pull: { 
-                    enrolledStudents: { 
-                        $in: [objectStudentId, normalizedStudentId] 
-                    } 
-                } 
+            {
+                $pull: {
+                    enrolledStudents: {
+                        $in: [objectStudentId, normalizedStudentId]
+                    }
+                }
             },
             { new: true }
         ).populate('enrolledStudents', 'firstName lastName email')

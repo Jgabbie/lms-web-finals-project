@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const Student = require('../models/Student')
 const User = require('../models/User')
+const Course = require('../models/Course')
 const ArchivedStudent = require('../models/ArchivedStudent')
 const ArchivedUser = require('../models/ArchivedUser')
 
@@ -15,6 +16,18 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS,
     }
 })
+
+const logActivity = async (user, action, description) => {
+    const actor = req.user
+    await Log.create({
+        firstName: actor.firstName,
+        lastName: actor.lastName,
+        role: actor.role,
+        action: action,
+        description: description,
+        status: 'Success'
+    })
+}
 
 exports.getStudents = async (req, res) => {
     try {
@@ -156,6 +169,13 @@ exports.addStudent = async (req, res) => {
             })
         }
 
+        const selectedCourse = await Course.findOne({ name: normalizedCourse })
+        if (!selectedCourse) {
+            return res.status(400).json({
+                message: 'The specified course does not exist'
+            })
+        }
+
         const generatedPassword = crypto.randomBytes(6).toString('base64url')
 
         const hashedPassword = await bcrypt.hash(generatedPassword, 10)
@@ -241,6 +261,12 @@ exports.addStudent = async (req, res) => {
             `
         })
 
+        await logActivity(
+            req,
+            'Create',
+            `Created student account for ${normalizedFirstName} ${normalizedLastName}`
+        )
+
         const student = new Student({
             studentId: normalizedStudentId,
             firstName: normalizedFirstName,
@@ -254,6 +280,10 @@ exports.addStudent = async (req, res) => {
         })
 
         await student.save()
+
+        await Course.findByIdAndUpdate(selectedCourse._id, {
+            $addToSet: { enrolledStudents: student._id }
+        })
 
         res.status(201).json({
             message: 'Student added successfully',
@@ -281,9 +311,6 @@ exports.addStudent = async (req, res) => {
         res.status(500).json({ message: 'Failed to add a student' })
     }
 }
-
-
-
 
 exports.updateStudent = async (req, res) => {
     try {
@@ -389,6 +416,13 @@ exports.updateStudent = async (req, res) => {
             })
         }
 
+        const selectedCourse = await Course.findOne({ name: normalizedCourse })
+        if (!selectedCourse) {
+            return res.status(400).json({
+                message: 'The specified course does not exist'
+            })
+        }
+
         const existingStudentId = await Student.findOne({ studentId: studentId.trim() })
         if (existingStudentId) {
             return res.status(400).json({
@@ -488,7 +522,46 @@ exports.updateStudent = async (req, res) => {
             `
         })
 
+        const previousCourse = await Course.findOne({
+            courseName: student.course
+        })
+
+        await User.findOneAndUpdate(
+            { email: student.email },
+            {
+                firstName: normalizedFirstName,
+                lastName: normalizedLastName,
+                email: normalizedEmail,
+            }
+        )
+
+        student.studentId = normalizedStudentId
+        student.firstName = normalizedFirstName
+        student.lastName = normalizedLastName
+        student.email = normalizedEmail
+        student.course = normalizedCourse
+        student.yearLevel = normalizedYearLevel
+
         await student.save()
+
+        if (previousCourse && previousCourse._id.toString() !== selectedCourse._id.toString()) {
+            await Course.findByIdAndUpdate(previousCourse._id, {
+                $pull: { enrolledStudents: student._id }
+            })
+        }
+
+        await Course.findByIdAndUpdate(
+            selectedCourse._id, {
+            $addToSet: {
+                enrolledStudents: student._id
+            }
+        })
+
+        await logActivity(
+            req,
+            'Update',
+            `Updated student account for ${normalizedFirstName} ${normalizedLastName}`
+        )
 
         res.status(200).json({
             message: 'Student updated successfully'
@@ -647,6 +720,12 @@ exports.deleteStudent = async (req, res) => {
         await Student.findByIdAndDelete(id)
         await User.findOneAndDelete({ email: studentInformation.email })
 
+        await logActivity(
+            req,
+            'Delete',
+            `Deleted student account for ${normalizedFirstName} ${normalizedLastName}`
+        )
+
         res.status(200).json({ message: 'Student deleted successfully' })
     } catch (error) {
         console.error('Delete student error: ', error)
@@ -724,6 +803,12 @@ exports.restoreStudent = async (req, res) => {
 
         await ArchivedStudent.findByIdAndDelete(id)
         await ArchivedUser.findOneAndDelete({ email: archivedStudent.email })
+
+        await logActivity(
+            req,
+            'Restore',
+            `Restored student account for ${normalizedFirstName} ${normalizedLastName}`
+        )
 
         res.status(200).json({ message: 'Student restored successfully' })
 
