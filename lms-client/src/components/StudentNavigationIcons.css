@@ -52,3 +52,30 @@
  .edu-role-student main div[class*='w-']:has(> svg:is([data-testid*='Schedule'],[data-testid*='AccessTime'],[data-testid*='TrendingUp'],[data-testid*='PendingActions'])) > svg { color:#073342!important; }
  :is(.edu-dashboard,.edu-role-student) main .MuiSvgIcon-root:is([data-testid*='Schedule'],[data-testid*='AccessTime'],[data-testid*='TrendingUp'],[data-testid*='Grade'],[data-testid*='PendingActions'],[data-testid*='Lightbulb']) { color:#073342!important; }
 }
+
+/* One navigation palette for Student, Instructor and Admin. */
+@layer utilities {
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper {
+  background:linear-gradient(165deg,#073342,#052b38)!important;
+  border-right:0!important; color:#fff!important;
+ }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper .MuiListItemIcon-root {
+  background:linear-gradient(145deg,#0a4658,#073342)!important;
+  color:#fff!important; border-radius:13px!important;
+  box-shadow:inset 0 1px 1px #ffffff30,0 2px 5px #0733420c!important;
+ }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper .MuiListItemIcon-root svg,
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper .MuiListItemButton-root.Mui-selected .MuiListItemIcon-root svg { color:#fff!important; }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper .MuiListItemButton-root.Mui-selected { background:#ffffff14!important; box-shadow:none!important; border-left:0!important; }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper .MuiListItemButton-root:hover { background:#ffffff10!important; }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) button.MuiIconButton-root[aria-expanded][aria-label][type='button'] {
+  background:#073342!important; color:#fff!important;
+  border:1px solid #ffffff35!important;
+  box-shadow:inset 0 1px 1px #ffffff30,0 3px 9px #07334220!important;
+ }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper button[aria-label='Logout'] .MuiButton-startIcon {
+  background:linear-gradient(145deg,#0a4658,#073342)!important; color:#fff!important;
+  border-radius:10px!important; box-shadow:inset 0 1px 1px #ffffff30!important;
+ }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper button[aria-label='Logout'] svg { color:#fff!important; }
+}

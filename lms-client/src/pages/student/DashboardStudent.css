@@ -198,3 +198,7 @@
   .edu-dashboard .dashboard-stats .w-12 svg { width:20px; height:20px; }
  }
 }
+
+@layer utilities {
+ .edu-dashboard .MuiDrawer-paper .MuiListItemButton-root.Mui-selected { box-shadow:none!important; border-left:0!important; }
+}
