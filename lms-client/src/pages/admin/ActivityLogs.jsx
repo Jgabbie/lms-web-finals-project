@@ -1,6 +1,6 @@
 import RoleScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, IconButton, MenuItem, Chip, TextField, Tooltip, Pagination } from '@mui/material'
-import { AssignmentTurnedInOutlined, DeleteOutlined, EditOutlined, HistoryEduOutlined, HistoryOutlined, LoginOutlined, LogoutOutlined, PersonAddAltOutlined, Search, VisibilityOutlined } from '@mui/icons-material'
+import { AssignmentTurnedInRounded as AssignmentTurnedInOutlined, DeleteRounded as DeleteOutlined, EditRounded as EditOutlined, HistoryEduRounded as HistoryEduOutlined, HistoryRounded as HistoryOutlined, LoginRounded as LoginOutlined, LogoutRounded as LogoutOutlined, PersonAddAltRounded as PersonAddAltOutlined, SearchRounded as Search, VisibilityRounded as VisibilityOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
@@ -65,6 +65,8 @@ export default function ActivityLogs() {
     const totalPages = Math.ceil(filteredLogs.length / logsPerPage)
 
     useEffect(() => {
+        // Preserve the existing filter reset while keeping the UI-only update scoped.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCurrentPage(1)
     }, [search, actionFilter, roleFilter])
 

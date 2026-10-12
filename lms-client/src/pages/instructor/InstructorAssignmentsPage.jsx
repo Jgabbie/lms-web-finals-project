@@ -16,13 +16,7 @@ import {
     Tabs,
     Tab
 } from '@mui/material'
-import {
-    RateReviewOutlined,
-    CheckCircleOutlined,
-    Search,
-    Add,
-    MenuBookOutlined
-} from '@mui/icons-material'
+import { RateReviewRounded as RateReviewOutlined, CheckCircleRounded as CheckCircleOutlined, SearchRounded as Search, AddRounded as Add, MenuBookRounded as MenuBookOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'

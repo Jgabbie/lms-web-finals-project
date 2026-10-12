@@ -1,6 +1,6 @@
 import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, Divider } from '@mui/material'
-import { People, School, MenuBook, TrendingUp, ArrowForward, MoreVert, CheckCircle, AccessTime, PersonAdd, Assignment, } from '@mui/icons-material'
+import { PeopleRounded as People, SchoolRounded as School, MenuBookRounded as MenuBook, TrendingUpRounded as TrendingUp, ArrowForwardRounded as ArrowForward, MoreVertRounded as MoreVert, CheckCircleRounded as CheckCircle, AccessTimeRounded as AccessTime, PersonAddRounded as PersonAdd, AssignmentRounded as Assignment } from '@mui/icons-material'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
 import { useState, useEffect } from 'react'

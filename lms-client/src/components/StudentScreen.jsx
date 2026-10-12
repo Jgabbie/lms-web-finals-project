@@ -1,4 +1,5 @@
 import './StudentScreen.css'
+import './RoleScreen.css'
 
 // Presentation only: existing pages retain their own navigation and handlers.
 export default function StudentScreen({ children, page, enabled = true, role = 'student' }) {

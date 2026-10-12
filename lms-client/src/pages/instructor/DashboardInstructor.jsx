@@ -1,6 +1,6 @@
 import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, CircularProgress } from '@mui/material'
-import { MenuBook, People, Assignment, RateReview, TrendingUp, AccessTime, PersonAdd, ArrowForward } from '@mui/icons-material'
+import { MenuBookRounded as MenuBook, PeopleRounded as People, AssignmentRounded as Assignment, RateReviewRounded as RateReview, TrendingUpRounded as TrendingUp, AccessTimeRounded as AccessTime, PersonAddRounded as PersonAdd, ArrowForwardRounded as ArrowForward } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import { useState, useEffect, useCallback, useMemo } from 'react'

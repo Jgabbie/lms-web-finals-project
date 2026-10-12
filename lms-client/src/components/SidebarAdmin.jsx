@@ -221,10 +221,10 @@ export default function SidebarAdmin() {
                                         {open && (
                                             <ListItemText
                                                 primary={item.label}
-                                                primaryTyporgraphyProps={{
+                                                slotProps={{ primary: {
                                                     fontSize: 14,
                                                     fontWeight: 500
-                                                }}
+                                                } }}
                                             />
                                         )}
 
@@ -268,6 +268,7 @@ export default function SidebarAdmin() {
                         >
                             <Button
                                 fullWidth
+                                aria-label='Logout'
                                 onClick={() => setLogoutDialogOpen(true)}
                                 startIcon={<Logout />}
                                 className={`!justify-start !normal-case !text-slate-500 hover:!bg-red-50 hover:!text-red-600 !rounded-lg
@@ -301,7 +302,8 @@ export default function SidebarAdmin() {
                     <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleLogout} color="primary" variant="contained">
+                    <Button aria-label='Logout'
+                                onClick={handleLogout} color="primary" variant="contained">
                         Logout
                     </Button>
                 </DialogActions>

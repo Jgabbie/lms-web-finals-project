@@ -16,19 +16,7 @@ import {
     Snackbar,
     Alert
 } from '@mui/material'
-import {
-    Add,
-    DescriptionOutlined,
-    InsertDriveFileOutlined,
-    MenuBookOutlined,
-    PictureAsPdfOutlined,
-    Search,
-    SlideshowOutlined,
-    VideoLibraryOutlined,
-    CheckCircle,
-    Edit,
-    Delete
-} from '@mui/icons-material'
+import { AddRounded as Add, DescriptionRounded as DescriptionOutlined, InsertDriveFileRounded as InsertDriveFileOutlined, MenuBookRounded as MenuBookOutlined, PictureAsPdfRounded as PictureAsPdfOutlined, SearchRounded as Search, SlideshowRounded as SlideshowOutlined, VideoLibraryRounded as VideoLibraryOutlined, CheckCircleRounded as CheckCircle, EditRounded as Edit, DeleteRounded as Delete } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import { useMemo, useState, useEffect, useCallback } from 'react'
@@ -569,9 +557,9 @@ export default function UploadMaterialsPage() {
                 onClose={() => !deleting && setDeleteModalOpen(false)}
                 maxWidth='xs'
                 fullWidth
-                PaperProps={{
+                slotProps={{ paper: {
                     className: '!rounded-2xl !p-2'
-                }}
+                } }}
             >
                 <DialogTitle className='!font-bold !text-slate-800'>
                     Confirm Deletion

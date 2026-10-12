@@ -1,6 +1,6 @@
 import RoleScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Chip, TextField, Alert, Snackbar, CircularProgress, Pagination } from '@mui/material'
-import { Add, DeleteOutlined, EditOutlined, PersonOutlined, Search, WarningAmber, VisibilityOutlined, RestoreFromTrash } from '@mui/icons-material'
+import { AddRounded as Add, DeleteRounded as DeleteOutlined, EditRounded as EditOutlined, PersonRounded as PersonOutlined, SearchRounded as Search, WarningAmberRounded as WarningAmber, VisibilityRounded as VisibilityOutlined, RestoreFromTrashRounded as RestoreFromTrash } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
@@ -477,7 +477,7 @@ export default function UserManagementPage() {
                                                     <td className='px-6 py-4'>
                                                         <div className='flex justify-end gap-1'>
 
-                                                            <td className='px-6 py-4 text-right'>
+                                                            <div className='text-right'>
                                                                 {activeTab === 'archived' ? (
                                                                     <IconButton
                                                                         size='small'
@@ -529,7 +529,7 @@ export default function UserManagementPage() {
                                                                         </IconButton>
                                                                     </div>
                                                                 )}
-                                                            </td>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -811,9 +811,9 @@ export default function UserManagementPage() {
                 onClose={() => setOpenDeleteUser(false)}
                 fullWidth
                 maxWidth='xs'
-                PaperProps={{
+                slotProps={{ paper: {
                     className: '!rounded-2xl'
-                }}
+                } }}
             >
                 <DialogContent className='!px-6 !pt-7 !pb-3'>
                     <div className='flex flex-col items-center text-center'>

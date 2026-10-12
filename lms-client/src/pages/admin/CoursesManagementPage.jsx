@@ -1,6 +1,6 @@
 import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, MenuItem, Chip, TextField, IconButton } from '@mui/material'
-import { DeleteOutlined, PeopleOutlined, Search, MenuBookOutlined } from '@mui/icons-material'
+import { DeleteRounded as DeleteOutlined, PeopleRounded as PeopleOutlined, SearchRounded as Search, MenuBookRounded as MenuBookOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import NavbarAdmin from '../../components/NavbarAdmin'
 import SidebarAdmin from '../../components/SidebarAdmin'
