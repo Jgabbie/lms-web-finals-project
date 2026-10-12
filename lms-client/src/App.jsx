@@ -24,7 +24,7 @@ import ActivityLogs from './pages/admin/ActivityLogs'
 import UserManagementPage from './pages/admin/UserManagementPage'
 import InstructorManagement from './pages/admin/InstructorManagement'
 import CoursesManagementPage from './pages/admin/CoursesManagementPage'
-import CreateCoursesPage from './pages/instructor/CreateCoursesPage'
+import CreateCoursesPage from './pages/admin/CreateCoursesPage'
 import StudentManagement from './pages/admin/StudentManagement'
 import ProfilePage from './pages/admin/ProfilePage'
 
