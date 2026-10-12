@@ -31,6 +31,8 @@ const logActivity = async (action, description, req) => {
     const actor = await User.findById(actorId).select('firstName lastName role')
 
     if (!actor) {
+        console.error('Actor not found for ID:', actorId)
+        console.error('Request user object:', req.user)
         throw new Error('Actor not found')
     }
 
