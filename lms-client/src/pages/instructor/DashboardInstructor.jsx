@@ -1,7 +1,7 @@
 import RoleScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, Chip, CircularProgress } from '@mui/material'
 import { MenuBookRounded as MenuBook, PeopleRounded as People, AssignmentRounded as Assignment, RateReviewRounded as RateReview, TrendingUpRounded as TrendingUp, AccessTimeRounded as AccessTime, PersonAddRounded as PersonAdd, ArrowForwardRounded as ArrowForward } from '@mui/icons-material'
-import Navbar from '../../components/Navbar'
+import NavbarInstructor from '../../components/NavbarInstructor'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -116,7 +116,7 @@ export default function DashboardInstructor() {
     return (
         <RoleScreen page="dashboardinstructor" role="instructor">
         <div className='min-h-screen bg-slate-50'>
-            <Navbar />
+            <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
             <div
                 className='transition-all duration-300'
@@ -158,7 +158,7 @@ export default function DashboardInstructor() {
                         </div>
                     ) : (
                         <>
-                            {/* Stat Cards */}
+                            
                             <div className='student-stat-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6'>
                                 {statistics.map(stat => (
                                     <Card
@@ -190,7 +190,7 @@ export default function DashboardInstructor() {
                                 ))}
                             </div>
 
-                            {/* Main Content Grid */}
+                          
                             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6'>
                                 <Card className='lg:col-span-2 !rounded-xl !border !border-slate-200 !shadow-sm'>
                                     <CardContent className='!p-6'>
@@ -251,7 +251,7 @@ export default function DashboardInstructor() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Quick Tools */}
+                                
                                 <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                     <CardContent className='!p-6'>
                                         <Typography variant='h6' className='!font-bold !text-slate-800'>
@@ -293,7 +293,7 @@ export default function DashboardInstructor() {
                                 </Card>
                             </div>
 
-                            {/* Classes & Course Distribution */}
+                         
                             <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
                                 <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                     <CardContent className='!p-6'>

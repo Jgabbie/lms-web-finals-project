@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import { GroupAddRounded as GroupAddOutlined, SearchRounded as Search, SchoolRounded as SchoolOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import Navbar from '../../components/Navbar'
+import NavbarInstructor from '../../components/NavbarInstructor'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import api from '../../api/axiosClient'
 
@@ -81,12 +81,12 @@ export default function EnrollStudentPage() {
         requestLoadData()
     }, [requestLoadData])
 
-    // Find the currently selected course object
+   
     const currentCourse = useMemo(() => {
         return courses.find(c => c._id === selectedCourseId || c.courseCode === selectedCourseId)
     }, [courses, selectedCourseId])
 
-    // Helper: checks whether a student is already enrolled in this course
+   
     const isStudentEnrolled = useCallback((studentId) => {
         if (!currentCourse || !currentCourse.enrolledStudents) return false
         return currentCourse.enrolledStudents.some(item => {
@@ -95,7 +95,7 @@ export default function EnrollStudentPage() {
         })
     }, [currentCourse])
 
-    // Filter students by search term
+    
     const filteredStudents = useMemo(() => {
         const key = search.toLowerCase()
         return students.filter(student => {
@@ -108,7 +108,7 @@ export default function EnrollStudentPage() {
         })
     }, [students, search])
 
-    // Toggle selection only if student is not already enrolled
+    
     const toggleStudent = (id) => {
         if (isStudentEnrolled(id)) return
         setSelectedStudents(prev =>
@@ -138,7 +138,7 @@ export default function EnrollStudentPage() {
             setSelectedStudents([])
             loadData()
         } catch {
-            // Fallback for localStorage-backed courses
+           
             const storedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
             const updatedStored = storedCourses.map(c => {
                 if (c._id === selectedCourseId || c.courseCode === selectedCourseId) {
@@ -163,7 +163,7 @@ export default function EnrollStudentPage() {
     return (
         <RoleScreen page="enrollstudentpage" role="instructor">
         <div className='min-h-screen bg-slate-50'>
-            <Navbar />
+           <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
             <div
                 className='transition-all duration-300'

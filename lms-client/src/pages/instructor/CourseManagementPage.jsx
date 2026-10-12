@@ -19,7 +19,7 @@ import {
 import { AddRounded as Add, DeleteRounded as DeleteOutlined, PeopleRounded as PeopleOutlined, SearchRounded as Search, PersonRemoveRounded as PersonRemoveOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Navbar from '../../components/Navbar'
+import NavbarInstructor from '../../components/NavbarInstructor'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import api from '../../api/axiosClient'
 
@@ -31,14 +31,14 @@ export default function CourseManagementPage() {
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const navigate = useNavigate()
 
-    // Enrolled Students Modal State
+ 
     const [rosterModalOpen, setRosterModalOpen] = useState(false)
     const [selectedCourseForRoster, setSelectedCourseForRoster] = useState(null)
     const [unenrollConfirmOpen, setUnenrollConfirmOpen] = useState(false)
     const [studentToUnenroll, setStudentToUnenroll] = useState(null)
     const [actionLoading, setActionLoading] = useState(false)
 
-    // Delete Course Modal State
+
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const [courseToDelete, setCourseToDelete] = useState(null)
 
@@ -96,7 +96,7 @@ export default function CourseManagementPage() {
                 studentId: targetStudentId
             })
 
-            // Update course state locally
+
             setSelectedCourseForRoster(prev => ({
                 ...prev,
                 enrolledStudents: prev.enrolledStudents.filter(
@@ -145,7 +145,7 @@ export default function CourseManagementPage() {
     return (
         <RoleScreen page="coursemanagementpage" role="instructor">
         <div className='min-h-screen bg-slate-50'>
-            <Navbar />
+            <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
             <div
                 className='transition-all duration-300'
@@ -284,7 +284,7 @@ export default function CourseManagementPage() {
                 </main>
             </div>
 
-            {/* ENROLLED STUDENTS ROSTER MODAL */}
+            
             <Dialog
                 open={rosterModalOpen}
                 onClose={() => setRosterModalOpen(false)}
@@ -340,7 +340,7 @@ export default function CourseManagementPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* UNENROLL CONFIRMATION MODAL */}
+           
             <Dialog
                 open={unenrollConfirmOpen}
                 onClose={() => !actionLoading && setUnenrollConfirmOpen(false)}
@@ -380,7 +380,7 @@ export default function CourseManagementPage() {
                 </DialogActions>
             </Dialog>
 
-            {/* DELETE COURSE MODAL */}
+          
             <Dialog
                 open={deleteModalOpen}
                 onClose={() => !actionLoading && setDeleteModalOpen(false)}

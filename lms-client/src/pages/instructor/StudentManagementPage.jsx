@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { SearchRounded as Search, MenuBookRounded as MenuBookOutlined, EmailRounded as EmailOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import Navbar from '../../components/Navbar'
+import NavbarInstructor from '../../components/NavbarInstructor'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import api from '../../api/axiosClient'
 
@@ -26,7 +26,7 @@ export default function StudentManagementPage() {
     const [loading, setLoading] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(true)
 
-    // Modal state for student course details
+   
     const [selectedStudent, setSelectedStudent] = useState(null)
     const [detailsModalOpen, setDetailsModalOpen] = useState(false)
 
@@ -50,7 +50,7 @@ export default function StudentManagementPage() {
         fetchData()
     }, [fetchData])
 
-    // Get courses that this student is enrolled in
+    
     const getStudentCourses = useCallback((studentId) => {
         return courses.filter(course =>
             (course.enrolledStudents || []).some(item => {
@@ -89,7 +89,7 @@ export default function StudentManagementPage() {
     return (
         <RoleScreen page="studentmanagementpage" role="instructor">
         <div className='min-h-screen bg-slate-50'>
-            <Navbar />
+            <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
             <div
                 className='transition-all duration-300'
@@ -224,7 +224,7 @@ export default function StudentManagementPage() {
                 </main>
             </div>
 
-            {/* STUDENT DETAILS & ENROLLED COURSES MODAL */}
+      
             <Dialog
                 open={detailsModalOpen}
                 onClose={() => setDetailsModalOpen(false)}
