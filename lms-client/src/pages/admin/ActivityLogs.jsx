@@ -35,16 +35,6 @@ export default function ActivityLogs() {
         fetchLogs()
     }, [fetchLogs])
 
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [search, actionFilter, roleFilter])
-
-    const indexOfLastLog = currentPage * logsPerPage
-    const indexOfFirstLog = indexOfLastLog - logsPerPage
-    const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog)
-
-    const totalPages = Math.ceil(filteredLogs.length / logsPerPage)
-
     const filteredLogs = useMemo(() => {
         const key = search.toLowerCase()
         return logs.filter(log => {
@@ -68,6 +58,15 @@ export default function ActivityLogs() {
         })
     }, [logs, search, actionFilter, roleFilter])
 
+    const indexOfLastLog = currentPage * logsPerPage
+    const indexOfFirstLog = indexOfLastLog - logsPerPage
+    const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog)
+
+    const totalPages = Math.ceil(filteredLogs.length / logsPerPage)
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [search, actionFilter, roleFilter])
 
     const actionIcon = action => {
         switch (action) {
@@ -158,9 +157,11 @@ export default function ActivityLogs() {
                                         placeholder='Search user or activity...'
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        slotProps={{ input: {
-                                            startAdornment: <Search className='!text-slate-400 !mr-2' />
-                                        } }}
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: <Search className='!text-slate-400 !mr-2' />
+                                            }
+                                        }}
                                     />
 
                                     <TextField
@@ -211,7 +212,7 @@ export default function ActivityLogs() {
                                         </thead>
 
                                         <tbody className='divide-y divide-slate-100'>
-                                            {filteredLogs.map(log => (
+                                            {currentLogs.map(log => (
                                                 <tr key={log.id} className='hover:bg-slate-50'>
                                                     <td className='px-6 py-4'>
                                                         <div className='flex items-center gap-3'>
