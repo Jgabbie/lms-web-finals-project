@@ -124,8 +124,8 @@ export default function AssignmentPage() {
                                 <AssignmentIcon />
                             </div>
                             <div>
-                                <p className='text-xs text-slate-500 m-0'>Completion</p>
-                                <p className='text-lg font-bold text-slate-800 m-0'>{completionRate}%</p>
+                                <p className='text-xs text-[#edf8fa] m-0'>Completion</p>
+                                <p className='text-lg font-bold text-white m-0'>{completionRate}%</p>
                             </div>
                         </div>
                     </div>
