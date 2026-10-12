@@ -100,3 +100,67 @@
 @layer utilities {
  .edu-student-screen:is(.edu-role-instructor,.edu-role-admin) main .student-stat-grid .MuiTypography-root:is(.MuiTypography-h4,.MuiTypography-h5) { color:#073342!important; }
 }
+
+/* Instructor color balance: warm neutral navigation, photo header, restrained gold. */
+@layer utilities {
+ .edu-student-screen.edu-role-instructor { background:#f5f7f6; --role-icon-start:#0a4658; --role-icon-end:#073342; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper { background:linear-gradient(165deg,#fff7e6,#fff1cf)!important; border-right:1px solid #eadfbe!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiListItemButton-root.Mui-selected { background:#073342!important; box-shadow:inset 3px 0 0 #ffba00; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .Mui-selected .MuiTypography-root { color:#fff!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiListItemIcon-root { --role-icon-start:#0a4658; --role-icon-end:#073342; box-shadow:inset 0 1px 1px #ffffff30,0 2px 5px #0733420c; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .Mui-selected .MuiListItemIcon-root { --role-icon-start:#ffca3a; --role-icon-end:#ffba00; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .Mui-selected .MuiListItemIcon-root svg { color:#073342!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .mt-auto { background:#ffffff70; border:1px solid #eadfbe; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiDivider-root { border-color:#eadfbe!important; }
+ .edu-student-screen.edu-role-instructor main .student-page-heading { background:#073342!important; }
+ .edu-student-screen.edu-role-instructor main .student-page-heading::before { background-image:linear-gradient(90deg,#052b38ef,#052b3870),url('../assets/images/student-header-photos.png'); }
+ .edu-student-screen.edu-role-instructor main .student-page-heading .MuiTypography-root { color:#fff!important; }
+ .edu-student-screen.edu-role-instructor main .student-page-heading .MuiTypography-body2 { color:#d6edf0!important; }
+ .edu-student-screen.edu-role-instructor main .student-page-heading .MuiButton-root.MuiButton-contained:not(.Mui-disabled) { background:#ffba00!important; color:#073342!important; border-color:#ffba00!important; }
+ .edu-student-screen.edu-role-instructor main .student-page-heading .MuiButton-root.MuiButton-outlined:not(.Mui-disabled) { background:#ffffff0a!important; color:#fff!important; border-color:#ffffff75!important; }
+ .edu-student-screen.edu-role-instructor .student-stat-grid .MuiCard-root:nth-child(n) { background:#fff!important; border-color:#dfe8e6!important; --role-icon-start:#0a4658; --role-icon-end:#073342; }
+ .edu-student-screen.edu-role-instructor .student-stat-grid .MuiCard-root:nth-child(1),
+ .edu-student-screen.edu-role-instructor .student-stat-grid .MuiCard-root:nth-child(4) { background:#fff9eb!important; border-color:#eee2c4!important; }
+ .edu-student-screen.edu-role-instructor .student-stat-grid .MuiCard-root:nth-child(4) { --role-icon-start:#ffca3a; --role-icon-end:#ffba00; }
+ .edu-student-screen.edu-role-instructor main .MuiCard-root .MuiButton-outlined:not(.Mui-disabled):not(.MuiButton-colorError) { background:#fff!important; border-color:#d4e1de!important; }
+ .edu-student-screen.edu-role-instructor main .MuiCard-root .MuiButton-outlined:not(.Mui-disabled):not(.MuiButton-colorError):hover { background:#edf8fa!important; }
+ .edu-student-screen.edu-role-instructor .MuiAppBar-root .MuiIconButton-root:has(.MuiBadge-root) { background:#fff1cf!important; }
+}
+
+/* Instructor tables, filters and forms use the same restrained surface palette. */
+@layer utilities {
+ .edu-student-screen.edu-role-instructor main :is(.MuiTableCell-head,thead) { background:#f4f7f5; color:#073342; }
+ .edu-student-screen.edu-role-instructor main thead th { font-weight:650; color:#073342; }
+ .edu-student-screen.edu-role-instructor main tbody tr:hover { background:#f7faf9; }
+ .edu-student-screen.edu-role-instructor main .MuiCard-root { border-color:#dfe8e6!important; }
+ .edu-student-screen.edu-role-instructor main .MuiOutlinedInput-root { background:#fff; }
+ .edu-student-screen.edu-role-instructor main .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline { border-color:#9ebcc4; }
+ .edu-student-screen.edu-role-instructor main .MuiTab-root.Mui-selected { color:#073342!important; }
+ .edu-student-screen.edu-role-instructor main .MuiTabs-indicator { background:#ffba00!important; }
+ .edu-student-screen.edu-role-instructor main .MuiSvgIcon-root[class*='text-5xl'] { color:#0d99a6!important; }
+ body:has(.edu-role-instructor) .MuiDialog-paper { background:#fff; border:1px solid #dfe8e6; }
+ body:has(.edu-role-instructor) .MuiDialogTitle-root { color:#073342; }
+}
+
+/* Dark Instructor navigation and neutral selection across roles. */
+@layer utilities {
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper { background:linear-gradient(165deg,#073342,#052b38)!important; border-right:0!important; color:#fff!important; scrollbar-color:#ffffff35 transparent; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiTypography-root,
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiButton-root { color:#d6edf0!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiTypography-h6 { color:#fff!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiTypography-caption { color:#b7dadd!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiListItemButton-root:hover { background:#ffffff10!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiListItemButton-root.Mui-selected { background:#ffffff14!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .Mui-selected .MuiListItemIcon-root { --role-icon-start:#0a4658; --role-icon-end:#073342; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .Mui-selected .MuiListItemIcon-root svg { color:#fff!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .Mui-selected .MuiTypography-root { color:#fff!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .mt-auto { background:#ffffff05; border:1px solid #ffffff12; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiDivider-root { border-color:#ffffff18!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper::-webkit-scrollbar-thumb { background:#ffffff35; }
+ :is(.edu-dashboard,.edu-student-screen) .MuiDrawer-paper .MuiListItemButton-root.Mui-selected { box-shadow:none!important; border-left:0!important; }
+}
+
+@layer utilities {
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .MuiListItemText-root .MuiTypography-root { color:#d6edf0!important; }
+ .edu-student-screen.edu-role-instructor .MuiDrawer-paper .Mui-selected .MuiListItemText-root .MuiTypography-root { color:#fff!important; }
+}
