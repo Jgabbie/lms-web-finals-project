@@ -16,6 +16,7 @@ const pages = [
 export default function NavbarAdmin() {
     const navigate = useNavigate()
 
+    const [anchorElNotifications, setAnchorElNotifications] = useState(null)
     const [anchorElNav, setAnchorElNav] = useState(null)
     const [anchorElUser, setAnchorElUser] = useState(null)
     const [sidebarOpen] = useState(true)
