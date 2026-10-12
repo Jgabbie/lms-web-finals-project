@@ -4,8 +4,10 @@ const nodemailer = require('nodemailer')
 const Student = require('../models/Student')
 const User = require('../models/User')
 const Course = require('../models/Course')
+const Log = require('../models/Log')
 const ArchivedStudent = require('../models/ArchivedStudent')
 const ArchivedUser = require('../models/ArchivedUser')
+
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
@@ -17,14 +19,14 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-const logActivity = async (user, action, description, req) => {
+const logActivity = async (action, description, req) => {
     const actor = req.user
     await Log.create({
         firstName: actor.firstName,
         lastName: actor.lastName,
         role: actor.role,
-        action: action,
-        description: description,
+        action,
+        description,
         status: 'Success'
     })
 }
