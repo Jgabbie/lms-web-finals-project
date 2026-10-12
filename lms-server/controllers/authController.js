@@ -35,8 +35,6 @@ exports.sendRegistrationOtp = async (req, res) => {
             termsAccepted
         } = req.body;
 
-        console.log(req.body)
-        console.log('reached sendRegistrationOtp')
 
         if (typeof firstName !== 'string' || !firstName.trim()) {
             return res.status(400).json({
@@ -865,8 +863,6 @@ exports.login = async (req, res) => {
         email: user.email,
     });
 }
-
-
 
 
 exports.logout = async (req, res) => {

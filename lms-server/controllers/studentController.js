@@ -22,6 +22,7 @@ const transporter = nodemailer.createTransport({
 const logActivity = async (action, description, req) => {
     const actorId = req.user?.id || req.user?._id
 
+    console.log(req.user)
     console.log('Actor ID:', actorId)
 
     if (!actorId) {
