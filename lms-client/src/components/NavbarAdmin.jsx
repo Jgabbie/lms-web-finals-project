@@ -62,7 +62,7 @@ export default function NavbarAdmin() {
                             <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu} className="md:hidden">
                                 {pages.map((page) => (
                                     <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                        <Typography textAlign="center">{page}</Typography>
+                                        <Typography textAlign="center">{page.name}</Typography>
                                     </MenuItem>
                                 ))}
                             </Menu>
