@@ -169,13 +169,6 @@ exports.addStudent = async (req, res) => {
             })
         }
 
-        const selectedCourse = await Course.findOne({ name: normalizedCourse })
-        if (!selectedCourse) {
-            return res.status(400).json({
-                message: 'The specified course does not exist'
-            })
-        }
-
         const generatedPassword = crypto.randomBytes(6).toString('base64url')
 
         const hashedPassword = await bcrypt.hash(generatedPassword, 10)
