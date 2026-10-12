@@ -77,6 +77,7 @@ export default function StudentManagement() {
                 setCoursesLoading(true)
 
                 const response = await api.get('/courses', getAuthConfig())
+                console.log('Courses response:', response.data)
 
                 const coursesData = Array.isArray(response.data)
                     ? response.data
@@ -693,7 +694,11 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 100 } }}
                         >
                             <MenuItem value='' disabled>
-                                {coursesLoading ? 'Loading courses...' : 'Select a course'}
+                                {coursesLoading
+                                    ? 'Loading courses...'
+                                    : courses.length === 0
+                                        ? 'No courses available'
+                                        : 'Select a course'}
                             </MenuItem>
 
                             {courses.map((course) => (
@@ -884,7 +889,11 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 100 } }}
                         >
                             <MenuItem value='' disabled>
-                                {coursesLoading ? 'Loading courses...' : 'Select a course'}
+                                {coursesLoading
+                                    ? 'Loading courses...'
+                                    : courses.length === 0
+                                        ? 'No courses available'
+                                        : 'Select a course'}
                             </MenuItem>
 
                             {courses.map((course) => (
