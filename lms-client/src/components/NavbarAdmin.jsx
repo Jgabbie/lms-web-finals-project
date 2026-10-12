@@ -62,7 +62,10 @@ export default function NavbarAdmin() {
                             </IconButton>
                             <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu} className="md:hidden">
                                 {pages.map((page) => (
-                                    <MenuItem key={page} onClick={handleCloseNavMenu}>
+                                    <MenuItem
+                                        key={page}
+                                        onClick={() => handleNavigate(page.path)}
+                                    >
                                         <Typography textAlign="center">{page.name}</Typography>
                                     </MenuItem>
                                 ))}
@@ -79,7 +82,7 @@ export default function NavbarAdmin() {
                                 onClick={() => handleNavigate(page.path)}
                                 className="text-slate-600 font-medium hover:text-blue-600 transition-colors duration-200"
                             >
-                                {page}
+                                {page.name}
                             </Button>
                         ))}
                     </div>
