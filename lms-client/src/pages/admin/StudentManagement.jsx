@@ -77,11 +77,12 @@ export default function StudentManagement() {
                 setCoursesLoading(true)
 
                 const response = await api.get('/courses', getAuthConfig())
-                console.log('Courses response:', response.data)
 
                 const coursesData = Array.isArray(response.data)
                     ? response.data
                     : response.data.courses || []
+
+                console.log('Courses response:', response.data)
 
                 setCourses(coursesData)
 
@@ -652,6 +653,7 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 11 } }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='First Name'
                             name='firstName'
@@ -662,6 +664,7 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Last Name'
                             name='lastName'
@@ -672,6 +675,7 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Email Address'
                             type='email'
@@ -684,14 +688,13 @@ export default function StudentManagement() {
                         />
                         <TextField
                             fullWidth
+                            select
+                            required
                             label='Course / Program'
-                            type='text'
                             name='course'
                             value={formData.course}
                             onChange={handleFormChange}
-                            error={Boolean(fieldErrors.course)}
-                            helperText={fieldErrors.course}
-                            slotProps={{ htmlInput: { maxLength: 100 } }}
+                            disabled={coursesLoading}
                         >
                             <MenuItem value='' disabled>
                                 {coursesLoading
@@ -706,11 +709,12 @@ export default function StudentManagement() {
                                     key={course._id}
                                     value={course.courseName}
                                 >
-                                    {course.courseName}
+                                    {course.courseCode} - {course.courseName}
                                 </MenuItem>
                             ))}
                         </TextField>
                         <TextField
+                            required
                             fullWidth
                             label='Year Level'
                             type='text'
@@ -837,6 +841,7 @@ export default function StudentManagement() {
                 <DialogContent>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2'>
                         <TextField
+                            required
                             fullWidth
                             label='Student Number'
                             name='studentId'
@@ -847,6 +852,7 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 20 } }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='First Name'
                             name='firstName'
@@ -857,6 +863,7 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Last Name'
                             name='lastName'
@@ -867,6 +874,7 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 50 } }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Email Address'
                             type='email'
@@ -878,15 +886,14 @@ export default function StudentManagement() {
                             slotProps={{ htmlInput: { maxLength: 100 } }}
                         />
                         <TextField
+                            required
                             fullWidth
                             label='Course / Program'
-                            type='text'
+                            select
                             name='course'
                             value={formData.course}
                             onChange={handleFormChange}
-                            error={Boolean(fieldErrors.course)}
-                            helperText={fieldErrors.course}
-                            slotProps={{ htmlInput: { maxLength: 100 } }}
+                            disabled={coursesLoading}
                         >
                             <MenuItem value='' disabled>
                                 {coursesLoading
@@ -901,7 +908,7 @@ export default function StudentManagement() {
                                     key={course._id}
                                     value={course.courseName}
                                 >
-                                    {course.courseName}
+                                    {course.courseCode} - {course.courseName}
                                 </MenuItem>
                             ))}
                         </TextField>
