@@ -295,11 +295,8 @@ exports.addUser = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
-                            background: #eff6ff;
-                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
-                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
@@ -487,11 +484,8 @@ exports.updateUser = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
-                            background: #eff6ff;
-                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
-                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
@@ -585,7 +579,8 @@ exports.deleteUser = async (req, res) => {
                 lastName: userInformation.lastName,
                 password: userInformation.password,
                 email: userInformation.email,
-                role: userInformation.role
+                role: userInformation.role,
+                status: 'inactive'
             },
             { upsert: true, new: true, runValidators: true }
         )
