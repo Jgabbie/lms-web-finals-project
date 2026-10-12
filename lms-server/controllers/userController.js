@@ -709,6 +709,7 @@ exports.deleteUser = async (req, res) => {
                 </div>
             `
                 }).catch((error) => {
+                    res.status(500).json({ message: 'Failed to send email notification' + error })
                     console.error('Error sending email:', error)
                 })
 
