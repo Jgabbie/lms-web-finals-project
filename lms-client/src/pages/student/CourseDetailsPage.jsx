@@ -15,7 +15,6 @@ import {
     AssignmentRounded as Assignment,
     SchoolRounded as School,
     CheckCircleRounded as CheckCircle,
-    ChatBubbleRounded as ChatBubble,
     InsertDriveFileRounded as InsertDriveFile,
     PictureAsPdfRounded as PictureAsPdf,
     SlideshowRounded as Slideshow,
@@ -68,16 +67,19 @@ export default function CourseDetailsPage() {
 
                 if (Array.isArray(allMaterialsRes.data)) {
                     setMaterials(allMaterialsRes.data.filter(m => 
-                        m.course === currentCourse.courseName || 
-                        m.course === currentCourse.courseCode ||
-                        String(m.courseId) === String(currentCourse._id)
+                        String(m.courseId) === String(currentCourse._id) ||
+                        [currentCourse.courseName, currentCourse.courseCode].some(courseValue =>
+                            String(m.course || '').trim().toLowerCase() === String(courseValue || '').trim().toLowerCase()
+                        )
                     )) 
                 }
 
                 if (Array.isArray(allAssignmentsRes.data)) {
                     setCourseAssignments(allAssignmentsRes.data.filter(a => 
-                        a.course === currentCourse.courseName || 
-                        String(a.courseId) === String(currentCourse._id)
+                        String(a.courseId) === String(currentCourse._id) ||
+                        [currentCourse.courseName, currentCourse.courseCode].some(courseValue =>
+                            String(a.course || '').trim().toLowerCase() === String(courseValue || '').trim().toLowerCase()
+                        )
                     )) 
                 }
             }
@@ -139,8 +141,6 @@ export default function CourseDetailsPage() {
             window.open(item.fileUrl, '_blank') 
         }
     }
-
-    const announcements = course?.announcements || [] 
 
     return (
         <div className='min-h-screen bg-[#f5f8fa]'>
@@ -269,7 +269,6 @@ export default function CourseDetailsPage() {
                                     <Tab label='Overview' /> 
                                     <Tab label='Modules' /> 
                                     <Tab label='Assignments' /> 
-                                    <Tab label='Announcements' /> 
                                 </Tabs>
                             </div>
 
@@ -455,44 +454,6 @@ export default function CourseDetailsPage() {
                                 </div>
                             )}
 
-                            {/* Tab 3: Announcements */}
-                            {activeTab === 3 && (
-                                <div className='space-y-3.5'>
-                                    {announcements.length > 0 ? (
-                                        announcements.map(ann => (
-                                            <div
-                                                key={ann._id}
-                                                className='bg-white rounded-2xl border border-slate-200/80 p-5 flex items-start gap-4 shadow-xs' 
-                                            >
-                                                <div className='w-11 h-11 rounded-xl bg-[#00acc1] text-white flex items-center justify-center shrink-0'>
-                                                    <ChatBubble className='!text-xl' /> 
-                                                </div>
-                                                <div className='flex-1 min-w-0'>
-                                                    <Typography className='!font-extrabold !text-slate-800 !text-sm uppercase tracking-wide'>
-                                                        {ann.title} 
-                                                    </Typography>
-                                                    <Typography variant='caption' className='!text-slate-400 block'>
-                                                        {ann.date} 
-                                                    </Typography>
-                                                    <Typography variant='body2' className='!text-slate-600 !mt-2 !text-xs !leading-relaxed'>
-                                                        {ann.content} 
-                                                    </Typography>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className='py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300'>
-                                            <ChatBubble className='text-slate-300 text-5xl mb-2' /> 
-                                            <Typography className='!font-bold !text-slate-700'>
-                                                No Announcements 
-                                            </Typography>
-                                            <Typography variant='caption' className='!text-slate-400'>
-                                                Course bulletins and updates will appear here. 
-                                            </Typography>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
                         </>
                     )}
                 </main>

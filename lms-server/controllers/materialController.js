@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Material = require('../models/Material')
+const Course = require('../models/Course')
 const cloudinary = require('cloudinary').v2
 const { Readable } = require('stream')
 
@@ -64,9 +65,16 @@ exports.uploadMaterial = async (req, res) => {
             fileUrl = uploadResult.secure_url
         }
 
+        const selectedCourse = course
+            ? await Course.findOne({
+                $or: [{ courseName: course }, { courseCode: course }]
+            }).select('_id')
+            : null
+
         const material = await Material.create({
             title: title.trim(),
             course: course || 'General',
+            courseId: selectedCourse?._id,
             type: type || 'PDF',
             description: description?.trim() || '',
             instructor: instructor || 'Instructor',
@@ -93,7 +101,13 @@ exports.updateMaterial = async (req, res) => {
         }
 
         if (title !== undefined) material.title = title.trim()
-        if (course !== undefined) material.course = course
+        if (course !== undefined) {
+            material.course = course
+            const selectedCourse = await Course.findOne({
+                $or: [{ courseName: course }, { courseCode: course }]
+            }).select('_id')
+            material.courseId = selectedCourse?._id
+        }
         if (type !== undefined) material.type = type
         if (description !== undefined) material.description = description.trim()
 

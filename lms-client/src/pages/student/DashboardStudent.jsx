@@ -1,5 +1,5 @@
 import { Card, CardContent, Typography, Button, Chip, Divider, LinearProgress } from '@mui/material'
-import { MenuBookRounded as MenuBook, TrendingUpRounded as TrendingUp, ArrowForwardRounded as ArrowForward, CheckCircleRounded as CheckCircle, AccessTimeRounded as AccessTime, ForumRounded as PersonAdd, AssignmentTurnedInRounded as AssignmentTurnedIn, BookmarkBorderRounded as Bookmark, PlayCircleOutlineRounded as PlayCircle, CalendarMonthRounded as CalendarMonth, LightbulbRounded as AutoStories } from '@mui/icons-material'
+import { MenuBookRounded as MenuBook, TrendingUpRounded as TrendingUp, ArrowForwardRounded as ArrowForward, AccessTimeRounded as AccessTime, ForumRounded as PersonAdd, AssignmentTurnedInRounded as AssignmentTurnedIn, BookmarkBorderRounded as Bookmark, PlayCircleOutlineRounded as PlayCircle, CalendarMonthRounded as CalendarMonth, LightbulbRounded as AutoStories } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useNavigate } from 'react-router-dom'
@@ -15,20 +15,23 @@ export default function DashboardStudent() {
     const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || 'Student'
     const [courses, setCourses] = useState([])
     const [assignments, setAssignments] = useState([])
+    const [materials, setMaterials] = useState([])
     const [submissions, setSubmissions] = useState([])
     const [discussions, setDiscussions] = useState([])
 
     useEffect(() => {
         const loadDashboard = async () => {
             try {
-                const [coursesResponse, assignmentsResponse, submissionsResponse, discussionsResponse] = await Promise.all([
+                const [coursesResponse, assignmentsResponse, materialsResponse, submissionsResponse, discussionsResponse] = await Promise.all([
                     api.get('/courses/my-courses'),
                     api.get('/assignments'),
+                    api.get('/materials'),
                     api.get('/assignments/submissions'),
                     api.get('/discussions')
                 ])
                 setCourses(Array.isArray(coursesResponse.data) ? coursesResponse.data : [])
                 setAssignments(Array.isArray(assignmentsResponse.data) ? assignmentsResponse.data : [])
+                setMaterials(Array.isArray(materialsResponse.data) ? materialsResponse.data : [])
                 setSubmissions(Array.isArray(submissionsResponse.data) ? submissionsResponse.data : [])
                 setDiscussions(Array.isArray(discussionsResponse.data) ? discussionsResponse.data : [])
             } catch (err) {
@@ -39,17 +42,35 @@ export default function DashboardStudent() {
         loadDashboard()
     }, [])
 
+    const enrolledCourseKeys = useMemo(
+        () => new Set(courses.flatMap(course => [
+            String(course._id),
+            String(course.courseName || '').trim().toLowerCase(),
+            String(course.courseCode || '').trim().toLowerCase()
+        ])),
+        [courses]
+    )
+    const enrolledAssignments = useMemo(
+        () => assignments.filter(item => enrolledCourseKeys.has(String(item.courseId)) ||
+            enrolledCourseKeys.has(String(item.course || '').trim().toLowerCase())),
+        [assignments, enrolledCourseKeys]
+    )
+    const enrolledMaterials = useMemo(
+        () => materials.filter(item => enrolledCourseKeys.has(String(item.courseId)) ||
+            enrolledCourseKeys.has(String(item.course || '').trim().toLowerCase())),
+        [materials, enrolledCourseKeys]
+    )
     const submittedAssignmentIds = useMemo(
         () => new Set(submissions.map(submission => String(submission.assignmentId))),
         [submissions]
     )
     const pendingAssignments = useMemo(
-        () => assignments.filter(assignment => !submittedAssignmentIds.has(String(assignment._id))),
-        [assignments, submittedAssignmentIds]
+        () => enrolledAssignments.filter(assignment => !submittedAssignmentIds.has(String(assignment._id))),
+        [enrolledAssignments, submittedAssignmentIds]
     )
-    const completedAssignments = assignments.length - pendingAssignments.length
-    const overallProgress = assignments.length
-        ? Math.round((completedAssignments / assignments.length) * 100)
+    const completedAssignments = enrolledAssignments.length - pendingAssignments.length
+    const overallProgress = enrolledAssignments.length
+        ? Math.round((completedAssignments / enrolledAssignments.length) * 100)
         : 0
     const statistics = [
         {
@@ -61,16 +82,16 @@ export default function DashboardStudent() {
             iconColor: "text-blue-600"
         },
         {
-            title: "Completed Courses",
-            value: 0,
-            detail: "Great Progress",
-            icon: <CheckCircle />,
+            title: "Learning Materials",
+            value: enrolledMaterials.length,
+            detail: "Course materials",
+            icon: <Bookmark />,
             iconBg: "bg-green-100",
             iconColor: "text-green-600"
         },
         {
             title: "Assignments",
-            value: assignments.length,
+            value: enrolledAssignments.length,
             detail: `${pendingAssignments.length} Pending Submission${pendingAssignments.length === 1 ? '' : 's'}`,
             icon: <AssignmentTurnedIn />,
             iconBg: "bg-purple-100",
@@ -86,16 +107,36 @@ export default function DashboardStudent() {
         },
     ]
 
-    const studentCourses = courses.map(course => ({
-        ...course,
-        name: course.courseName,
-        instructor: course.instructor,
-        progress: 0,
-        lessons: 'No lesson progress recorded',
-        color: 'bg-blue-500'
-    }))
+    const studentCourses = courses.map(course => {
+        const courseAssignments = enrolledAssignments.filter(assignment =>
+            String(assignment.courseId) === String(course._id) ||
+            [course.courseName, course.courseCode].some(courseValue =>
+                String(assignment.course || '').trim().toLowerCase() === String(courseValue || '').trim().toLowerCase()
+            )
+        )
+        const courseMaterials = enrolledMaterials.filter(material =>
+            String(material.courseId) === String(course._id) ||
+            [course.courseName, course.courseCode].some(courseValue =>
+                String(material.course || '').trim().toLowerCase() === String(courseValue || '').trim().toLowerCase()
+            )
+        )
+        const submittedCount = courseAssignments.filter(assignment =>
+            submittedAssignmentIds.has(String(assignment._id))
+        ).length
 
-    const upcomingAssignments = assignments.slice(0, 4).map(assignment => ({
+        return {
+            ...course,
+            name: course.courseName,
+            instructor: course.instructor,
+            progress: courseAssignments.length
+                ? Math.round((submittedCount / courseAssignments.length) * 100)
+                : 0,
+            lessons: `${courseMaterials.length} learning material${courseMaterials.length === 1 ? '' : 's'}`,
+            color: 'bg-blue-500'
+        }
+    })
+
+    const upcomingAssignments = enrolledAssignments.slice(0, 4).map(assignment => ({
         ...assignment,
         due: assignment.dueDate || 'No Due Date',
         status: submittedAssignmentIds.has(String(assignment._id)) ? 'Submitted' : 'Pending'
@@ -117,8 +158,22 @@ export default function DashboardStudent() {
             icon: <PersonAdd />,
             bg: 'bg-blue-100',
             color: 'text-blue-600'
+        })),
+        ...enrolledMaterials.slice(0, 3).map(material => ({
+            title: 'Learning material added',
+            description: `${material.title} for ${material.course}`,
+            time: material.createdAt,
+            icon: <Bookmark />,
+            bg: 'bg-emerald-100',
+            color: 'text-emerald-600'
         }))
     ].slice(0, 5)
+
+    const learningTip = pendingAssignments.length > 0
+        ? `You have ${pendingAssignments.length} pending assignment${pendingAssignments.length === 1 ? '' : 's'}. Open the assignment list, review the related course materials, and submit your work before the due date.`
+        : enrolledMaterials.length > 0
+            ? 'Review the latest materials in each course module, then use the course assignments to apply what you have learned.'
+            : 'Open your enrolled courses to review modules, course requirements, and upcoming assignments.'
 
     return (
         <div className='edu-dashboard'>
@@ -226,7 +281,7 @@ export default function DashboardStudent() {
                                             <LinearProgress variant='determinate' value={course.progress} className='!h-2 !rounded-full' />
                                             <div className='flex justify-between items-center mt-2'>
                                                 <span className='text-xs text-slate-400'>{course.lessons}</span>
-                                                <Button onClick={() => navigate('/student/courses/details')} size='small' endIcon={<ArrowForward />} className='!normal-case !text-blue-600'>
+                                                <Button onClick={() => navigate('/student/courses/details', { state: { course } })} size='small' endIcon={<ArrowForward />} className='!normal-case !text-blue-600'>
                                                     Continue
                                                 </Button>
                                             </div>
@@ -351,15 +406,19 @@ export default function DashboardStudent() {
                                 </div>
 
                                 <Typography variant='body2' className='!text-slate-600'>
-                                    Set aside a short, focused study session every day. Review.
+                                {learningTip}
                                 </Typography>
 
                                 <Divider className='!my-5' />
                                 <div className='flex items-center justify-between'>
-                                    <span className='text-sm font-semibold text-slate-700'>Week study goal</span>
-                                    <span className='text-sm font-semibold text-blue-600'>4 / 5 hours</span>
+                                    <span className='text-sm font-semibold text-slate-700'>Assignment progress</span>
+                                    <span className='text-sm font-semibold text-blue-600'>{completedAssignments} / {enrolledAssignments.length}</span>
                                 </div>
-                                <LinearProgress variant='determinate' value={80} className='!h-2 !rounded-full !mt-2' />
+                                <LinearProgress
+                                    variant='determinate'
+                                    value={overallProgress}
+                                    className='!h-2 !rounded-full !mt-2'
+                                />
                             </CardContent>
                         </Card>
                     </div>
