@@ -539,17 +539,18 @@ exports.deleteUser = async (req, res) => {
                     },
                     { upsert: true, new: true, runValidators: true }
                 )
-            }
 
-            await Student.findOneAndDelete({
-                email: userInformation.email
-            })
+                await Student.findOneAndDelete({
+                    email: userInformation.email
+                })
 
-            await transporter.sendMail({
-                from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
-                to: userInformation.email,
-                subject: 'EduLearn LMS - Account Deleted',
-                html: `
+                await User.findByIdAndDelete(id)
+
+                await transporter.sendMail({
+                    from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
+                    to: userInformation.email,
+                    subject: 'EduLearn LMS - Account Deleted',
+                    html: `
                 <div
                     style="
                     font-family: Arial, sans-serif;
@@ -621,10 +622,10 @@ exports.deleteUser = async (req, res) => {
                     </div>
                 </div>
             `
-            })
-            await User.findByIdAndDelete(id)
+                })
 
-            res.status(200).json({ message: 'User deleted successfully' })
+                res.status(200).json({ message: 'User deleted successfully' })
+            }
         }
 
         if (userInformation.role === 'instructor') {
@@ -647,17 +648,18 @@ exports.deleteUser = async (req, res) => {
                     },
                     { upsert: true, new: true, runValidators: true }
                 )
-            }
 
-            await Instructor.findOneAndDelete({
-                email: userInformation.email
-            })
+                await Instructor.findOneAndDelete({
+                    email: userInformation.email
+                })
 
-            await transporter.sendMail({
-                from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
-                to: userInformation.email,
-                subject: 'EduLearn LMS - Account Deleted',
-                html: `
+                await User.findByIdAndDelete(id)
+
+                await transporter.sendMail({
+                    from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
+                    to: userInformation.email,
+                    subject: 'EduLearn LMS - Account Deleted',
+                    html: `
                 <div
                     style="
                     font-family: Arial, sans-serif;
@@ -729,10 +731,11 @@ exports.deleteUser = async (req, res) => {
                     </div>
                 </div>
             `
-            })
-            await User.findByIdAndDelete(id)
+                })
 
-            res.status(200).json({ message: 'User deleted successfully' })
+                res.status(200).json({ message: 'User deleted successfully' })
+
+            }
         }
 
         await User.findByIdAndDelete(id)
