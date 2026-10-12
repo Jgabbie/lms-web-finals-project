@@ -4,6 +4,7 @@ import { ArrowBackRounded as ArrowBack, CalendarTodayRounded as CalendarToday, C
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
+import Sidebar from '../../components/Sidebar'
 import api from '../../api/axiosClient'
 import { getStoredProfile } from '../../utils/profileStorage'
 
@@ -72,8 +73,9 @@ export default function AssignmentDetailsPage() {
     return (
         <StudentScreen page="assignment-details" role={localStorage.getItem('role')?.toLowerCase() || 'student'}>
             <Navbar />
+            <Sidebar />
             <div className='min-h-screen bg-slate-50'>
-                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                <main className='ml-0 lg:ml-[260px] transition-all max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <Button
                         startIcon={<ArrowBack />}
                         className='!normal-case !text-slate-600 !mb-5'

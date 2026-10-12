@@ -1,6 +1,6 @@
 import StudentScreen from '../components/StudentScreen'
 import { Avatar, Badge, Card, CardContent, Typography, Button, Menu, MenuItem, Chip, TextField, IconButton } from '@mui/material'
-import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
+import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, ForumOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
@@ -70,6 +70,8 @@ export default function NotificationsPage() {
                 return <AnnouncementOutlined />
             case 'Grade':
                 return <CheckCircleOutlined />
+            case 'Discussion':
+                return <ForumOutlined />
             case 'Quiz':
                 return <QuizOutlined />
             case 'Schedule':
@@ -87,6 +89,8 @@ export default function NotificationsPage() {
                 return 'bg-amber-50 text-amber-600'
             case 'Grade':
                 return 'bg-green-50 text-green-600'
+            case 'Discussion':
+                return 'bg-indigo-50 text-indigo-600'
             case 'Quiz':
                 return 'bg-purple-50 text-purple-600'
             case 'Schedule':
@@ -257,7 +261,7 @@ export default function NotificationsPage() {
                                 />
 
                                 <div className='flex flex-wrap gap-2 lg:justify-end lg:shrink-0'>
-                                    {['All', 'Unread', 'Assignment', 'Announcement', 'Grade', 'Quiz'].map(item => (
+                                    {['All', 'Unread', 'Assignment', 'Announcement', 'Grade', 'Discussion', 'Quiz'].map(item => (
                                         <Button
                                             key={item}
                                             size='small'

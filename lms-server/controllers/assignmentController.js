@@ -1,5 +1,6 @@
 const Assignment = require('../models/Assignment')
 const Submission = require('../models/Submission')
+const Notification = require('../models/Notification')
 
 // 1. Get all assignments
 exports.getAllAssignments = async (req, res) => {
@@ -58,6 +59,30 @@ exports.gradeSubmission = async (req, res) => {
         submission.feedback = feedback || ''
         submission.status = 'Graded'
         await submission.save()
+
+        const scoreMessage = `${submission.score} / ${submission.maxScore}`
+        const feedbackMessage = submission.feedback ? ' Feedback is available.' : ''
+
+        await Notification.updateOne(
+            {
+                userId: submission.studentId,
+                sourceType: 'Submission',
+                sourceId: submission._id
+            },
+            {
+                $setOnInsert: {
+                    userId: submission.studentId,
+                    type: 'Grade',
+                    title: 'Assignment Graded',
+                    message: `${submission.assignmentTitle} has been graded: ${scoreMessage}.${feedbackMessage}`,
+                    course: submission.course,
+                    sourceType: 'Submission',
+                    sourceId: submission._id,
+                    read: false
+                }
+            },
+            { upsert: true }
+        )
 
         res.status(200).json({ message: 'Grade saved successfully', submission })
     } catch (err) {

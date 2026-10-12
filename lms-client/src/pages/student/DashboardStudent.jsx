@@ -71,7 +71,7 @@ export default function DashboardStudent() {
         {
             title: "Assignments",
             value: assignments.length,
-            detail: `${pendingAssignments.length} Pending Submission`,
+            detail: `${pendingAssignments.length} Pending Submission${pendingAssignments.length === 1 ? '' : 's'}`,
             icon: <AssignmentTurnedIn />,
             iconBg: "bg-purple-100",
             iconColor: "text-purple-600"
@@ -357,7 +357,7 @@ export default function DashboardStudent() {
                                 <Divider className='!my-5' />
                                 <div className='flex items-center justify-between'>
                                     <span className='text-sm font-semibold text-slate-700'>Week study goal</span>
-                                    <span className='text-sm font-semibold text-blue-600'>4 / 5 hourse</span>
+                                    <span className='text-sm font-semibold text-blue-600'>4 / 5 hours</span>
                                 </div>
                                 <LinearProgress variant='determinate' value={80} className='!h-2 !rounded-full !mt-2' />
                             </CardContent>
