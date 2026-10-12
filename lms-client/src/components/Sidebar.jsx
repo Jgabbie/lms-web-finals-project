@@ -263,6 +263,7 @@ export default function Sidebar() {
                         >
                             <Button
                                 fullWidth
+                                aria-label='Logout'
                                 onClick={handleLogout}
                                 startIcon={<Logout />}
                                 className={`!justify-start !normal-case !text-slate-500 hover:!bg-red-50 hover:!text-red-600 !rounded-lg

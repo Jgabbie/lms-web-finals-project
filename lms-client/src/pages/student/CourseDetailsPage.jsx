@@ -1,6 +1,6 @@
 import StudentScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, Button, Chip, Divider, LinearProgress, Tab, Tabs } from '@mui/material'
-import { AnnouncementOutlined, AssignmentOutlined, CalendarTodayOutlined, CheckCircleOutlined, MenuBookOutlined, PersonOutlined, PlayCircleOutlined, Schedule, SchoolOutlined } from '@mui/icons-material'
+import { AnnouncementRounded as AnnouncementOutlined, AssignmentRounded as AssignmentOutlined, CalendarTodayRounded as CalendarTodayOutlined, CheckCircleRounded as CheckCircleOutlined, MenuBookRounded as MenuBookOutlined, PersonRounded as PersonOutlined, PlayCircleRounded as PlayCircleOutlined, ScheduleRounded as Schedule, SchoolRounded as SchoolOutlined } from '@mui/icons-material'
 import { useState } from 'react'
 import Navbar from '../../components/Navbar'
 

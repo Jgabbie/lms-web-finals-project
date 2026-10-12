@@ -1,6 +1,6 @@
 import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, TextField, InputAdornment, Chip, MenuItem, CircularProgress } from '@mui/material'
-import { Search, MenuBook } from '@mui/icons-material'
+import { SearchRounded as Search, MenuBookRounded as MenuBook } from '@mui/icons-material'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'

@@ -13,15 +13,7 @@ import {
     LinearProgress,
     CircularProgress
 } from '@mui/material'
-import {
-    Assignment as AssignmentIcon,
-    Search,
-    CalendarToday,
-    CheckCircle,
-    PendingActions,
-    Grade,
-    UploadFile
-} from '@mui/icons-material'
+import { AssignmentRounded as AssignmentIcon, SearchRounded as Search, CalendarTodayRounded as CalendarToday, CheckCircleRounded as CheckCircle, PendingActionsRounded as PendingActions, GradeRounded as Grade, UploadFileRounded as UploadFile } from '@mui/icons-material'
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'

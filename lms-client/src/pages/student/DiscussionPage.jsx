@@ -1,6 +1,6 @@
 import StudentScreen from '../../components/StudentScreen'
 import { Avatar, Card, CardContent, Typography, Button, Chip, Divider, Dialog, DialogActions, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField, DialogContent } from '@mui/material'
-import { Add, ForumOutlined, PersonOutlined, Search, Schedule, SchoolOutlined, ChatBubbleOutlined } from '@mui/icons-material'
+import { AddRounded as Add, ForumRounded as ForumOutlined, PersonRounded as PersonOutlined, SearchRounded as Search, ScheduleRounded as Schedule, SchoolRounded as SchoolOutlined, ChatBubbleRounded as ChatBubbleOutlined } from '@mui/icons-material'
 import { useState, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'

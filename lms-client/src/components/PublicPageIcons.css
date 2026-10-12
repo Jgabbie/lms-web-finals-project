@@ -1,0 +1,46 @@
+/* Public pages share the Student icon treatment without changing controls. */
+:is(.edulanding,.edulogin,.edusignup) .MuiSvgIcon-root:not(.MuiCheckbox-root svg):not(.MuiAlert-icon svg):not(.MuiButton-root svg):not(.MuiIconButton-root[aria-label*='password'] svg),
+.signup-otp .MuiSvgIcon-root:not(.signup-envelope-logo svg) {
+ --public-icon-top:#0d99a6; --public-icon-bottom:#073342;
+ box-sizing:content-box; width:22px!important; height:22px!important; padding:7px;
+ border-radius:11px; color:#fff!important; flex-shrink:0;
+ background:linear-gradient(145deg,var(--public-icon-top),var(--public-icon-bottom));
+ box-shadow:inset 0 1px 1px #ffffff60,inset 0 -1px 2px #00000012,0 3px 8px #07334212;
+}
+:is(.edulanding,.edulogin,.edusignup) .MuiSvgIcon-root:is([data-testid*='Groups'],[data-testid*='CheckCircle'],[data-testid*='Phone']) { --public-icon-top:#0d99a6; --public-icon-bottom:#009b71; }
+:is(.edulanding,.edulogin,.edusignup) .MuiSvgIcon-root:is([data-testid*='School'],[data-testid*='AutoAwesome']) { --public-icon-top:#ffca3a; --public-icon-bottom:#ffba00; }
+:is(.edulanding,.edulogin,.edusignup) .MuiSvgIcon-root:is([data-testid*='Email'],[data-testid*='Visibility'],[data-testid*='Terminal']) { --public-icon-top:#00b4c6; --public-icon-bottom:#0d99a6; }
+:is(.edulanding,.edulogin,.edusignup) .MuiSvgIcon-root:is([data-testid*='LocationOn'],[data-testid*='Palette']) { --public-icon-top:#00b4c6; --public-icon-bottom:#0d99a6; }
+.edulanding .landing-feature-grid .MuiSvgIcon-root { width:27px!important; height:27px!important; padding:12px; border-radius:15px; }
+.edulanding .landing-course-art .MuiSvgIcon-root { width:45px!important; height:45px!important; padding:15px; border-radius:20px; }
+.edulanding .landing-brand .MuiSvgIcon-root,
+.edulogin .login-brand .MuiSvgIcon-root { color:#073342!important; width:24px!important; height:24px!important; padding:6px; }
+:is(.edulanding,.edulogin,.edusignup) .MuiButton-root .MuiSvgIcon-root { width:17px!important; height:17px!important; padding:3px; border-radius:7px; --public-icon-top:#00b4c6; --public-icon-bottom:#0d99a6; }
+:is(.edulogin,.edusignup) .MuiIconButton-root .MuiSvgIcon-root { width:19px!important; height:19px!important; padding:4px; border-radius:8px; }
+.edulanding :is(.landing-tag,.landing-announcement) .MuiSvgIcon-root { width:15px!important; height:15px!important; padding:3px; border-radius:6px; }
+.edulogin .login-audiences .MuiSvgIcon-root { width:18px!important; height:18px!important; padding:5px; border-radius:8px; }
+:is(.edulogin,.edusignup) .MuiCheckbox-root { color:#0d99a6!important; }
+:is(.edulogin,.edusignup) .MuiCheckbox-root.Mui-checked { color:#073342!important; }
+.signup-otp .signup-envelope-logo .MuiSvgIcon-root { color:#fff!important; background:none; }
+:is(.edulanding,.edulogin,.edusignup) .MuiIconButton-root.Mui-disabled .MuiSvgIcon-root { opacity:.5; }
+
+/* Gold and cyan tiles use dark brand glyphs for stronger contrast. */
+:is(.edulanding,.edulogin,.edusignup) .MuiSvgIcon-root:is([data-testid*='School'],[data-testid*='AutoAwesome'],[data-testid*='Palette'],[data-testid*='LocationOn']) { color:#073342!important; }
+.edulanding .landing-feature-grid article:nth-child(1) .MuiSvgIcon-root { --public-icon-top:#0d99a6; --public-icon-bottom:#073342; }
+.edulanding .landing-feature-grid article:nth-child(2) .MuiSvgIcon-root { --public-icon-top:#0d99a6; --public-icon-bottom:#009b71; }
+.edulanding .landing-feature-grid article:nth-child(3) .MuiSvgIcon-root { --public-icon-top:#ffca3a; --public-icon-bottom:#ffba00; color:#073342!important; }
+
+/* Keep compact control glyphs plain, as requested. */
+:is(.edulogin,.edusignup) .MuiIconButton-root[aria-label*='password'] .MuiSvgIcon-root {
+ background:none!important; box-shadow:none!important; padding:0!important;
+ border-radius:0; color:#073342!important; width:24px!important; height:24px!important;
+ box-sizing:border-box;
+}
+.edulanding .MuiButton-root .MuiSvgIcon-root {
+ background:none!important; box-shadow:none!important; padding:0!important;
+ border-radius:0; color:#073342!important; width:22px!important; height:22px!important;
+ box-sizing:border-box;
+}
+
+:is(.edulogin,.edusignup) .MuiIconButton-root[aria-label*='password'] { display:inline-flex!important; visibility:visible!important; opacity:1!important; flex-shrink:0; min-width:40px; min-height:40px; }
+:is(.edulogin,.edusignup) .MuiIconButton-root[aria-label*='password'] svg { display:block!important; visibility:visible!important; opacity:1!important; fill:currentColor!important; color:#073342!important; }

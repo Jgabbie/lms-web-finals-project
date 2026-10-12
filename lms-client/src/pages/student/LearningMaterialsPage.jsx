@@ -1,16 +1,6 @@
 import StudentScreen from '../../components/StudentScreen'
 import { Card, CardContent, Typography, Button, TextField, Chip, MenuItem, CircularProgress } from '@mui/material'
-import {
-    DescriptionOutlined,
-    DownloadOutlined,
-    InsertDriveFileOutlined,
-    MenuBookOutlined,
-    PictureAsPdfOutlined,
-    Search,
-    SlideshowOutlined,
-    VideoLibraryOutlined,
-    VisibilityOutlined
-} from '@mui/icons-material'
+import { DescriptionRounded as DescriptionOutlined, DownloadRounded as DownloadOutlined, InsertDriveFileRounded as InsertDriveFileOutlined, MenuBookRounded as MenuBookOutlined, PictureAsPdfRounded as PictureAsPdfOutlined, SearchRounded as Search, SlideshowRounded as SlideshowOutlined, VideoLibraryRounded as VideoLibraryOutlined, VisibilityRounded as VisibilityOutlined } from '@mui/icons-material'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useState, useEffect, useMemo, useCallback } from 'react'
