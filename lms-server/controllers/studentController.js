@@ -157,9 +157,9 @@ exports.addStudent = async (req, res) => {
             })
         }
 
-        const temporaryPassword = crypto.randomBytes(6).toString('base64url')
+        const generatedPassword = crypto.randomBytes(6).toString('base64url')
 
-        const hashedPassword = await bcrypt.hash(temporaryPassword, 10)
+        const hashedPassword = await bcrypt.hash(generatedPassword, 10)
 
         await User.create({
             firstName: firstName.trim(),
@@ -268,7 +268,6 @@ exports.addStudent = async (req, res) => {
                 yearLevel: student.yearLevel,
                 status: student.status,
                 role: student.role,
-                temporaryPassword: temporaryPassword
             }
         })
     } catch (error) {

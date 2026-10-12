@@ -156,9 +156,9 @@ exports.addInstructor = async (req, res) => {
 
         const instructorId = newInstructorId
 
-        const temporaryPassword = crypto.randomBytes(6).toString('base64url')
+        const generatedPassword = crypto.randomBytes(6).toString('base64url')
 
-        const hashedPassword = await bcrypt.hash(temporaryPassword, 10)
+        const hashedPassword = await bcrypt.hash(generatedPassword, 10)
 
         await User.create({
             firstName: firstName.trim(),
