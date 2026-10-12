@@ -523,39 +523,60 @@ export default function Dashboard() {
                                         </Typography>
                                     ) : (
                                         <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8'>
-                                            {activityLogs.map((item, index) => {
+                                            {activityLogs.map((item) => {
                                                 const style = getActivityStyle(item.action)
                                                 return (
                                                     <div key={item.id}>
-                                                        <div className='flex items-center gap-4 py-4'>
+                                                        <div className='flex items-start gap-4 py-4'>
                                                             <div className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center ${item.bg} ${item.color}`}>
                                                                 {style.icon}
                                                             </div>
 
                                                             <div className='flex-1 min-w-0'>
-                                                                <Typography variant='body2' className='!font-semibold !text-slate-800'>
+                                                                <Typography
+                                                                    variant='body2'
+                                                                    className='!font-semibold !text-slate-800'
+                                                                >
                                                                     {item.action}
                                                                     {item.user ? ` - ${item.user}` : ''}
                                                                 </Typography>
 
-                                                                <Typography variant='caption' className='!text-slate-500'>
+                                                                <Typography
+                                                                    variant='caption'
+                                                                    className='!text-slate-500 !mt-1 !break-words'
+                                                                >
                                                                     {item.description}
                                                                 </Typography>
 
-                                                                <Typography variant='caption' className='!text-slate-500'>
-                                                                    {item.role} - {item.status}
-                                                                </Typography>
-                                                            </div>
+                                                                <div className='flex flex-wrap items-center gap-2 mt-2'>
+                                                                    {item.role && (
+                                                                        <Chip
+                                                                            label={item.role}
+                                                                            size='small'
+                                                                            variant='outlined'
+                                                                            className='!text-xs !border-slate-200 !text-slate-600'
+                                                                        />
+                                                                    )}
 
-                                                            <div className='flex items-center gap-1 text-xs text-slate-400 whitespace-nowrap'>
-                                                                <AccessTime className='!text-sm' />
-                                                                {item.date} at {item.time}
+                                                                    {item.status && (
+                                                                        <Chip
+                                                                            label={item.status}
+                                                                            size='small'
+                                                                            className='!text-xs !border-slate-100 !text-slate-600'
+                                                                        />
+                                                                    )}
+                                                                </div>
+
+                                                                <div className='flex items-center gap-1 mt-2 text-xs text-slate-400'>
+                                                                    <AccessTime className='!text-sm shrink-0' />
+                                                                    <span className='break-words'>
+                                                                        {item.date}
+                                                                        {item.time ? ` at ${item.time}` : ''}
+                                                                    </span>
+
+                                                                </div>
                                                             </div>
                                                         </div>
-
-                                                        {index < activityLogs.length - 1 && (
-                                                            <Divider />
-                                                        )}
                                                     </div>
                                                 )
                                             })}
