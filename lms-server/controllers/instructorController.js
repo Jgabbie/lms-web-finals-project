@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-const logActivity = async (user, action, description) => {
+const logActivity = async (user, action, description, req) => {
     const actor = req.user
     await Log.create({
         firstName: actor.firstName,
