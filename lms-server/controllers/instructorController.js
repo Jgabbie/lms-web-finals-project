@@ -426,11 +426,8 @@ exports.updateInstructor = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
-                            background: #eff6ff;
-                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
-                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
@@ -501,7 +498,7 @@ exports.deleteInstructor = async (req, res) => {
             })
         }
 
-        const instructorInformation = await User.findByIdAndDelete(id)
+        const instructorInformation = await Instructor.findById(id)
 
         if (!instructorInformation) {
             return res.status(404).json({ message: 'Instructor not found' })
@@ -566,7 +563,7 @@ exports.deleteInstructor = async (req, res) => {
                         EduLearn LMS
                     </h2>
 
-                    <p>Hello ${normalizedFirstName} ${normalizedLastName},</p>
+                    <p>Hello ${instructorInformation.firstName} ${instructorInformation.lastName},</p>
 
                     <p>
                         Your account has been deleted successfully.
@@ -580,29 +577,26 @@ exports.deleteInstructor = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
-                            background: #eff6ff;
-                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
-                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Email Address:
-                                <strong>${normalizedEmail}</strong>
+                                <strong>${instructorInformation.email}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Role:
-                                <strong>${role}</strong>
+                                <strong>${instructorInformation.role}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Department:
-                                <strong>${normalizedDepartment}</strong>
+                                <strong>${instructorInformation.department}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Specialization:
-                                <strong>${normalizedSpecialization}</strong>
+                                <strong>${instructorInformation.specialization}</strong>
                             </p>
                         </span>
                     </div>

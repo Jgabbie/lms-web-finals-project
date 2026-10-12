@@ -295,8 +295,11 @@ exports.addUser = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
+                            background: #eff6ff;
+                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
+                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
@@ -378,8 +381,11 @@ exports.addUser = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
+                            background: #eff6ff;
+                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
+                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">

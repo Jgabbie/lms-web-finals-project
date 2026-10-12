@@ -512,7 +512,7 @@ exports.deleteStudent = async (req, res) => {
             })
         }
 
-        const studentInformation = await Student.findOne({ _id: id })
+        const studentInformation = await Student.findById(id)
 
         if (!studentInformation) {
             return res.status(404).json({ message: 'Student not found' })
@@ -577,7 +577,7 @@ exports.deleteStudent = async (req, res) => {
                         EduLearn LMS
                     </h2>
 
-                    <p>Hello ${normalizedFirstName} ${normalizedLastName},</p>
+                    <p>Hello ${studentInformation.firstName} ${studentInformation.lastName},</p>
 
                     <p>
                         Your account has been deleted successfully.
@@ -601,19 +601,19 @@ exports.deleteStudent = async (req, res) => {
                         ">
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Email Address:
-                                <strong>${normalizedEmail}</strong>
+                                <strong>${studentInformation.email}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Role:
-                                <strong>${role}</strong>
+                                <strong>${studentInformation.role}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Course:
-                                <strong>${normalizedCourse}</strong>
+                                <strong>${studentInformation.course}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Year Level:
-                                <strong>${normalizedYearLevel}</strong>
+                                <strong>${studentInformation.yearLevel}</strong>
                             </p>
                         </span>
                     </div>
