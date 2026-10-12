@@ -1,7 +1,8 @@
 import { Button, TextField } from '@mui/material'
-import { School, MenuBook, Email, Phone, LocationOn, ArrowForward, AutoAwesome, Groups, Code, Palette, Terminal } from '@mui/icons-material'
+import { School, MenuBook, Email, Phone, LocationOn, ArrowForward, AutoAwesome, Groups, Code, Palette, Terminal, LoginRounded, AssignmentRounded, CheckCircleRounded } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import LandingGraphics from '../../assets/graphics/undraw_education_3vwh.svg'
+import StudentDashboardPreview from '../../assets/images/landing-student-dashboard.png'
 import './LandingPage.css'
 
 export default function LandingPage() {
@@ -36,6 +37,14 @@ export default function LandingPage() {
                     <div className='landing-hero-note'><span className='landing-status-dot' /> Small steps. Endless possibilities.</div>
                 </section>
                 <div className='landing-intro'><p>A space for every kind of learner</p><div><span><School /> Students</span><span><MenuBook /> Instructors</span><span><Groups /> Learning together</span></div></div>
+                <section id='how-it-works' className='landing-section landing-how' aria-labelledby='landing-how-title'>
+                    <div className='landing-section-heading'><span className='landing-eyebrow'>SMALL STEPS. REAL PROGRESS.</span><h2 id='landing-how-title'>Your next chapter,<br />in three simple steps.</h2><p>From signing in to submitting your work, keep your learning in one place.</p></div>
+                    <ol className='landing-steps'>
+                        <li><div className='landing-step-top'><LoginRounded /><span>01</span></div><h3>Sign in to your space</h3><p>Use your EduLearn account to open your personal learning dashboard.</p></li>
+                        <li><div className='landing-step-top'><MenuBook /><span>02</span></div><h3>Find your enrolled courses</h3><p>Open the courses assigned to you and explore their lessons and learning materials.</p></li>
+                        <li><div className='landing-step-top'><AssignmentRounded /><span>03</span></div><h3>Learn, discuss, and submit</h3><p>Review resources, join course discussions, and submit your assignments.</p></li>
+                    </ol>
+                </section>
                 <section id='courses' className='landing-section landing-courses'>
                     <div className='landing-section-heading'><span className='landing-eyebrow'>FIND YOUR NEXT POSSIBILITY</span><h2>Big ideas.<br />Practical classes.</h2><p>Explore courses designed to help you build technical, creative, and professional skills.</p></div>
                     <div className='landing-course-grid'>{courses.map((course, index) => <article className={`landing-course-card course-${index}`} key={course.title}>
@@ -54,12 +63,22 @@ export default function LandingPage() {
                         <article><AutoAwesome /><h3>Practical Skills</h3><p>Focus on skills that can be applied directly to your projects, studies, and career.</p></article>
                     </div>
                 </section>
+                <section id='platform-preview' className='landing-section landing-platform' aria-labelledby='landing-platform-title'>
+                    <div className='landing-platform-copy'><span className='landing-eyebrow'>A CLEARER WAY TO LEARN</span><h2 id='landing-platform-title'>Your learning.<br />All together.</h2><p>A personal workspace that helps you stay focused on what comes next.</p><ul className='landing-platform-benefits'><li><CheckCircleRounded /> Access your enrolled courses and materials</li><li><CheckCircleRounded /> Keep track of assignments and deadlines</li><li><CheckCircleRounded /> Join discussions and follow your progress</li></ul><Button variant='contained' onClick={navigateSignup}>Open Your Learning Space <ArrowForward fontSize='small' /></Button></div>
+                    <figure className='landing-dashboard-preview'>
+                        <a className='landing-dashboard-image-link' href={StudentDashboardPreview} target='_blank' rel='noreferrer' aria-label='Open full-size Student dashboard screenshot'>
+                            <img src={StudentDashboardPreview} alt='EduLearn Student dashboard with enrolled courses, learning materials, assignments, progress, and upcoming deadlines' loading='lazy' width='1440' height='960' />
+                        </a>
+                        <figcaption>Our Student dashboard, shown with an empty workspace and personal details hidden. Select the preview to view it full size.</figcaption>
+                    </figure>
+                </section>
                 <section className='landing-learning-banner'><div className='landing-learning-card'><span className='landing-eyebrow'>EDUCATION MADE SIMPLE</span><h2>A little curiosity<br />can take you a long way.</h2><p>Empowering learners with practical knowledge and skills for a better future.</p><img src={LandingGraphics} alt='Illustration of learning and education' loading='lazy' /></div></section>
                 <section className='landing-section landing-faq' aria-labelledby='landing-faq-title'>
                     <div className='landing-section-heading'><span className='landing-eyebrow'>A LITTLE MORE CLARITY</span><h2 id='landing-faq-title'>Frequently asked<br />questions.</h2></div>
                     <details open><summary>Who is EduLearn for?</summary><p>EduLearn brings students, instructors, and administrators together in one learning management system.</p></details>
-                    <details><summary>What courses can I explore?</summary><p>The featured classes introduce React, UI/UX design, and backend development with Node.js.</p></details>
-                    <details><summary>What can I find in the student portal?</summary><p>The student interface includes courses, assignments, learning materials, discussions, and a personal dashboard.</p></details>
+                    <details><summary>How do I access my courses?</summary><p>Sign in and open My Courses in the Student portal. The courses you are enrolled in will appear there.</p></details>
+                    <details><summary>Where do I submit my assignments?</summary><p>Open Assignments in the Student portal, select an assignment, and follow its submission instructions.</p></details>
+                    <details><summary>Who can help with course enrollment?</summary><p>Contact your instructor or school administrator if a course you need is missing from My Courses.</p></details>
                     <details><summary>How do I get started?</summary><p>Use Get Started to visit the login page. You can also find the signup link there if you need an account.</p></details>
                 </section>
                 <section id='contact' className='landing-section landing-contact'>

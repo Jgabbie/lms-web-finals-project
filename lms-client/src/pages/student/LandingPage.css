@@ -1,4 +1,30 @@
 @import '../../components/PublicPageIcons.css';
+.landing-steps { list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; }
+.landing-steps li { padding:28px; border:1px solid #e4e9e3; border-radius:24px; background:#fff; }
+.landing-steps li:nth-child(2) { background:#fff9eb; border-color:#eee2c4; }
+.landing-step-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+.landing-step-top span { font-size:13px; letter-spacing:.08em; color:#53717a; }
+.edulanding .landing-steps h3 { color:#073342; margin-bottom:12px; }
+.edulanding .landing-step-top svg { background:linear-gradient(145deg,#0a4658,#073342)!important; color:#fff!important; padding:12px; border-radius:15px; }
+.landing-platform { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr); gap:46px; align-items:center; border-top:1px solid #e4e9e3; }
+.landing-platform-copy .landing-eyebrow { color:#073342; }
+.landing-platform-copy h2 { margin:16px 0 20px; }
+.landing-platform-benefits { list-style:none; padding:0; margin:24px 0 30px; display:grid; gap:16px; }
+.landing-platform-benefits li { display:flex; gap:10px; align-items:center; color:#36525a; font-size:14px; line-height:1.5; }
+.edulanding .landing-platform-benefits svg { background:none!important; padding:0!important; box-shadow:none!important; color:#073342!important; fill:#073342!important; width:20px!important; height:20px!important; }
+.landing-dashboard-preview { margin:0; min-width:0; }
+.landing-dashboard-preview figcaption { margin-top:16px; text-align:center; font-size:11px; line-height:1.6; color:#686d68; }
+@media(max-width:900px) {
+ .landing-platform { grid-template-columns:1fr; gap:32px; }
+ .landing-platform-copy { max-width:540px; }
+ .landing-dashboard-preview { width:100%; max-width:660px; margin:auto; }
+}
+@media(max-width:650px) {
+ .landing-steps { grid-template-columns:1fr; gap:16px; }
+ .landing-steps li { padding:24px; }
+ .landing-step-top { margin-bottom:20px; }
+
+}
 .edulanding {
     --blue:#073342;
     --ink:#202321;
@@ -853,4 +879,75 @@
 @layer utilities {
  .edulanding .MuiButton-contained { background:#ffba00!important; color:#073342!important; }
  .edulanding .MuiButton-contained:hover { background:#ffca3a!important; }
+}
+
+/* A compact page rhythm with the actual Student dashboard preview. */
+.edulanding .landing-section { padding-top:72px; padding-bottom:72px; }
+.edulanding .landing-section-heading { margin-bottom:38px; }
+.edulanding .landing-intro { padding-top:36px; }
+.edulanding .landing-platform { gap:32px; grid-template-columns:minmax(0,.7fr) minmax(0,1.5fr); }
+.landing-dashboard-image-link { display:block; border:1px solid #d7e3e2; border-radius:20px; overflow:hidden; box-shadow:0 14px 35px #07334212; }
+.landing-dashboard-image-link img { display:block; width:100%; height:auto; }
+.edulanding .landing-faq { padding-bottom:28px; }
+@media(max-width:900px) {
+ .edulanding .landing-platform { grid-template-columns:1fr; }
+}
+@media(max-width:650px) {
+ .edulanding .landing-section { padding-top:46px; padding-bottom:46px; }
+ .edulanding .landing-section-heading { margin-bottom:28px; }
+ .edulanding .landing-intro { padding-top:28px; }
+ .edulanding .landing-faq { padding-bottom:20px; }
+}
+
+/* A contrasting journey strip separates the introduction from course cards. */
+.edulanding .landing-how {
+ display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.8fr); align-items:center; gap:32px;
+ background:#073342; border-radius:28px; margin:36px auto 12px; padding:40px 32px;
+ width:calc(100% - 48px); max-width:1032px;
+}
+.edulanding .landing-how .landing-section-heading { text-align:left; margin:0; max-width:none; }
+.edulanding .landing-how .landing-eyebrow { color:#ffca3a; }
+.edulanding .landing-how h2 { color:#fff; font-size:clamp(28px,2.5vw,36px); line-height:1.15; }
+.edulanding .landing-how .landing-section-heading p { color:#c5dfe2; font-size:13px; margin-top:16px; }
+.edulanding .landing-how .landing-steps { gap:0; }
+.edulanding .landing-how .landing-steps li {
+ background:transparent; border:0; border-left:1px solid #ffffff25; border-radius:0; padding:8px 20px;
+ transition:transform .25s ease;
+}
+.edulanding .landing-how .landing-step-top { margin-bottom:18px; }
+.edulanding .landing-how .landing-step-top span { color:#ffca3a; font-weight:700; }
+.edulanding .landing-how .landing-step-top svg { background:#0a4658!important; box-shadow:none; }
+.edulanding .landing-how .landing-steps h3 { color:#fff; font-size:16px; line-height:1.35; margin-bottom:10px; }
+.edulanding .landing-how .landing-steps p { color:#c5dfe2; font-size:12px; line-height:1.65; }
+.edulanding .landing-feature-grid article { transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease; }
+.edulanding .landing-dashboard-image-link { animation:landing-preview-float 8s ease-in-out infinite; transition:box-shadow .3s ease; }
+.edulanding .landing-dashboard-image-link:is(:hover,:focus-visible) { animation-play-state:paused; box-shadow:0 20px 42px #07334220; }
+@keyframes landing-preview-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+@media(hover:hover) and (pointer:fine) {
+ .edulanding .landing-feature-grid article:hover { transform:translateY(-6px); border-color:#b7cece; box-shadow:0 12px 24px #0733420d; }
+ .edulanding .landing-how .landing-steps li:hover { transform:translateY(-4px); }
+}
+@supports(animation-timeline:view()) {
+ @media(prefers-reduced-motion:no-preference) {
+  .edulanding .landing-feature-grid article { animation:landing-card-arrive linear both; animation-timeline:view(); animation-range:entry 0% entry 90%; }
+ }
+}
+@keyframes landing-card-arrive { from { opacity:.65; translate:0 18px; } to { opacity:1; translate:0 0; } }
+@media(max-width:900px) {
+ .edulanding .landing-how { grid-template-columns:1fr; gap:28px; }
+ .edulanding .landing-how .landing-section-heading { max-width:540px; }
+ .edulanding .landing-how .landing-steps li:first-child { border-left:0; padding-left:0; }
+}
+@media(max-width:650px) {
+ .edulanding .landing-how { width:calc(100% - 30px); padding:28px 24px; margin-top:28px; border-radius:22px; }
+ .edulanding .landing-how .landing-steps li { border-left:0; border-top:1px solid #ffffff25; padding:18px 0; }
+ .edulanding .landing-how .landing-steps li:first-child { border-top:0; padding-top:0; }
+ .edulanding .landing-how .landing-steps li:last-child { padding-bottom:0; }
+ .edulanding .landing-how .landing-step-top { margin-bottom:10px; }
+ .edulanding .landing-how .landing-steps p { font-size:13px; }
+ .edulanding .landing-dashboard-image-link { animation:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .edulanding .landing-dashboard-image-link,.edulanding .landing-feature-grid article { animation:none!important; translate:none!important; transform:none!important; }
+ .edulanding .landing-how .landing-steps li { transition:none; transform:none!important; }
 }
