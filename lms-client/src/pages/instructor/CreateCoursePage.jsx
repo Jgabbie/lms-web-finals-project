@@ -6,16 +6,21 @@ import { useNavigate } from 'react-router-dom'
 import NavbarInstructor from '../../components/NavbarInstructor'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import api from '../../api/axiosClient'
+import { getStoredProfile } from '../../utils/profileStorage'
 
 export default function CreateCoursePage() {
     const navigate = useNavigate()
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+
+    const profile = getStoredProfile()
+    const instructorFullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ') || 'Instructor'
+
     const [form, setForm] = useState({
         courseCode: '',
         courseName: '',
-        instructor: 'Instructor Portal',
+        instructor: instructorFullName,
         units: 3,
         semester: '1st Semester',
         schedule: '',
@@ -39,7 +44,10 @@ export default function CreateCoursePage() {
         try {
             setLoading(true)
             setError('')
-            await api.post('/courses/create', form)
+            await api.post('/courses/create', {
+                ...form,
+                instructor: instructorFullName
+            })
             navigate('/instructor/courses')
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to create course')
@@ -73,7 +81,6 @@ export default function CreateCoursePage() {
                             Add a new course to your curriculum.
                         </Typography>
                     </div>
-
                     <form onSubmit={handleSubmit}>
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-6 sm:!p-8'>
@@ -90,7 +97,6 @@ export default function CreateCoursePage() {
                                         </Typography>
                                     </div>
                                 </div>
-
                                 <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
                                     <TextField
                                         required
@@ -179,7 +185,6 @@ export default function CreateCoursePage() {
                     </form>
                 </main>
             </div>
-
             <Snackbar open={Boolean(error)} autoHideDuration={4000} onClose={() => setError('')}>
                 <Alert onClose={() => setError('')} severity='error' variant='filled'>
                     {error}

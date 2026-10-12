@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 
 
+
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import ResetPassword from './pages/ResetPassword'
@@ -35,6 +36,7 @@ import ProfileInstructorPage from './pages/instructor/ProfileInstructorPage'
 import CourseManagementPage from './pages/instructor/CourseManagementPage'
 import CreateCoursePage from './pages/instructor/CreateCoursePage'
 import UploadMaterialsPage from './pages/instructor/UploadMaterialsPage'
+import InstructorCourseDetailsPage from './pages/instructor/InstructorCourseDetailsPage'
 import StudentManagementPage from './pages/instructor/StudentManagementPage'
 
 
@@ -166,6 +168,7 @@ function App() {
         <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
         <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
         <Route path='/instructor/profile' element={<ProfileInstructorPage />} />
+        <Route path='/instructor/courses/details' element={<InstructorCourseDetailsPage />} />
       </Route>
 
         <Route
@@ -184,6 +187,7 @@ function App() {
           <Route path='/student/courses/details' element={<CourseDetailsPage role={role} />} />
           <Route path='/student/assignments/details' element={<AssignmentDetailsPage role={role} />} />
           <Route path='/student/discussions' element={<DiscussionPage role={role} />} />
+          <Route path='/student/courses/details' element={<CourseDetailsPage />} />
         </Route>
 
         <Route
@@ -211,6 +215,7 @@ function App() {
           <Route path='/assigndetails' element={<AssignmentDetailsPage role={role} />} />
           <Route path='/discussion' element={<DiscussionPage role={role} />} />
           <Route path='/notifications' element={<NotificationsPage />} />
+          <Route path='/coursedetails' element={role === 'instructor' || role === 'admin' ? <InstructorCourseDetailsPage /> : <CourseDetailsPage />} />
         </Route>
 
         <Route
