@@ -697,8 +697,8 @@ exports.restoreInstructor = async (req, res) => {
             lastName: archivedInstructor.lastName,
             password: archivedInstructor.password,
             email: archivedInstructor.email,
-            specialization: archivedInstructor.specialization,
-            department: archivedInstructor.department,
+            specialization: archivedInstructor.specialization || 'None',
+            department: archivedInstructor.department || 'None',
             status: 'active',
             role: 'instructor',
         })

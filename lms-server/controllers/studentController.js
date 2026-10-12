@@ -707,13 +707,13 @@ exports.restoreStudent = async (req, res) => {
 
         const restoredStudentInStudent = new Student({
             _id: archivedStudent._id,
-            studentId: archivedStudent.studentId,
+            studentId: archivedStudent.studentId || 'None',
             firstName: archivedStudent.firstName,
             lastName: archivedStudent.lastName,
             password: archivedStudent.password,
             email: archivedStudent.email,
-            course: archivedStudent.course,
-            yearLevel: archivedStudent.yearLevel,
+            course: archivedStudent.course || 'None',
+            yearLevel: archivedStudent.yearLevel || 'None',
             status: 'active',
             role: 'student'
         })
