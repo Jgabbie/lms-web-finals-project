@@ -3,6 +3,7 @@ import { Card, CardContent, Typography, Button, Avatar, Divider, TextField, Aler
 import { Person, Email, Lock, Edit, Save, Close, Visibility, VisibilityOff, PhotoCamera } from '@mui/icons-material'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import Navbar from '../../components/Navbar'
+import NavbarInstructor from '../../components/NavbarInstructor'
 import Sidebar from '../../components/Sidebar'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import SidebarAdmin from '../../components/SidebarAdmin'
@@ -332,7 +333,11 @@ export default function ProfilePage() {
     return (
         <StudentScreen page="profile" role={userRole} enabled={['student', 'instructor', 'admin'].includes(userRole)}>
         <div className='min-h-screen bg-slate-50'>
-            <Navbar />
+            {userRole === 'instructor' ? (
+                <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+            ) : (
+                <Navbar />
+            )}
 
             {/* Render appropriate sidebar for user role */}
             {userRole === 'instructor' && (
@@ -561,9 +566,9 @@ export default function ProfilePage() {
                         setShowOtpModal(false)
                     }
                 }}
-                className='flex items-center justify-center p-4'
+                className='edu-profile-modal flex items-center justify-center p-4'
             >
-                <div className='relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                <div className='edu-profile-modal-surface relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
                     <div className='text-center'>
                         <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100'>
                             <span className='text-2xl font-bold text-blue-600'>EduLearn</span>
@@ -639,9 +644,9 @@ export default function ProfilePage() {
                         setShowResetModal(false)
                     }
                 }}
-                className='flex items-center justify-center p-4'
+                className='edu-profile-modal flex items-center justify-center p-4'
             >
-                <div className='relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                <div className='edu-profile-modal-surface relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
                     <div className='text-center mb-6'>
                         <Typography variant='h5' className='font-bold text-slate-800'>
                             Create New Password
@@ -666,7 +671,7 @@ export default function ProfilePage() {
                             slotProps={{ input: {
                                 endAdornment: (
                                     <InputAdornment position='end'>
-                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge='end'>
+                                        <IconButton aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)} edge='end'>
                                             {showPassword ? <Visibility /> : <VisibilityOff />}
                                         </IconButton>
                                     </InputAdornment>
@@ -688,7 +693,7 @@ export default function ProfilePage() {
                             slotProps={{ input: {
                                 endAdornment: (
                                     <InputAdornment position='end'>
-                                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge='end'>
+                                        <IconButton aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'} onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge='end'>
                                             {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                                         </IconButton>
                                     </InputAdornment>
@@ -717,9 +722,9 @@ export default function ProfilePage() {
                         closeImagePreview()
                     }
                 }}
-                className='flex items-center justify-center p-4'
+                className='edu-profile-modal flex items-center justify-center p-4'
             >
-                <div className='relative w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 outline-none'>
+                <div className='edu-profile-modal-surface relative w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 outline-none'>
                     <div className='flex items-center justify-between mb-5'>
                         <div>
                             <Typography variant='h6' className='font-bold text-slate-800'>

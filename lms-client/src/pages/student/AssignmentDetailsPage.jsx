@@ -1,4 +1,5 @@
 import StudentScreen from '../../components/StudentScreen'
+import Sidebar from '../../components/Sidebar'
 import { Card, CardContent, Typography, Button, Chip, Divider, TextField, Snackbar, Alert } from '@mui/material'
 import {
     ArrowBackRounded as ArrowBack,
@@ -101,6 +102,7 @@ export default function AssignmentDetailsPage() {
     return (
         <StudentScreen page="assignment-details" role={localStorage.getItem('role')?.toLowerCase() || 'student'}>
             <Navbar />
+            {localStorage.getItem('role')?.toLowerCase() === 'student' && <Sidebar />}
             <div className='min-h-screen bg-slate-50'>
                 <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
                     <Button

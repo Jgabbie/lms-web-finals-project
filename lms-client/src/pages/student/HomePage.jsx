@@ -1,4 +1,5 @@
 import StudentScreen from '../../components/StudentScreen'
+import Sidebar from '../../components/Sidebar'
 import Navbar from "../../components/Navbar"
 import { Button, Card, CardContent, Typography, LinearProgress } from '@mui/material'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
@@ -17,6 +18,7 @@ export default function HomePage() {
     return (
         <StudentScreen page="home" enabled={localStorage.getItem('role')?.toLowerCase() === 'student'}>
             <Navbar />
+            {localStorage.getItem('role')?.toLowerCase() === 'student' && <Sidebar />}
             <div className="min-h-screen bg-slate-50">
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="student-page-heading bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">

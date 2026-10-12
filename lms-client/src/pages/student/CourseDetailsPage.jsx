@@ -1,8 +1,8 @@
+import RoleScreen from '../../components/StudentScreen'
 import {
     Avatar,
     Typography,
     Button,
-    Chip,
     Divider,
     Tab,
     Tabs
@@ -143,10 +143,11 @@ export default function CourseDetailsPage() {
     }
 
     return (
+        <RoleScreen page="course-details" role="student">
         <div className='min-h-screen bg-[#f5f8fa]'>
             <Navbar />
             <Sidebar />
-            <div className='transition-all duration-300 ml-0 lg:ml-[260px]'>
+            <div className='role-detail-content transition-all duration-300'>
                 <main className='max-w-[1300px] mx-auto px-4 sm:px-8 py-7'>
                     {loading || !course ? (
                         <div className='py-20 text-center text-slate-500'>
@@ -155,7 +156,7 @@ export default function CourseDetailsPage() {
                     ) : (
                         <>
                             {/* Deep Teal Hero Card */}
-                            <div className='bg-[#002f37] rounded-3xl p-7 sm:p-8 text-white relative shadow-sm mb-6'>
+                            <div className='student-page-heading bg-[#002f37] rounded-3xl p-7 sm:p-8 text-white relative shadow-sm mb-6'>
                                 <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>
                                     <div>
                                         <div className='flex items-center gap-2 mb-3.5'>
@@ -191,7 +192,7 @@ export default function CourseDetailsPage() {
                                         </div>
                                     </div>
 
-                                    <div className='bg-[#003d48]/80 border border-white/5 rounded-2xl p-5 min-w-[270px]'>
+                                    <div className='course-heading-summary bg-[#003d48]/80 border border-white/5 rounded-2xl p-5 min-w-[270px]'>
                                         <div className='flex items-center justify-between mb-2'>
                                             <span className='text-xs font-semibold text-slate-300'>Course Progress</span> 
                                             <span className='text-sm font-black text-white'>100%</span> 
@@ -207,7 +208,7 @@ export default function CourseDetailsPage() {
                             </div>
 
                             {/* Metric Cards */}
-                            <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6'>
+                            <div className='role-course-stat-grid grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6'>
                                 <div className='bg-[#e6f4f6] rounded-2xl p-5 flex items-center gap-4'>
                                     <div className='w-12 h-12 rounded-xl bg-[#003d48] text-white flex items-center justify-center shrink-0'>
                                         <MenuBook /> 
@@ -252,9 +253,12 @@ export default function CourseDetailsPage() {
                             {/* Tabs */}
                             <div className='bg-white rounded-2xl border border-slate-200/80 px-6 py-2.5 mb-6 shadow-xs'>
                                 <Tabs
+                                    variant="scrollable"
+                                    scrollButtons="auto"
+                                    allowScrollButtonsMobile
                                     value={activeTab}
                                     onChange={(_, v) => setActiveTab(v)} 
-                                    TabIndicatorProps={{ style: { backgroundColor: '#002f37', height: 3, borderRadius: 2 } }} 
+                                    slotProps={{ indicator: { style: { backgroundColor: '#002f37', height: 3, borderRadius: 2 } } }}
                                     sx={{
                                         '& .MuiTab-root': {
                                             textTransform: 'none',
@@ -459,5 +463,6 @@ export default function CourseDetailsPage() {
                 </main>
             </div>
         </div>
+        </RoleScreen>
     )
 }

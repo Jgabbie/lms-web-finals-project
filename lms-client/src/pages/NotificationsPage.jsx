@@ -1,3 +1,4 @@
+import RoleScreen from '../components/StudentScreen'
 import { Avatar, Badge, Card, CardContent, Typography, Button, Menu, MenuItem, Chip, TextField, IconButton } from '@mui/material'
 import { AnnouncementOutlined, AssignmentOutlined, CheckCircleOutlined, DoneAllOutlined, ForumOutlined, MoreVert, NotificationsNoneOutlined, QuizOutlined, Search, SchoolOutlined, ScheduleOutlined } from '@mui/icons-material'
 import { useState, useMemo, useEffect } from 'react'
@@ -148,9 +149,10 @@ export default function NotificationsPage() {
     }
 
     return (
+        <RoleScreen page="notifications" role={userRole} enabled={['student', 'instructor'].includes(userRole)}>
         <div className='min-h-screen bg-slate-50'>
             {/* Top Navbar */}
-            {userRole === 'instructor' ? (
+            {userRole === 'admin' ? (
                 <NavbarAdmin />
             ) :
                 userRole === 'instructor' ? (
@@ -182,9 +184,9 @@ export default function NotificationsPage() {
                 }}
             >
                 <main className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
+                    <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                         <div>
-                            <div className='flex items-center gap-3'>
+                            <div className='notification-heading-title flex flex-wrap items-center gap-3'>
                                 <Typography variant='h4' className='!font-bold !text-slate-800'>
                                     Notifications
                                 </Typography>
@@ -211,7 +213,7 @@ export default function NotificationsPage() {
                         </Button>
                     </div>
 
-                    <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
+                    <div className='student-stat-grid notification-stat-grid grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-5'>
                                 <div className='flex items-center gap-4'>
@@ -269,7 +271,7 @@ export default function NotificationsPage() {
 
                     <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                         <CardContent className='!p-4'>
-                            <div className='flex flex-col lg:flex-row lg:items-center gap-4'>
+                            <div className='notification-filters flex flex-col gap-4'>
                                 <TextField
                                     fullWidth
                                     size='small'
@@ -277,6 +279,7 @@ export default function NotificationsPage() {
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
                                     slotProps={{
+                                        htmlInput: { 'aria-label': 'Search notifications' },
                                         input: {
                                             startAdornment: <Search className='!text-slate-400 !mr-2' />
                                         }
@@ -311,7 +314,7 @@ export default function NotificationsPage() {
                                         <div
                                             key={notification.id}
                                             onClick={() => markAsRead(notification.id)}
-                                            className={`relative px-5 sm:px-6 py-5 cursor-pointer transition-colors ${notification.unread
+                                            className={`notification-row relative px-5 sm:px-6 py-5 cursor-pointer transition-colors ${notification.unread
                                                 ? 'bg-blue-50/50 hover:bg-blue-50'
                                                 : 'bg-white hover:bg-slate-50'
                                                 }`}
@@ -320,7 +323,7 @@ export default function NotificationsPage() {
                                                 <div className='absolute left-0 top-0 bottom-0 w-1 bg-blue-600' />
                                             )}
                                             <div className='flex items-start gap-4'>
-                                                <Avatar className={`!w-11 !h-11 ${getIconClass(notification.type)}`}>
+                                                <Avatar className={`notification-icon !w-11 !h-11 ${getIconClass(notification.type)}`}>
                                                     {getNotificationIcon(notification.type)}
                                                 </Avatar>
                                                 <div className='flex-1 min-w-0'>
@@ -349,6 +352,7 @@ export default function NotificationsPage() {
                                                             </Typography>
                                                             <IconButton
                                                                 size='small'
+                                                                aria-label={`Options for ${notification.title}`}
                                                                 onClick={e => {
                                                                     e.stopPropagation()
                                                                     handleMenuOpen(e, notification)
@@ -420,5 +424,6 @@ export default function NotificationsPage() {
                 )}
             </Menu>
         </div>
+        </RoleScreen>
     )
 }

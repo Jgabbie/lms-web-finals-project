@@ -22,7 +22,7 @@ import {
     PersonOutlined,
     LockResetOutlined,
     LogoutOutlined,
-    CheckCircleOutlined,
+    CheckCircleOutlined as CheckCircleOutline,
     DoneAllOutlined,
     Menu as MenuIcon
 } from '@mui/icons-material'
@@ -123,7 +123,7 @@ export default function NavbarInstructor({ sidebarOpen, setSidebarOpen }) {
             >
                 <Toolbar className='flex justify-between items-center px-4 sm:px-6 min-h-[70px]'>
                     
-                    <Box className='flex items-center gap-3'>
+                    <Box className='instructor-navbar-brand flex items-center gap-3'>
                         {setSidebarOpen && (
                             <IconButton
                                 size='small'
@@ -146,6 +146,7 @@ export default function NavbarInstructor({ sidebarOpen, setSidebarOpen }) {
                     <Box className='flex items-center gap-3'>
                         <IconButton
                             size='medium'
+                            aria-label='Open notifications'
                             onClick={handleOpenNotifMenu}
                             className='!bg-amber-50 hover:!bg-amber-100 !text-slate-700 transition'
                         >
