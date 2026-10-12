@@ -315,7 +315,7 @@ export default function UploadMaterialsPage() {
                                     Learning Materials
                                 </Typography>
                                 <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                    Upload, edit, view, and download materials hosted on Cloudinary.
+                                    Upload, edit, view, and download materials.
                                 </Typography>
                             </div>
                             <Button
@@ -436,7 +436,7 @@ export default function UploadMaterialsPage() {
                                                     <td className='px-6 py-4 text-right'>
                                                         <div className='flex items-center justify-end gap-1.5'>
                                                             {/* VIEW BUTTON */}
-                                                            <Tooltip title='View in Cloudinary'>
+                                                            <Tooltip title='View'>
                                                                 <span>
                                                                     <IconButton
                                                                         size='small'
@@ -568,7 +568,7 @@ export default function UploadMaterialsPage() {
                                 startIcon={<InsertDriveFileOutlined />}
                                 className='!normal-case !rounded-xl !border-slate-300 !text-slate-700 !py-3'
                             >
-                                {form.fileName ? form.fileName : 'Choose File to Host on Cloudinary'}
+                                {form.fileName ? form.fileName : 'Choose File'}
                                 <input
                                     ref={fileInputRef}
                                     hidden
@@ -599,7 +599,7 @@ export default function UploadMaterialsPage() {
                             disabled={uploading}
                             className='!bg-slate-900 hover:!bg-slate-800 !normal-case !rounded-xl !px-5 !py-2 !shadow-none'
                         >
-                            {uploading ? 'Uploading to Cloudinary...' : 'Upload Material'}
+                            {uploading ? 'Uploading...' : 'Upload Material'}
                         </Button>
                     </DialogActions>
                 </Dialog>

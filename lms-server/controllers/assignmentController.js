@@ -4,6 +4,7 @@ const { Readable } = require('stream')
 const cloudinary = require('cloudinary').v2
 const Assignment = require('../models/Assignment')
 const Submission = require('../models/Submission')
+const Course = require('../models/Course')
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -64,9 +65,14 @@ exports.createAssignment = async (req, res) => {
             fileUrl = uploadResult.secure_url
         }
 
+        const selectedCourse = await Course.findOne({
+            $or: [{ courseName: course }, { courseCode: course }]
+        }).select('_id')
+
         const assignment = await Assignment.create({
             title: title.trim(),
             course,
+            courseId: selectedCourse?._id,
             dueDate: dueDate || 'No Due Date',
             points: Number(points) || 100,
             description: description?.trim() || '',
@@ -91,7 +97,13 @@ exports.updateAssignment = async (req, res) => {
         if (!assignment) return res.status(404).json({ message: 'Assignment not found' })
 
         if (title !== undefined) assignment.title = title.trim()
-        if (course !== undefined) assignment.course = course
+        if (course !== undefined) {
+            assignment.course = course
+            const selectedCourse = await Course.findOne({
+                $or: [{ courseName: course }, { courseCode: course }]
+            }).select('_id')
+            assignment.courseId = selectedCourse?._id
+        }
         if (dueDate !== undefined) assignment.dueDate = dueDate
         if (points !== undefined) assignment.points = Number(points) || 100
         if (description !== undefined) assignment.description = description.trim()

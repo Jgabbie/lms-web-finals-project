@@ -227,14 +227,17 @@ export default function CourseManagementPage() {
                                     <tbody className='divide-y divide-slate-100'>
                                         {filteredCourses.map(course => (
                                             <tr key={course._id} className='hover:bg-slate-50'>
-                                                <td className='px-6 py-4'>
-                                                    <Typography className='!font-semibold !text-slate-800'>
-                                                        {course.courseName}
-                                                    </Typography>
-                                                    <Typography variant='caption' className='!text-slate-500'>
-                                                        {course.courseCode}
-                                                    </Typography>
-                                                </td>
+                                                                                            <td 
+                                                className='px-6 py-4 cursor-pointer group'
+                                                onClick={() => navigate('/instructor/courses/details', { state: { courseId: course._id, course } })}
+                                            >
+                                                <Typography className='!font-semibold !text-slate-800 group-hover:!text-blue-600 transition'>
+                                                    {course.courseName}
+                                                </Typography>
+                                                <Typography variant='caption' className='!text-slate-500'>
+                                                    {course.courseCode}
+                                                </Typography>
+                                            </td>
                                                 <td className='px-6 py-4 text-slate-600'>{course.instructor}</td>
                                                 <td className='px-6 py-4 text-slate-600'>{course.semester}</td>
                                                 <td className='px-6 py-4'>

@@ -1,7 +1,6 @@
 const router = require('express').Router()
 const { verifyToken } = require('../middleware/authMiddleware')
 const upload = require('../middleware/uploadMiddleware')
-
 const {
     getProfile,
     updateProfile,
@@ -18,8 +17,9 @@ router.post('/change-password/verify-otp', verifyToken, verifyPasswordResetOtp)
 router.post('/change-password/send-otp', sendPasswordResetOtp)
 router.post('/change-password/reset', resetPassword)
 router.post('/change-password/resend-otp', resendPasswordResetOtp)
-router.post('/profile/upload-image', verifyToken, upload.single('profileImage'), uploadProfileImage)
 
 
+router.post('/upload-image', verifyToken, upload.single('profileImage'), uploadProfileImage)
+router.post('/upload_image', verifyToken, upload.single('profileImage'), uploadProfileImage)
 
-module.exports = router;
+module.exports = router

@@ -563,10 +563,12 @@ exports.resendPasswordResetOtp = async (req, res) => {
 
 
 
+const Instructor = require('../models/Instructor')
+const Student = require('../models/Student')
+
 exports.uploadProfileImage = async (req, res) => {
     try {
         const userId = req.user.id
-
         if (!req.file) {
             return res.status(400).json({
                 message: 'No file uploaded'
@@ -574,13 +576,11 @@ exports.uploadProfileImage = async (req, res) => {
         }
 
         const user = await User.findById(userId)
-
         if (!user) {
             return res.status(404).json({
                 message: 'User not found'
             })
         }
-
 
         const uploadToCloudinary = () => {
             return new Promise((resolve, reject) => {
@@ -590,6 +590,7 @@ exports.uploadProfileImage = async (req, res) => {
                         public_id: `${userId}-${Date.now()}`,
                         overwrite: true,
                         resource_type: 'image',
+                        transformation: [{ width: 300, height: 300, crop: 'fill', gravity: 'face' }]
                     },
                     (error, result) => {
                         if (error) {
@@ -599,23 +600,34 @@ exports.uploadProfileImage = async (req, res) => {
                         }
                     }
                 )
-
                 Readable.from(req.file.buffer).pipe(stream)
             })
         }
 
         const result = await uploadToCloudinary()
-
         user.profileImage = result.secure_url
         await user.save()
 
+        // Sync avatar with Instructor/Student collections if applicable
+        if (user.role === 'instructor') {
+            await Instructor.findOneAndUpdate(
+                { $or: [{ _id: user._id }, { email: user.email }] },
+                { profileImage: result.secure_url }
+            )
+        } else if (user.role === 'student') {
+            await Student.findOneAndUpdate(
+                { $or: [{ _id: user._id }, { email: user.email }] },
+                { profileImage: result.secure_url }
+            )
+        }
+
         return res.status(200).json({
             message: 'Profile image uploaded successfully',
-            profileImage: result.secure_url
+            profileImage: result.secure_url,
+            userData: user
         })
     } catch (error) {
         console.error('Upload profile image error: ', error)
-
         return res.status(500).json({
             message: 'Unable to upload profile image. Please try again'
         })
