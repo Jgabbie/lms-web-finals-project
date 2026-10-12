@@ -24,8 +24,6 @@ const generateOTP = () => {
     return crypto.randomInt(100000, 1000000).toString()
 }
 
-
-
 exports.sendRegistrationOtp = async (req, res) => {
     try {
         const {
@@ -186,7 +184,7 @@ exports.sendRegistrationOtp = async (req, res) => {
 
                     <p>
                         This OTP will expire in
-                        <strong>${OTP_EXPIRE_MINUTES}</strong>
+                        <strong>${OTP_EXPIRE_MINUTES} minutes</strong>
                     </p>
 
                     <p>
@@ -398,7 +396,7 @@ exports.resendRegistrationOtp = async (req, res) => {
 
                     <p>
                         This OTP will expire in
-                        <strong>${OTP_EXPIRE_MINUTES}</strong>
+                        <strong>${OTP_EXPIRE_MINUTES} minutes</strong>
                     </p>
 
                     <p>
@@ -516,7 +514,7 @@ exports.sendPasswordResetOtp = async (req, res) => {
 
                     <p>
                         This OTP will expire in
-                        <strong>${OTP_EXPIRE_MINUTES}</strong>
+                        <strong>${OTP_EXPIRE_MINUTES} minutes</strong>
                     </p>
 
                     <p>

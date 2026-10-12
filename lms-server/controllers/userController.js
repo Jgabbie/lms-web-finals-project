@@ -18,7 +18,6 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-
 exports.getAllUsers = async (req, res) => {
     try {
         const users = await User.find()
@@ -46,7 +45,6 @@ exports.getUserById = async (req, res) => {
         res.status(500).json({ message: 'Failed to retrieve a user' })
     }
 }
-
 
 exports.addUser = async (req, res) => {
     try {
@@ -137,9 +135,6 @@ exports.addUser = async (req, res) => {
         const generatedPassword = crypto.randomBytes(6).toString('base64url')
         const hashedPassword = await bcrypt.hash(generatedPassword, 10)
 
-
-        let instructorId
-
         if (normalizedRole === 'instructor') {
             const lastInstructor = await Instructor.findOne().sort({ instructorId: -1 })
 
@@ -147,7 +142,7 @@ exports.addUser = async (req, res) => {
 
             if (lastInstructor && lastInstructor.instructorId) {
                 const lastIdNumber = parseInt(lastInstructor.instructorId.replace('INST', ''))
-                const nextIdNumber = lastIdNumber + 1
+                nextIdNumber = lastIdNumber + 1
             }
 
             const instructorId = `INST${nextIdNumber.toString().padStart(3, '0')}`
@@ -240,6 +235,9 @@ exports.addUser = async (req, res) => {
                     </div>
                 </div>
             `
+            }).catch((error) => {
+                res.status(500).json({ message: 'Failed to send email notification' + error })
+                console.error('Error sending email:', error)
             })
 
             return res.status(201).json({
@@ -337,6 +335,9 @@ exports.addUser = async (req, res) => {
                     </div>
                 </div>
             `
+            }).catch((error) => {
+                console.error('Error sending account creation email:', error)
+                throw new Error('Failed to send email notification')
             })
 
             return res.status(201).json({
@@ -344,15 +345,11 @@ exports.addUser = async (req, res) => {
             })
         }
 
-
-        return res.status(201).json({
-            message: 'User added successfully',
-        })
     } catch (error) {
-        console.log('Add user error:', error)
+        console.error('Add user error:', error)
 
         return res.status(500).json({
-            message: 'Unable to create account. Please try again' + error,
+            message: error.message || 'Unable to create account.',
         })
     }
 }
