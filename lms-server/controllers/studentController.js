@@ -512,7 +512,7 @@ exports.deleteStudent = async (req, res) => {
             })
         }
 
-        const studentInformation = await Student.findOne({ _id: id })
+        const studentInformation = await Student.findById(id)
 
         if (!studentInformation) {
             return res.status(404).json({ message: 'Student not found' })
@@ -532,12 +532,13 @@ exports.deleteStudent = async (req, res) => {
             { _id: studentInformation._id },
             {
                 _id: studentInformation._id,
+                studentId: studentInformation.studentId,
                 firstName: studentInformation.firstName,
                 lastName: studentInformation.lastName,
                 password: studentInformation.password,
                 course: studentInformation.course,
                 yearLevel: studentInformation.yearLevel,
-                status: studentInformation.status,
+                status: 'inactive',
                 email: studentInformation.email,
                 role: studentInformation.role
             },
@@ -551,7 +552,7 @@ exports.deleteStudent = async (req, res) => {
                 firstName: studentInformation.firstName,
                 lastName: studentInformation.lastName,
                 password: studentInformation.password,
-                status: studentInformation.status,
+                status: 'inactive',
                 email: studentInformation.email,
                 role: studentInformation.role
             },
@@ -560,7 +561,7 @@ exports.deleteStudent = async (req, res) => {
 
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
-            to: normalizedEmail,
+            to: studentInformation.email,
             subject: 'EduLearn LMS - Account Deleted',
             html: `
                 <div
@@ -577,7 +578,7 @@ exports.deleteStudent = async (req, res) => {
                         EduLearn LMS
                     </h2>
 
-                    <p>Hello ${normalizedFirstName} ${normalizedLastName},</p>
+                    <p>Hello ${studentInformation.firstName} ${studentInformation.lastName},</p>
 
                     <p>
                         Your account has been deleted successfully.
@@ -601,19 +602,19 @@ exports.deleteStudent = async (req, res) => {
                         ">
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Email Address:
-                                <strong>${normalizedEmail}</strong>
+                                <strong>${studentInformation.email}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Role:
-                                <strong>${role}</strong>
+                                <strong>${studentInformation.role}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Course:
-                                <strong>${normalizedCourse}</strong>
+                                <strong>${studentInformation.course}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Year Level:
-                                <strong>${normalizedYearLevel}</strong>
+                                <strong>${studentInformation.yearLevel}</strong>
                             </p>
                         </span>
                     </div>
@@ -645,7 +646,7 @@ exports.deleteStudent = async (req, res) => {
         })
 
         await Student.findByIdAndDelete(id)
-        await User.findByIdAndDelete(id)
+        await User.findOneAndDelete({ email: studentInformation.email })
 
         res.status(200).json({ message: 'Student deleted successfully' })
     } catch (error) {
@@ -674,8 +675,9 @@ exports.restoreStudent = async (req, res) => {
             })
         }
 
-        const archivedUser = await ArchivedUser.findById(id)
         const archivedStudent = await ArchivedStudent.findById(id)
+        const archivedUser = await ArchivedUser.findOne({ email: archivedStudent.email })
+
 
         if (!archivedUser) {
             return res.status(404).json({ message: 'Archived student not found' })
@@ -698,6 +700,7 @@ exports.restoreStudent = async (req, res) => {
             _id: archivedUser._id,
             firstName: archivedUser.firstName,
             lastName: archivedUser.lastName,
+            password: archivedUser.password,
             email: archivedUser.email,
             role: archivedUser.role,
             status: 'active'
@@ -708,6 +711,7 @@ exports.restoreStudent = async (req, res) => {
             studentId: archivedStudent.studentId,
             firstName: archivedStudent.firstName,
             lastName: archivedStudent.lastName,
+            password: archivedStudent.password,
             email: archivedStudent.email,
             course: archivedStudent.course,
             yearLevel: archivedStudent.yearLevel,
@@ -720,7 +724,7 @@ exports.restoreStudent = async (req, res) => {
         await restoredStudentInStudent.save()
 
         await ArchivedStudent.findByIdAndDelete(id)
-        await ArchivedUser.findByIdAndDelete(id)
+        await ArchivedUser.findOneAndDelete({ email: archivedStudent.email })
 
         res.status(200).json({ message: 'Student restored successfully' })
 

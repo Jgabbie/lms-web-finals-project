@@ -426,11 +426,8 @@ exports.updateInstructor = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
-                            background: #eff6ff;
-                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
-                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
@@ -501,7 +498,7 @@ exports.deleteInstructor = async (req, res) => {
             })
         }
 
-        const instructorInformation = await User.findByIdAndDelete(id)
+        const instructorInformation = await Instructor.findById(id)
 
         if (!instructorInformation) {
             return res.status(404).json({ message: 'Instructor not found' })
@@ -521,12 +518,13 @@ exports.deleteInstructor = async (req, res) => {
             { _id: instructorInformation._id },
             {
                 _id: instructorInformation._id,
+                instructorId: instructorInformation.instructorId,
                 firstName: instructorInformation.firstName,
                 lastName: instructorInformation.lastName,
                 password: instructorInformation.password,
                 department: instructorInformation.department,
                 specialization: instructorInformation.specialization,
-                status: instructorInformation.status,
+                status: 'inactive',
                 email: instructorInformation.email,
                 role: instructorInformation.role
             },
@@ -540,7 +538,7 @@ exports.deleteInstructor = async (req, res) => {
                 firstName: instructorInformation.firstName,
                 lastName: instructorInformation.lastName,
                 password: instructorInformation.password,
-                status: instructorInformation.status,
+                status: 'inactive',
                 email: instructorInformation.email,
                 role: instructorInformation.role
             },
@@ -549,7 +547,7 @@ exports.deleteInstructor = async (req, res) => {
 
         await transporter.sendMail({
             from: `"EduLearn LMS" <${process.env.EMAIL_FROM}>`,
-            to: normalizedEmail,
+            to: instructorInformation.email,
             subject: 'EduLearn LMS - Account Deleted',
             html: `
                 <div
@@ -566,7 +564,7 @@ exports.deleteInstructor = async (req, res) => {
                         EduLearn LMS
                     </h2>
 
-                    <p>Hello ${normalizedFirstName} ${normalizedLastName},</p>
+                    <p>Hello ${instructorInformation.firstName} ${instructorInformation.lastName},</p>
 
                     <p>
                         Your account has been deleted successfully.
@@ -580,29 +578,26 @@ exports.deleteInstructor = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
-                            background: #eff6ff;
-                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
-                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Email Address:
-                                <strong>${normalizedEmail}</strong>
+                                <strong>${instructorInformation.email}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Role:
-                                <strong>${role}</strong>
+                                <strong>${instructorInformation.role}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Department:
-                                <strong>${normalizedDepartment}</strong>
+                                <strong>${instructorInformation.department}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Specialization:
-                                <strong>${normalizedSpecialization}</strong>
+                                <strong>${instructorInformation.specialization}</strong>
                             </p>
                         </span>
                     </div>
@@ -634,7 +629,7 @@ exports.deleteInstructor = async (req, res) => {
         })
 
         await Instructor.findByIdAndDelete(id)
-        await User.findByIdAndDelete(id)
+        await User.findOneAndDelete({ email: instructorInformation.email })
 
         res.status(200).json({ message: 'Instructor deleted successfully' })
     } catch (error) {
@@ -663,8 +658,11 @@ exports.restoreInstructor = async (req, res) => {
             })
         }
 
-        const archivedUser = await ArchivedUser.findById(id)
+
+
         const archivedInstructor = await ArchivedInstructor.findById(id)
+        const archivedUser = await ArchivedUser.findOne({ email: archivedInstructor.email })
+
 
         if (!archivedUser) {
             return res.status(404).json({ message: 'Archived user not found' })
@@ -687,6 +685,7 @@ exports.restoreInstructor = async (req, res) => {
             _id: archivedInstructor._id,
             firstName: archivedInstructor.firstName,
             lastName: archivedInstructor.lastName,
+            password: archivedInstructor.password,
             email: archivedInstructor.email,
             role: archivedInstructor.role,
             status: 'active'
@@ -698,6 +697,7 @@ exports.restoreInstructor = async (req, res) => {
             instructorId: archivedInstructor.instructorId,
             firstName: archivedInstructor.firstName,
             lastName: archivedInstructor.lastName,
+            password: archivedInstructor.password,
             email: archivedInstructor.email,
             specialization: archivedInstructor.specialization,
             department: archivedInstructor.department,
@@ -710,7 +710,7 @@ exports.restoreInstructor = async (req, res) => {
         await restoredInstructorInInstructor.save()
 
         await ArchivedInstructor.findByIdAndDelete(id)
-        await ArchivedUser.findByIdAndDelete(id)
+        await ArchivedUser.findOneAndDelete({ email: archivedInstructor.email })
 
         res.status(200).json({ message: 'Instructor restored successfully' })
     } catch (error) {

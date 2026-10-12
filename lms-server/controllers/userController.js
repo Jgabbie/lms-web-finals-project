@@ -295,8 +295,11 @@ exports.addUser = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
+                            background: #eff6ff;
+                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
+                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
@@ -378,8 +381,11 @@ exports.addUser = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
+                            background: #eff6ff;
+                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
+                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
@@ -650,7 +656,22 @@ exports.updateUser = async (req, res) => {
                 { upsert: true, new: true, runValidators: true }
             )
             await Student.deleteMany({ _id: user._id })
+        } else if (normalizedRole === 'admin') {
+            await Student.deleteMany({
+                $or: [
+                    { _id: user._id },
+                    { email: normalizedEmail }
+                ]
+            })
+
+            await Instructor.deleteMany({
+                $or: [
+                    { _id: user._id },
+                    { email: normalizedEmail }
+                ]
+            })
         }
+
 
 
         await Student.findByIdAndUpdate(user._id, {
