@@ -95,3 +95,14 @@
   line-height:1.35!important; letter-spacing:0; white-space:nowrap;
  }
 }
+
+/* Consistent 1px title-to-subtitle spacing throughout all role screens. */
+@layer utilities {
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) main :is(.MuiTypography-h4,.MuiTypography-h5,.MuiTypography-h6) {
+  margin-bottom:0!important; line-height:1.2!important; overflow:visible;
+ }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) main :is(.MuiTypography-h4,.MuiTypography-h5,.MuiTypography-h6) + :is(.MuiTypography-body1,.MuiTypography-body2,.MuiTypography-caption) {
+  display:block; margin-top:1px!important; margin-bottom:0!important; line-height:1.4!important;
+ }
+ :is(.edu-dashboard.edu-dashboard,.edu-student-screen.edu-student-screen) .MuiDrawer-paper > div:first-child > div { gap:1px!important; }
+}
