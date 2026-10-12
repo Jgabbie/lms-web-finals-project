@@ -12,7 +12,7 @@ const OTP_EXPIRE_MINUTES = Number(process.env.OTP_EXPIRE_MINUTES)
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
-    port: 587,
+    port: 2525,
     secure: false,
     auth: {
         user: process.env.SMTP_USER,

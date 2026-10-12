@@ -10,7 +10,7 @@ const ArchivedUser = require('../models/ArchivedUser')
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
-    port: 587,
+    port: 2525,
     secure: false,
     auth: {
         user: process.env.SMTP_USER,
@@ -656,11 +656,8 @@ exports.deleteUser = async (req, res) => {
                         ">
                             <span style="
                                 display: inline-block;
-                                background: #eff6ff;
-                                color: #2563eb;
                                 font-size: 32px;
                                 font-weight: bold;
-                                letter-spacing: 8px;
                                 padding: 15px 25px;
                                 border-radius: 10px;
                             ">
@@ -765,11 +762,8 @@ exports.deleteUser = async (req, res) => {
                         ">
                             <span style="
                                 display: inline-block;
-                                background: #eff6ff;
-                                color: #2563eb;
                                 font-size: 32px;
                                 font-weight: bold;
-                                letter-spacing: 8px;
                                 padding: 15px 25px;
                                 border-radius: 10px;
                             ">
@@ -850,11 +844,8 @@ exports.deleteUser = async (req, res) => {
                     ">
                         <span style="
                             display: inline-block;
-                            background: #eff6ff;
-                            color: #2563eb;
                             font-size: 32px;
                             font-weight: bold;
-                            letter-spacing: 8px;
                             padding: 15px 25px;
                             border-radius: 10px;
                         ">
