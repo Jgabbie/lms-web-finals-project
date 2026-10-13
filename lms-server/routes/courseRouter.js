@@ -17,7 +17,6 @@ const {
     deleteCourse
 } = require('../controllers/courseController')
 
-router.use(verifyToken)
 
 router.get('/my-courses', verifyToken, getMyEnrolledCourses)
 router.get('/', getAllCourses)

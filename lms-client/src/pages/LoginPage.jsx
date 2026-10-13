@@ -177,7 +177,6 @@ export default function LoginPage({ onLogin }) {
                         />
 
                         <div className='login-options'>
-                            <FormControlLabel control={<Checkbox size='small' className='text-blue-600' />} label={<Typography variant='body2' className='text-slate-600'>Remember Me</Typography>} />
                             <Link href="#" underline='hover' className='text-sm text-blue-600 font-medium cursor-pointer'>
                                 Forgot password?
                             </Link>

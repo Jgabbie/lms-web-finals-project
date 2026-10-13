@@ -81,12 +81,12 @@ export default function EnrollStudentPage() {
         requestLoadData()
     }, [requestLoadData])
 
-   
+
     const currentCourse = useMemo(() => {
         return courses.find(c => c._id === selectedCourseId || c.courseCode === selectedCourseId)
     }, [courses, selectedCourseId])
 
-   
+
     const isStudentEnrolled = useCallback((studentId) => {
         if (!currentCourse || !currentCourse.enrolledStudents) return false
         return currentCourse.enrolledStudents.some(item => {
@@ -95,7 +95,7 @@ export default function EnrollStudentPage() {
         })
     }, [currentCourse])
 
-    
+
     const filteredStudents = useMemo(() => {
         const key = search.toLowerCase()
         return students.filter(student => {
@@ -108,7 +108,7 @@ export default function EnrollStudentPage() {
         })
     }, [students, search])
 
-    
+
     const toggleStudent = (id) => {
         if (isStudentEnrolled(id)) return
         setSelectedStudents(prev =>
@@ -138,7 +138,7 @@ export default function EnrollStudentPage() {
             setSelectedStudents([])
             loadData()
         } catch {
-           
+
             const storedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
             const updatedStored = storedCourses.map(c => {
                 if (c._id === selectedCourseId || c.courseCode === selectedCourseId) {
@@ -162,154 +162,153 @@ export default function EnrollStudentPage() {
 
     return (
         <RoleScreen page="enrollstudentpage" role="instructor">
-        <div className='min-h-screen bg-slate-50'>
-           <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-            <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
-            <div
-                className='transition-all duration-300'
-                style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
-            >
-                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='student-page-heading mb-7'>
-                        <Typography variant='h4' className='!font-bold !text-slate-800'>
-                            Enroll Students
-                        </Typography>
-                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                            Select a course and enroll eligible registered students.
-                        </Typography>
-                    </div>
+            <div className='min-h-screen bg-slate-50'>
+                <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+                <div
+                    className='transition-all duration-300'
+                    style={{ marginLeft: sidebarOpen ? '260px' : '72px' }}
+                >
+                    <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                        <div className='student-page-heading mb-7'>
+                            <Typography variant='h4' className='!font-bold !text-slate-800'>
+                                Enroll Students
+                            </Typography>
+                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                Select a course and enroll eligible registered students.
+                            </Typography>
+                        </div>
 
-                    <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mb-6'>
-                        <CardContent className='!p-6'>
-                            <div className='grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4'>
-                                <FormControl fullWidth size='small'>
-                                    <InputLabel>Target Course</InputLabel>
-                                    <Select
-                                        value={selectedCourseId}
-                                        label='Target Course'
-                                        onChange={e => handleCourseChange(e.target.value)}
+                        <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mb-6'>
+                            <CardContent className='!p-6'>
+                                <div className='grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4'>
+                                    <FormControl fullWidth size='small'>
+                                        <InputLabel>Target Course</InputLabel>
+                                        <Select
+                                            value={selectedCourseId}
+                                            label='Target Course'
+                                            onChange={e => handleCourseChange(e.target.value)}
+                                        >
+                                            {courses.map(c => (
+                                                <MenuItem key={c._id || c.courseCode} value={c._id || c.courseCode}>
+                                                    {c.courseCode} - {c.courseName}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <TextField
+                                        fullWidth
+                                        size='small'
+                                        placeholder='Search students by name or email...'
+                                        value={search}
+                                        onChange={e => setSearch(e.target.value)}
+                                        slotProps={{ input: { startAdornment: <Search className='!text-slate-400 !mr-2' /> } }}
+                                    />
+                                    <Button
+                                        variant='contained'
+                                        startIcon={<GroupAddOutlined />}
+                                        disabled={!selectedCourseId || selectedStudents.length === 0}
+                                        onClick={handleEnroll}
+                                        className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none !px-6'
                                     >
-                                        {courses.map(c => (
-                                            <MenuItem key={c._id || c.courseCode} value={c._id || c.courseCode}>
-                                                {c.courseCode} - {c.courseName}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <TextField
-                                    fullWidth
-                                    size='small'
-                                    placeholder='Search students by name or email...'
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    slotProps={{ input: { startAdornment: <Search className='!text-slate-400 !mr-2' /> } }}
-                                />
-                                <Button
-                                    variant='contained'
-                                    startIcon={<GroupAddOutlined />}
-                                    disabled={!selectedCourseId || selectedStudents.length === 0}
-                                    onClick={handleEnroll}
-                                    className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none !px-6'
-                                >
-                                    Enroll ({selectedStudents.length})
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
-                        <CardContent className='!p-0'>
-                            <div className='flex items-center justify-between gap-3 px-6 py-5 border-b border-slate-200'>
-                                <div>
-                                    <Typography variant='h6' className='!font-bold !text-slate-800'>
-                                        Registered Students
-                                    </Typography>
-                                    <Typography variant='body2' className='!text-slate-500'>
-                                        {filteredStudents.length} student(s) available
-                                    </Typography>
+                                        Enroll ({selectedStudents.length})
+                                    </Button>
                                 </div>
-                                <Chip
-                                    icon={<SchoolOutlined />}
-                                    label={`${selectedStudents.length} selected`}
-                                    className='!bg-blue-50 !text-blue-700 !font-medium'
-                                />
-                            </div>
+                            </CardContent>
+                        </Card>
 
-                            <div className='divide-y divide-slate-100'>
-                                {filteredStudents.length > 0 ? (
-                                    filteredStudents.map(student => {
-                                        const alreadyEnrolled = isStudentEnrolled(student._id)
-                                        const isChecked = selectedStudents.includes(student._id)
-
-                                        return (
-                                            <div
-                                                key={student._id}
-                                                onClick={() => toggleStudent(student._id)}
-                                                className={`flex items-center gap-3 sm:gap-4 px-6 py-4 transition-colors ${
-                                                    alreadyEnrolled
-                                                        ? 'bg-slate-50/70 cursor-not-allowed opacity-75'
-                                                        : 'hover:bg-slate-50 cursor-pointer'
-                                                }`}
-                                            >
-                                                <Checkbox
-                                                    checked={alreadyEnrolled || isChecked}
-                                                    disabled={alreadyEnrolled}
-                                                    onChange={() => toggleStudent(student._id)}
-                                                />
-                                                <Avatar className='!bg-blue-600 !text-sm'>
-                                                    {student.firstName?.charAt(0) || 'S'}
-                                                    {student.lastName?.charAt(0) || ''}
-                                                </Avatar>
-                                                <div className='flex-1 min-w-0'>
-                                                    <Typography className='!font-semibold !text-slate-800'>
-                                                        {student.firstName} {student.lastName}
-                                                    </Typography>
-                                                    <Typography variant='caption' className='!text-slate-400 break-all'>
-                                                        {student.email}
-                                                    </Typography>
-                                                </div>
-
-                                                {alreadyEnrolled ? (
-                                                    <Chip
-                                                        size='small'
-                                                        label='Already Enrolled'
-                                                        className='!bg-green-100 !text-green-800 !font-semibold'
-                                                    />
-                                                ) : (
-                                                    <Chip
-                                                        size='small'
-                                                        label={student.status || 'Active'}
-                                                        variant='outlined'
-                                                    />
-                                                )}
-                                            </div>
-                                        )
-                                    })
-                                ) : (
-                                    <div className='py-14 px-6 text-center'>
-                                        <SchoolOutlined className='!text-slate-300 !text-5xl' />
-                                        <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
-                                            {loading ? 'Loading registered students...' : 'No registered students found'}
+                        <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
+                            <CardContent className='!p-0'>
+                                <div className='flex items-center justify-between gap-3 px-6 py-5 border-b border-slate-200'>
+                                    <div>
+                                        <Typography variant='h6' className='!font-bold !text-slate-800'>
+                                            Registered Students
+                                        </Typography>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            {filteredStudents.length} student(s) available
                                         </Typography>
                                     </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </main>
-            </div>
+                                    <Chip
+                                        icon={<SchoolOutlined />}
+                                        label={`${selectedStudents.length} selected`}
+                                        className='!bg-blue-50 !text-blue-700 !font-medium'
+                                    />
+                                </div>
 
-            <Snackbar
-                open={notification.open}
-                autoHideDuration={3000}
-                onClose={() => setNotification(prev => ({ ...prev, open: false }))}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert severity={notification.severity} variant='filled'>
-                    {notification.message}
-                </Alert>
-            </Snackbar>
-        </div>
+                                <div className='divide-y divide-slate-100'>
+                                    {filteredStudents.length > 0 ? (
+                                        filteredStudents.map(student => {
+                                            const alreadyEnrolled = isStudentEnrolled(student._id)
+                                            const isChecked = selectedStudents.includes(student._id)
+
+                                            return (
+                                                <div
+                                                    key={student._id}
+                                                    onClick={() => toggleStudent(student._id)}
+                                                    className={`flex items-center gap-3 sm:gap-4 px-6 py-4 transition-colors ${alreadyEnrolled
+                                                            ? 'bg-slate-50/70 cursor-not-allowed opacity-75'
+                                                            : 'hover:bg-slate-50 cursor-pointer'
+                                                        }`}
+                                                >
+                                                    <Checkbox
+                                                        checked={alreadyEnrolled || isChecked}
+                                                        disabled={alreadyEnrolled}
+                                                        onChange={() => toggleStudent(student._id)}
+                                                    />
+                                                    <Avatar className='!bg-blue-600 !text-sm'>
+                                                        {student.firstName?.charAt(0) || 'S'}
+                                                        {student.lastName?.charAt(0) || ''}
+                                                    </Avatar>
+                                                    <div className='flex-1 min-w-0'>
+                                                        <Typography className='!font-semibold !text-slate-800'>
+                                                            {student.firstName} {student.lastName}
+                                                        </Typography>
+                                                        <Typography variant='caption' className='!text-slate-400 break-all'>
+                                                            {student.email}
+                                                        </Typography>
+                                                    </div>
+
+                                                    {alreadyEnrolled ? (
+                                                        <Chip
+                                                            size='small'
+                                                            label='Already Enrolled'
+                                                            className='!bg-green-100 !text-green-800 !font-semibold'
+                                                        />
+                                                    ) : (
+                                                        <Chip
+                                                            size='small'
+                                                            label={student.status || 'Active'}
+                                                            variant='outlined'
+                                                        />
+                                                    )}
+                                                </div>
+                                            )
+                                        })
+                                    ) : (
+                                        <div className='py-14 px-6 text-center'>
+                                            <SchoolOutlined className='!text-slate-300 !text-5xl' />
+                                            <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-3'>
+                                                {loading ? 'Loading registered students...' : 'No registered students found'}
+                                            </Typography>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </main>
+                </div>
+
+                <Snackbar
+                    open={notification.open}
+                    autoHideDuration={3000}
+                    onClose={() => setNotification(prev => ({ ...prev, open: false }))}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                    <Alert severity={notification.severity} variant='filled'>
+                        {notification.message}
+                    </Alert>
+                </Snackbar>
+            </div>
         </RoleScreen>
     )
 }
