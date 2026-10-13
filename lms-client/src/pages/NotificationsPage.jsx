@@ -149,7 +149,7 @@ export default function NotificationsPage() {
     }
 
     return (
-        <RoleScreen page="notifications" role={userRole} enabled={['student', 'instructor'].includes(userRole)}>
+        <RoleScreen page="notifications" role={userRole} enabled={['student', 'instructor', 'admin'].includes(userRole)}>
         <div className='min-h-screen bg-slate-50'>
             {/* Top Navbar */}
             {userRole === 'admin' ? (
@@ -379,7 +379,7 @@ export default function NotificationsPage() {
                                 </div>
                             ) : (
                                 <div className='py-16 px-6 text-center'>
-                                    <div className='w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto'>
+                                    <div className='notification-empty-icon w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto'>
                                         <NotificationsNoneOutlined fontSize='large' />
                                     </div>
                                     <Typography variant='h6' className='!font-semibold !text-slate-700 !mt-4'>
