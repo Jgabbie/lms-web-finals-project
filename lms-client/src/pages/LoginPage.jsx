@@ -90,6 +90,7 @@ export default function LoginPage({ onLogin }) {
             const res = await api.post('/auth/login', { email: email.trim(), password });
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('role', res.data.role);
+            localStorage.setItem('profile', JSON.stringify(res.data));
 
             const loggedInUser = {
                 firstName: res.data.firstName,
@@ -177,7 +178,7 @@ export default function LoginPage({ onLogin }) {
                         />
 
                         <div className='login-options'>
-                            <Link href="#" underline='hover' className='text-sm text-blue-600 font-medium cursor-pointer'>
+                            <Link href="/reset" underline='hover' className='text-sm text-blue-600 font-medium cursor-pointer'>
                                 Forgot password?
                             </Link>
                         </div>

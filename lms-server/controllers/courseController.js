@@ -353,7 +353,7 @@ exports.deleteCourse = async (req, res) => {
             `Deleted course "${course.courseName}"`
         )
 
-        res.status(200).jsSon({ message: 'Course deleted successfully' })
+        res.status(200).json({ message: 'Course deleted successfully' })
     } catch (err) {
         res.status(500).json({ message: 'Failed to delete course' })
     }

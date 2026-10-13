@@ -554,6 +554,7 @@ export default function StudentManagement() {
                                                                     onClick={() => {
                                                                         setSelectedStudent(student)
                                                                         setFormData({
+                                                                            studentId: student.studentId,
                                                                             firstName: student.firstName,
                                                                             lastName: student.lastName,
                                                                             email: student.email,

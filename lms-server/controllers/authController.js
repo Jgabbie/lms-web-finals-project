@@ -493,7 +493,7 @@ exports.sendPasswordResetOtp = async (req, res) => {
                         EduLearn LMS
                     </h2>
 
-                    <p>Hello ${user.name},</p>
+                    <p>Hello ${user.firstName} ${user.lastName},</p>
 
                     <p>
                         We received a request to reset your EduLearn LMS password.
@@ -767,7 +767,7 @@ exports.forgotPasswordResendOtp = async (req, res) => {
                         EduLearn LMS
                     </h2>
 
-                    <p>Hello ${user.name},</p>
+                    <p>Hello ${user.firstName} ${user.lastName},</p>
 
                     <p>
                         We received a request to reset your EduLearn LMS password.

@@ -30,13 +30,13 @@ export default function NavbarAdmin() {
     const handleCloseUserMenu = () => setAnchorElUser(null)
 
     const user = JSON.parse(localStorage.getItem('profile')) || {}
-    const initials = user.firstName && user.lastName ? `${user.firstName[0]}${user.lastName[0]}` : 'U'
+    const initials = `${user.firstName[0]}${user.lastName[0]}`
 
     useEffect(() => {
         let active = true
         const fetchNotifications = async () => {
             try {
-                const response = await api.get('/notifications/unread-count')
+                const response = await api.get('/notifications')
                 const notifications = response.data.notifications || []
                 if (active) {
                     setUnreadCount(
@@ -124,14 +124,14 @@ export default function NavbarAdmin() {
                             color="inherit"
                             onClick={() => handleNavigate('/notifications')}
                             className="text-slate-600 hover:bg-slate-100">
-                            <Badge badgeContent={3} color="error">
+                            <Badge badgeContent={unreadCount} color="error" invisible={unreadCount === 0}>
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>
 
                         <IconButton onClick={handleOpenUserMenu} className="p-0">
                             <Avatar alt="Student Profile" src="/avatar.jpg" className="w-9 h-9 border-2 border-blue-500" >
-                                {initials || user.firstName?.[0] || 'U'}
+                                {initials}
                             </Avatar>
                         </IconButton>
                     </div>

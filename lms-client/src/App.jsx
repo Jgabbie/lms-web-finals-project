@@ -79,6 +79,15 @@ function ProtectedRoute({ role, allowedRoles }) {
   return <Outlet />
 }
 
+function PublicOnlyRoute({ role, children }) {
+  if (role) {
+    return <Navigate to={getHomeRoute(role)} replace />
+  }
+
+  return children
+}
+
+
 function App() {
   const [role, setRole] = useState(() => {
     const savedRole = localStorage.getItem('role')?.toLowerCase()
@@ -112,28 +121,51 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<LandingPage />} />
-        <Route path='/home' element={<HomePage />} />
+
+        <Route
+          path='/'
+          element={
+            <PublicOnlyRoute role={role}>
+              <LandingPage />
+            </PublicOnlyRoute>
+          }
+        />
+
+        <Route
+          path='/home'
+          element={
+            <PublicOnlyRoute role={role}>
+              <HomePage />
+            </PublicOnlyRoute>
+          }
+        />
 
         <Route
           path='/login'
           element={
-            role
-              ? <Navigate to={getHomeRoute(role)} replace />
-              : <LoginPage onLogin={handleLogin} />
+            <PublicOnlyRoute role={role}>
+              <LoginPage onLogin={handleLogin} />
+            </PublicOnlyRoute>
           }
         />
 
         <Route
           path='/signup'
           element={
-            role
-              ? <Navigate to={getHomeRoute(role)} replace />
-              : <SignupPage />
+            <PublicOnlyRoute role={role}>
+              <SignupPage />
+            </PublicOnlyRoute>
           }
         />
 
-        <Route path='/reset' element={<ResetPassword />} />
+        <Route
+          path='/reset'
+          element={
+            <PublicOnlyRoute role={role}>
+              <ResetPassword />
+            </PublicOnlyRoute>
+          }
+        />
 
         <Route
           element={
@@ -153,23 +185,23 @@ function App() {
         </Route>
 
         <Route
-        element={
-          <ProtectedRoute
-            role={role}
-            allowedRoles={['instructor']}
-          />
-        }
-      >
-        <Route path='/instructor/dashboard' element={<DashboardInstructor role={role} />} />
-        <Route path='/instructor/courses' element={<CourseManagementPage />} />
-        <Route path='/instructor/courses/create' element={<CreateCoursePage />} />
-        <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
-        <Route path='/instructor/students' element={<StudentManagementPage />} />
-        <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
-        <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
-        <Route path='/instructor/profile' element={<ProfileInstructorPage />} />
-        <Route path='/instructor/courses/details' element={<InstructorCourseDetailsPage />} />
-      </Route>
+          element={
+            <ProtectedRoute
+              role={role}
+              allowedRoles={['instructor']}
+            />
+          }
+        >
+          <Route path='/instructor/dashboard' element={<DashboardInstructor role={role} />} />
+          <Route path='/instructor/courses' element={<CourseManagementPage />} />
+          <Route path='/instructor/courses/create' element={<CreateCoursePage />} />
+          <Route path='/instructor/materials' element={<UploadMaterialsPage />} />
+          <Route path='/instructor/students' element={<StudentManagementPage />} />
+          <Route path='/instructor/enroll' element={<EnrollStudentPage />} />
+          <Route path='/instructor/assignments' element={<InstructorAssignmentsPage />} />
+          <Route path='/instructor/profile' element={<ProfileInstructorPage />} />
+          <Route path='/instructor/courses/details' element={<InstructorCourseDetailsPage />} />
+        </Route>
 
         <Route
           element={

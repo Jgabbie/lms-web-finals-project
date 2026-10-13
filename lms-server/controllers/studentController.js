@@ -459,7 +459,10 @@ exports.updateStudent = async (req, res) => {
             })
         }
 
-        const existingStudentId = await Student.findOne({ studentId: studentId.trim() })
+        const existingStudentId = await Student.findOne({
+            studentId: normalizedStudentId,
+            _id: { $ne: req.params.id }
+        })
         if (existingStudentId) {
             return res.status(400).json({
                 message: 'A student with this Student Number already exists'

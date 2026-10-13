@@ -15,6 +15,7 @@ export default function ActivityLogs() {
     const [actionFilter, setActionFilter] = useState('All')
     const [roleFilter, setRoleFilter] = useState('All')
     const [logs, setLogs] = useState([])
+    const [userCount, setUserCount] = useState(0)
     const [loading, setLoading] = useState(true)
     const [, setError] = useState('')
 
@@ -23,6 +24,7 @@ export default function ActivityLogs() {
             const data = await response.data
 
             setLogs(data.logs)
+            setUserCount(data.userCount)
         }).catch((error) => {
             console.error('Error fetching logs:', error)
             setError('Failed to fetch logs. Please try again later.')
@@ -43,7 +45,7 @@ export default function ActivityLogs() {
                 log.description.toLowerCase().includes(key)
 
             const roleAliases = {
-                Administrator: 'admin',
+                Administrator: 'administrator',
                 Instructor: 'instructor',
                 Student: 'student',
             }
@@ -98,8 +100,6 @@ export default function ActivityLogs() {
 
     const successful = logs.filter(log => log.status === 'Success').length
     const failed = logs.filter(log => log.status === 'Failed').length
-    const usersToday = new Set(logs.filter(log => log.date === 'Sep 30, 2026').map(log => log.user)).size
-
 
     return (
         <RoleScreen page="activitylogs" role="admin">
@@ -135,7 +135,7 @@ export default function ActivityLogs() {
                                 ['Total Activities', logs.length, 'text-slate-800'],
                                 ['Successful', successful, 'text-green-600'],
                                 ['Failed', failed, 'text-red-600'],
-                                ['Users', usersToday, 'text-blue-600'],
+                                ['Users', userCount, 'text-blue-600'],
                             ].map(([label, value, color]) => (
                                 <Card key={label} className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                                     <CardContent className='!p-5'>

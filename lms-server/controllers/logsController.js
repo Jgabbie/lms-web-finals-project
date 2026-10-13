@@ -1,9 +1,12 @@
 const Log = require('../models/Log')
+const User = require('../models/User')
 
 exports.getLogs = (async (req, res) => {
     try {
-        const logs = await Log.find().sort({ timestamp: -1 })
-            .lean()
+        const [logs, userCount] = await Promise.all([
+            Log.find().sort({ timestamp: -1 }).lean(),
+            User.countDocuments()
+        ])
 
         const formattedLogs = logs.map(log => ({
             id: log._id,
@@ -25,7 +28,8 @@ exports.getLogs = (async (req, res) => {
         }))
 
         return res.status(200).json({
-            logs: formattedLogs
+            logs: formattedLogs,
+            userCount
         })
 
     } catch (error) {
