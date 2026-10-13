@@ -1,35 +1,35 @@
 const Course = require('../models/Course')
 const Log = require('../models/Log')
+const User = require('../models/User')
+const Student = require('../models/Student')
 const mongoose = require('mongoose')
 
 const logActivity = async (req, action, description) => {
-    const actorId = req.user?.id || req.user?._id
+    try {
+        const actorId = req.user?.id || req.user?._id
+        if (!actorId) return
 
-    if (!actorId) {
-        throw new Error('Actor ID is missing in the request')
+        const actor = await User.findById(actorId).select('firstName lastName role')
+        if (!actor) return
+
+        await Log.create({
+            firstName: actor.firstName,
+            lastName: actor.lastName,
+            role: actor.role,
+            action,
+            description,
+            status: 'Success'
+        })
+    } catch (e) {
+        console.error('Failed to log activity:', e.message)
     }
-
-    const actor = await User.findById(actorId).select('firstName lastName role')
-
-    if (!actor) {
-        throw new Error('Actor not found')
-    }
-
-    await Log.create({
-        firstName: actor.firstName,
-        lastName: actor.lastName,
-        role: actor.role,
-        action,
-        description,
-        status: 'Success'
-    })
 }
 
 // 1. Get all courses
 exports.getAllCourses = async (req, res) => {
     try {
         const courses = await Course.find()
-            .populate('enrolledStudents', 'firstName lastName email')
+            .populate('enrolledStudents', 'firstName lastName email studentId')
             .sort({ createdAt: -1 })
         res.status(200).json(courses)
     } catch (err) {
@@ -41,8 +41,14 @@ exports.getAllCourses = async (req, res) => {
 exports.getMyEnrolledCourses = async (req, res) => {
     try {
         const studentObjectId = new mongoose.Types.ObjectId(req.user.id)
+
+        // Match either student User ID or linked Student document ID
+        const studentDoc = await Student.findOne({ email: req.user.email })
+        const idsToMatch = [studentObjectId]
+        if (studentDoc) idsToMatch.push(studentDoc._id)
+
         const courses = await Course.find({
-            enrolledStudents: studentObjectId
+            enrolledStudents: { $in: idsToMatch }
         }).sort({ createdAt: -1 })
 
         res.status(200).json(courses)
@@ -59,7 +65,7 @@ exports.getCourseDetails = async (req, res) => {
             return res.status(400).json({ message: 'Invalid course ID' })
         }
         const course = await Course.findById(req.params.id)
-            .populate('enrolledStudents', 'firstName lastName email')
+            .populate('enrolledStudents', 'firstName lastName email studentId')
         if (!course) return res.status(404).json({ message: 'Course not found' })
         res.status(200).json(course)
     } catch (err) {
@@ -77,13 +83,11 @@ exports.updateCourseOverview = async (req, res) => {
             { description, learningObjectives, schedule, room },
             { new: true }
         )
-
         await logActivity(
             req,
             'Update',
             `Updated course overview for "${course.courseName}"`
         )
-
         res.status(200).json({ message: 'Course updated', course })
     } catch (err) {
         res.status(500).json({ message: 'Failed to update overview' })
@@ -100,14 +104,12 @@ exports.addModule = async (req, res) => {
 
         course.modules = course.modules || []
         course.modules.push({ title, lessons: [] })
-
+        await course.save()
         await logActivity(
             req,
             'Create',
             `Created module for course "${course.courseName}"`
         )
-
-        await course.save()
         res.status(201).json({ message: 'Module added', modules: course.modules })
     } catch (err) {
         res.status(500).json({ message: 'Failed to add module' })
@@ -122,14 +124,12 @@ exports.deleteModule = async (req, res) => {
         if (!course) return res.status(404).json({ message: 'Course not found' })
 
         course.modules = (course.modules || []).filter(m => String(m._id) !== String(moduleId))
-
+        await course.save()
         await logActivity(
             req,
             'Delete',
             `Deleted module for course "${course.courseName}"`
         )
-
-        await course.save()
         res.status(200).json({ message: 'Module removed', modules: course.modules })
     } catch (err) {
         res.status(500).json({ message: 'Failed to delete module' })
@@ -155,7 +155,6 @@ exports.addLesson = async (req, res) => {
             videoUrl: videoUrl || ''
         })
         await course.save()
-
         await logActivity(
             req,
             'Create',
@@ -178,14 +177,12 @@ exports.deleteLesson = async (req, res) => {
         if (!targetModule) return res.status(404).json({ message: 'Module not found' })
 
         targetModule.lessons = targetModule.lessons.filter(l => String(l._id) !== String(lessonId))
-
+        await course.save()
         await logActivity(
             req,
             'Delete',
             `Deleted lesson for course "${course.courseName}"`
         )
-
-        await course.save()
         res.status(200).json({ message: 'Lesson removed', modules: course.modules })
     } catch (err) {
         res.status(500).json({ message: 'Failed to delete lesson' })
@@ -208,7 +205,6 @@ exports.addAnnouncement = async (req, res) => {
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
         })
         await course.save()
-
         await logActivity(
             req,
             'Create',
@@ -228,46 +224,38 @@ exports.deleteAnnouncement = async (req, res) => {
         if (!course) return res.status(404).json({ message: 'Course not found' })
 
         course.announcements = (course.announcements || []).filter(a => String(a._id) !== String(announcementId))
-
+        await course.save()
         await logActivity(
             req,
             'Delete',
             `Deleted announcement for course "${course.courseName}"`
         )
-
-        await course.save()
         res.status(200).json({ message: 'Announcement removed', announcements: course.announcements })
     } catch (err) {
         res.status(500).json({ message: 'Failed to delete announcement' })
     }
 }
 
-const User = require('../models/User')
-
+// 11. Create Course
 exports.createCourse = async (req, res) => {
     try {
         let instructorName = req.body.instructor
-
-        // Fetch instructor name from the database user record if empty or placeholder
         if (!instructorName || instructorName === 'Instructor Portal') {
             const user = await User.findById(req.user.id)
             if (user) {
                 instructorName = `${user.firstName} ${user.lastName}`.trim()
             }
         }
-
         const course = await Course.create({
             ...req.body,
             instructor: instructorName || 'Instructor',
             instructorId: req.user.id
         })
-
         await logActivity(
             req,
             'Create',
             `Created course named "${course.courseName}" by ${instructorName}`
         )
-
         res.status(201).json({ message: 'Course created successfully', course })
     } catch (err) {
         res.status(500).json({ message: 'Failed to create course' })
@@ -281,19 +269,20 @@ exports.enrollStudents = async (req, res) => {
         if (!courseId || !Array.isArray(studentIds) || studentIds.length === 0) {
             return res.status(400).json({ message: 'Course ID and student IDs are required' })
         }
+
         const objectStudentIds = studentIds.map(id => new mongoose.Types.ObjectId(id))
         const course = await Course.findByIdAndUpdate(
             courseId,
             { $addToSet: { enrolledStudents: { $each: objectStudentIds } } },
             { new: true }
         ).populate('enrolledStudents', 'firstName lastName email')
-        if (!course) return res.status(404).json({ message: 'Course not found' })
 
+        if (!course) return res.status(404).json({ message: 'Course not found' })
 
         await logActivity(
             req,
             'Enroll',
-            `Enrolled student in course "${course.courseName}"`
+            `Enrolled ${studentIds.length} student(s) in course "${course.courseName}"`
         )
 
         res.status(200).json({ message: 'Students enrolled successfully', course })
@@ -314,6 +303,7 @@ exports.unenrollStudent = async (req, res) => {
         const objectStudentId = mongoose.isValidObjectId(normalizedStudentId)
             ? new mongoose.Types.ObjectId(normalizedStudentId)
             : normalizedStudentId
+
         const course = await Course.findByIdAndUpdate(
             courseId,
             {
@@ -325,6 +315,7 @@ exports.unenrollStudent = async (req, res) => {
             },
             { new: true }
         ).populate('enrolledStudents', 'firstName lastName email')
+
         if (!course) {
             return res.status(404).json({ message: 'Course not found' })
         }
@@ -346,13 +337,13 @@ exports.unenrollStudent = async (req, res) => {
 exports.deleteCourse = async (req, res) => {
     try {
         const course = await Course.findByIdAndDelete(req.params.id)
-
-        await logActivity(
-            req,
-            'Delete',
-            `Deleted course "${course.courseName}"`
-        )
-
+        if (course) {
+            await logActivity(
+                req,
+                'Delete',
+                `Deleted course "${course.courseName}"`
+            )
+        }
         res.status(200).json({ message: 'Course deleted successfully' })
     } catch (err) {
         res.status(500).json({ message: 'Failed to delete course' })

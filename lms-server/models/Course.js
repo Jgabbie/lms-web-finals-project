@@ -34,7 +34,7 @@ const courseSchema = new mongoose.Schema({
     modules: [moduleSchema],
     announcements: [announcementSchema],
     status: { type: String, enum: ['Active', 'Archived'], default: 'Active' },
-    enrolledStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }]
+    enrolledStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true })
 
 module.exports = mongoose.model('Course', courseSchema)
