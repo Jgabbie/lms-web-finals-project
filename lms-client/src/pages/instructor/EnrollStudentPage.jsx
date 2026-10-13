@@ -21,12 +21,6 @@ import NavbarInstructor from '../../components/NavbarInstructor'
 import SidebarInstructor from '../../components/SidebarInstructor'
 import api from '../../api/axiosClient'
 
-const DEFAULT_COURSES = [
-    { _id: '1', courseCode: 'IT 301', courseName: 'Web Development', enrolledStudents: [] },
-    { _id: '2', courseCode: 'IT 204', courseName: 'Database Systems', enrolledStudents: [] },
-    { _id: '3', courseCode: 'CS 101', courseName: 'Intro to OOP', enrolledStudents: [] },
-]
-
 export default function EnrollStudentPage() {
     const [courses, setCourses] = useState([])
     const [selectedCourseId, setSelectedCourseId] = useState('')
@@ -35,57 +29,40 @@ export default function EnrollStudentPage() {
     const [students, setStudents] = useState([])
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [loading, setLoading] = useState(true)
+    const [enrolling, setEnrolling] = useState(false)
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' })
 
-    const requestLoadData = useCallback(() => {
-        const request = async () => {
-            let loadedCourses = []
-            try {
-                const coursesRes = await api.get('/courses')
-                if (Array.isArray(coursesRes.data) && coursesRes.data.length > 0) {
-                    loadedCourses = coursesRes.data
-                }
-            } catch {
-                const storedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
-                loadedCourses = [...storedCourses, ...DEFAULT_COURSES]
-            }
+    const loadData = useCallback(async () => {
+        try {
+            setLoading(true)
+            const [coursesRes, usersRes] = await Promise.all([
+                api.get('/courses'),
+                api.get('/user/accounts')
+            ])
 
-            if (loadedCourses.length === 0) {
-                const storedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
-                loadedCourses = [...storedCourses, ...DEFAULT_COURSES]
-            }
-
-
-            return loadedCourses
-        }
-        return request().then((loadedCourses) => {
+            const loadedCourses = Array.isArray(coursesRes.data) ? coursesRes.data : []
             setCourses(loadedCourses)
-            setSelectedCourseId(prev => prev || loadedCourses[0]?._id || loadedCourses[0]?.courseCode || '')
-            return api.get('/user/accounts')
-        }).then((usersRes) => {
+
+            if (loadedCourses.length > 0 && !selectedCourseId) {
+                setSelectedCourseId(loadedCourses[0]._id)
+            }
+
             const allUsers = Array.isArray(usersRes.data) ? usersRes.data : []
             setStudents(allUsers.filter(u => u.role?.toLowerCase() === 'student'))
-        }).catch((err) => {
+        } catch (err) {
             console.error('Error loading enrollment data:', err)
-        }).finally(() => {
+        } finally {
             setLoading(false)
-        })
-    }, [])
-
-    const loadData = async () => {
-        setLoading(true)
-        await requestLoadData()
-    }
+        }
+    }, [selectedCourseId])
 
     useEffect(() => {
-        requestLoadData()
-    }, [requestLoadData])
-
+        loadData()
+    }, [loadData])
 
     const currentCourse = useMemo(() => {
-        return courses.find(c => c._id === selectedCourseId || c.courseCode === selectedCourseId)
+        return courses.find(c => c._id === selectedCourseId)
     }, [courses, selectedCourseId])
-
 
     const isStudentEnrolled = useCallback((studentId) => {
         if (!currentCourse || !currentCourse.enrolledStudents) return false
@@ -94,7 +71,6 @@ export default function EnrollStudentPage() {
             return String(enrolledId) === String(studentId)
         })
     }, [currentCourse])
-
 
     const filteredStudents = useMemo(() => {
         const key = search.toLowerCase()
@@ -107,7 +83,6 @@ export default function EnrollStudentPage() {
                 email.toLowerCase().includes(key)
         })
     }, [students, search])
-
 
     const toggleStudent = (id) => {
         if (isStudentEnrolled(id)) return
@@ -123,13 +98,12 @@ export default function EnrollStudentPage() {
 
     const handleEnroll = async () => {
         if (!selectedCourseId || selectedStudents.length === 0) return
-
         try {
+            setEnrolling(true)
             await api.post('/courses/enroll', {
                 courseId: selectedCourseId,
                 studentIds: selectedStudents
             })
-
             setNotification({
                 open: true,
                 message: `Successfully enrolled ${selectedStudents.length} student(s)!`,
@@ -137,26 +111,14 @@ export default function EnrollStudentPage() {
             })
             setSelectedStudents([])
             loadData()
-        } catch {
-
-            const storedCourses = JSON.parse(localStorage.getItem('instructor_courses') || '[]')
-            const updatedStored = storedCourses.map(c => {
-                if (c._id === selectedCourseId || c.courseCode === selectedCourseId) {
-                    const currentEnrolled = c.enrolledStudents || []
-                    const newEnrolled = Array.from(new Set([...currentEnrolled, ...selectedStudents]))
-                    return { ...c, enrolledStudents: newEnrolled }
-                }
-                return c
-            })
-            localStorage.setItem('instructor_courses', JSON.stringify(updatedStored))
-
+        } catch (err) {
             setNotification({
                 open: true,
-                message: `Successfully enrolled ${selectedStudents.length} student(s)!`,
-                severity: 'success'
+                message: err.response?.data?.message || 'Failed to enroll students',
+                severity: 'error'
             })
-            setSelectedStudents([])
-            loadData()
+        } finally {
+            setEnrolling(false)
         }
     }
 
@@ -178,7 +140,6 @@ export default function EnrollStudentPage() {
                                 Select a course and enroll eligible registered students.
                             </Typography>
                         </div>
-
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mb-6'>
                             <CardContent className='!p-6'>
                                 <div className='grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4'>
@@ -190,7 +151,7 @@ export default function EnrollStudentPage() {
                                             onChange={e => handleCourseChange(e.target.value)}
                                         >
                                             {courses.map(c => (
-                                                <MenuItem key={c._id || c.courseCode} value={c._id || c.courseCode}>
+                                                <MenuItem key={c._id} value={c._id}>
                                                     {c.courseCode} - {c.courseName}
                                                 </MenuItem>
                                             ))}
@@ -207,16 +168,15 @@ export default function EnrollStudentPage() {
                                     <Button
                                         variant='contained'
                                         startIcon={<GroupAddOutlined />}
-                                        disabled={!selectedCourseId || selectedStudents.length === 0}
+                                        disabled={!selectedCourseId || selectedStudents.length === 0 || enrolling}
                                         onClick={handleEnroll}
                                         className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none !px-6'
                                     >
-                                        Enroll ({selectedStudents.length})
+                                        {enrolling ? 'Enrolling...' : `Enroll (${selectedStudents.length})`}
                                     </Button>
                                 </div>
                             </CardContent>
                         </Card>
-
                         <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
                             <CardContent className='!p-0'>
                                 <div className='flex items-center justify-between gap-3 px-6 py-5 border-b border-slate-200'>
@@ -234,13 +194,11 @@ export default function EnrollStudentPage() {
                                         className='!bg-blue-50 !text-blue-700 !font-medium'
                                     />
                                 </div>
-
                                 <div className='divide-y divide-slate-100'>
                                     {filteredStudents.length > 0 ? (
                                         filteredStudents.map(student => {
                                             const alreadyEnrolled = isStudentEnrolled(student._id)
                                             const isChecked = selectedStudents.includes(student._id)
-
                                             return (
                                                 <div
                                                     key={student._id}
@@ -267,7 +225,6 @@ export default function EnrollStudentPage() {
                                                             {student.email}
                                                         </Typography>
                                                     </div>
-
                                                     {alreadyEnrolled ? (
                                                         <Chip
                                                             size='small'
@@ -297,7 +254,6 @@ export default function EnrollStudentPage() {
                         </Card>
                     </main>
                 </div>
-
                 <Snackbar
                     open={notification.open}
                     autoHideDuration={3000}
