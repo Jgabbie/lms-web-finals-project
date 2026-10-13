@@ -12,6 +12,9 @@ const logSchema = new mongoose.Schema({
             'Create',
             'Update',
             'Delete',
+            'Restore',
+            'Enroll',
+            'Unenroll'
         ],
         required: true
     },

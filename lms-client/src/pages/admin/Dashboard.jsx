@@ -31,6 +31,8 @@ export default function Dashboard() {
 
                 setDashboardData(statsResponse.data)
 
+                console.log('Stats:', statsResponse.data)
+
                 const logs = activityResponse.data.logs
                 setActivityLogs(Array.isArray(logs) ? logs : [])
             } catch (error) {
@@ -124,15 +126,19 @@ export default function Dashboard() {
     const recentStudents = (dashboardData?.recentStudents || []).map(student => ({
         name: `${student.firstName} ${student.lastName}`,
         email: student.email,
-        course: student.courseName || "N/A",
+        studentId: student.studentId,
         date: new Date(student.createdAt).toLocaleDateString(),
         status: student.status === 'active' ? 'Active' : 'Inactive',
     }))
 
     const popularCourses = (dashboardData?.popularCourses || []).map(course => ({
         name: course.courseName,
+        code: course.courseCode,
         students: course.enrollmentCount,
-        progress: Math.min((course.enrollmentCount / 100) * 100, 100),
+        progress: Math.min(
+            (course.enrollmentCount / Math.max(...(dashboardData?.popularCourses || []).map(c => c.enrollmentCount), 1)) * 100,
+            100
+        ),
     }))
 
     return (
@@ -225,27 +231,39 @@ export default function Dashboard() {
                                         </div>
 
                                         <div className='h-64 flex items-end gap-3 sm:gap-5 border-b border-slate-200 px-2'>
-                                            {[
-                                                ["Jan", 45],
-                                                ["Feb", 83],
-                                                ["Mar", 46],
-                                                ["Apr", 45],
-                                                ["May", 92],
-                                                ["Jun", 34],
-                                                ["Jul", 32],
-                                                ["Aug", 32],
-                                            ].map(([month, value]) => (
-                                                <div key={month} className='flex-1 h-full flex flex-col justify-end items-center gap-2'>
-                                                    <span className='text-xs font-medium text-slate-500'>
-                                                        {Math.round(value * 12)}
-                                                    </span>
+                                            {(() => {
+                                                const overview = dashboardData?.enrollmentOverview || []
+                                                const maxEnrollments = Math.max(...overview.map(item => item.enrollments), 1)
+                                                return overview.map(({ month, enrollments }) => {
+                                                    const height = (enrollments / maxEnrollments) * 100
 
-                                                    <div className='w-full max-w-10 bg-blue-500 hover:bg-blue-600 rounded-t-md transition-all' style={{ height: `${value}%` }} />
-                                                    <span className='text-xs text-slate-400'>
-                                                        {month}
-                                                    </span>
-                                                </div>
-                                            ))}
+                                                    return (
+                                                        <div
+                                                            key={month}
+                                                            className='flex flex-col items-center gap-1'
+                                                            title={`${month}: ${enrollments} enrollments`}
+                                                        >
+                                                            <span
+                                                                className='text-xs font-medium text-slate-500'
+                                                            >
+                                                                {enrollments}
+                                                            </span>
+
+                                                            <div
+                                                                className='w-full max-w-10 bg-blue-500 hover:bg-blue-600 rounded-t-md transition-all'
+                                                                style={{ height: `${height}%`, minHeight: enrollments > 0 ? '4px' : '0' }}
+                                                            />
+
+                                                            <span
+                                                                className='text-xs text-slate-400'
+                                                            >
+                                                                {month}
+                                                            </span>
+                                                        </div>
+                                                    )
+                                                })
+                                            }
+                                            )()}
                                         </div>
                                     </div>
                                 </CardContent>
@@ -365,7 +383,7 @@ export default function Dashboard() {
                                         </div>
 
                                         <div>
-                                            <Button endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
+                                            <Button endIcon={<ArrowForward />} className='!text-blue-600 !normal-case' onClick={() => navigate('/admin/users')}>
                                                 View All
                                             </Button>
                                         </div>
@@ -379,7 +397,7 @@ export default function Dashboard() {
                                                         Student
                                                     </th>
                                                     <th className='text-left py-3 text-xs font-semibold text-slate-500'>
-                                                        Course
+                                                        Student Number
                                                     </th>
                                                     <th className='text-left py-3 text-xs font-semibold text-slate-500'>
                                                         Joined
@@ -412,7 +430,7 @@ export default function Dashboard() {
                                                         </td>
 
                                                         <td className='py-4 text-sm text-slate-600'>
-                                                            {student.course}
+                                                            {student.studentId}
                                                         </td>
 
                                                         <td className='py-4 text-sm text-slate-500'>
@@ -423,11 +441,6 @@ export default function Dashboard() {
                                                             <Chip label={student.status} size='small' className={student.status === "Active" ? "!bg-green-100 !text-green-700" : "!bg-blue-100 !text-blue-700"} />
                                                         </td>
 
-                                                        <td className='py-4 text-right'>
-                                                            <Button size='small' className='!min-w-0 !text-slate-400'>
-                                                                <MoreVert />
-                                                            </Button>
-                                                        </td>
 
                                                     </tr>
                                                 ))}
@@ -464,23 +477,19 @@ export default function Dashboard() {
                                                                 <span className='text-sm font-semibold text-slate-700 truncate'>
                                                                     {course.name}
                                                                 </span>
-
-                                                                <span className='text-xs font-bold text-slate-500'>
-                                                                    {course.students}
-                                                                </span>
                                                             </div>
 
                                                             <div className='w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden'>
-                                                                <div className='h-full bg-blue-500 rounded-full' style={{ width: `${course.progress}%` }} />
+                                                                <div className='h-full bg-blue-500 rounded-full' style={{ width: `${course.students} enrolled` }} />
+
                                                             </div>
 
                                                             <div className='flex justify-between mt-1'>
                                                                 <span className='text-xs text-slate-400'>
-                                                                    students
+                                                                    Students
                                                                 </span>
-
-                                                                <span className='text-xs font-medium text-slate-500'>
-                                                                    {course.progress}% completion
+                                                                <span className='text-xs font-bold text-slate-500'>
+                                                                    {course.students} enrolled
                                                                 </span>
                                                             </div>
 
@@ -492,7 +501,7 @@ export default function Dashboard() {
                                         </div>
                                         <Divider className='!my-5' />
 
-                                        <Button fullWidth endIcon={<ArrowForward />} className='!text-blue-600 !normal-case'>
+                                        <Button fullWidth endIcon={<ArrowForward />} className='!text-blue-600 !normal-case' onClick={() => navigate('/admin/courses')}>
                                             Manage Courses
                                         </Button>
                                     </div>

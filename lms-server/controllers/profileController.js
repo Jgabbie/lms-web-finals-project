@@ -12,6 +12,29 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
+const logActivity = async (req, action, description) => {
+    const actorId = req.user?.id || req.user?._id
+
+    if (!actorId) {
+        throw new Error('Actor ID is missing in the request')
+    }
+
+    const actor = await User.findById(actorId).select('firstName lastName role')
+
+    if (!actor) {
+        throw new Error('Actor not found')
+    }
+
+    await Log.create({
+        firstName: actor.firstName,
+        lastName: actor.lastName,
+        role: actor.role,
+        action,
+        description,
+        status: 'Success'
+    })
+}
+
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
@@ -149,6 +172,12 @@ exports.updateProfile = async (req, res) => {
                 message: 'User not found'
             })
         }
+
+        await logActivity(
+            req,
+            'Update',
+            `Updated profile for user "${user.firstName} ${user.lastName}"`
+        )
 
         return res.status(200).json({
             message: 'Profile updated successfully',
@@ -427,6 +456,12 @@ exports.resetPassword = async (req, res) => {
 
         user.password = hashedPassword
 
+        await logActivity(
+            req,
+            'Update',
+            `Updated password for user "${user.firstName} ${user.lastName}"`
+        )
+
         await user.save()
 
         pendingPasswordResets.delete(normalizedEmail)
@@ -620,6 +655,12 @@ exports.uploadProfileImage = async (req, res) => {
                 { profileImage: result.secure_url }
             )
         }
+
+        await logActivity(
+            req,
+            'Update',
+            `Updated profile image for user "${user.firstName} ${user.lastName}"`
+        )
 
         return res.status(200).json({
             message: 'Profile image uploaded successfully',

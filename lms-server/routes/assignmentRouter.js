@@ -17,6 +17,8 @@ const upload = multer({
     limits: { fileSize: 25 * 1024 * 1024 } // 25MB
 })
 
+router.use(verifyToken)
+
 router.get('/', verifyToken, getAllAssignments)
 router.post('/create', verifyToken, upload.single('attachment'), createAssignment)
 router.put('/:id', verifyToken, upload.single('attachment'), updateAssignment)

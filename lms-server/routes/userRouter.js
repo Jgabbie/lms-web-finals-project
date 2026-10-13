@@ -2,6 +2,9 @@ const router = require('express').Router()
 
 const { getAllUsers, getUserById, addUser, updateUser, deleteUser, restoreUser, getArchivedUsers } = require('../controllers/userController')
 
+const { verifyToken } = require('../middleware/authMiddleware')
+
+router.use(verifyToken)
 router.get('/accounts', getAllUsers)
 router.get('/account/:id', getUserById)
 router.post('/account/add', addUser)

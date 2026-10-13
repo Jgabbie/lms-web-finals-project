@@ -1,5 +1,4 @@
 const router = require('express').Router()
-
 const {
     login,
     logout,
@@ -11,6 +10,9 @@ const {
     resetPassword,
     verifyPasswordResetOtp,
 } = require('../controllers/authController')
+
+
+
 
 router.post('/login', login)
 router.post('/register/send-otp', sendRegistrationOtp)

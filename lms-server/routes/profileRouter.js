@@ -11,6 +11,8 @@ const {
     uploadProfileImage
 } = require('../controllers/profileController')
 
+router.use(verifyToken)
+
 router.get('/user', verifyToken, getProfile)
 router.put('/user/update', verifyToken, updateProfile)
 router.post('/change-password/verify-otp', verifyToken, verifyPasswordResetOtp)

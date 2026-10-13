@@ -33,9 +33,9 @@ exports.getDashboardStats = async (req, res) => {
                 { $match: { createdAt: { $gte: startOfYear } } },
                 { $group: { _id: { $month: '$createdAt' }, count: { $sum: 1 } } },
             ]),
-            Student.find().select('firstName lastName email course status createdAt').sort({ createdAt: -1 }).limit(5).lean(),
+            Student.find().select('studentId firstName lastName email course status createdAt').sort({ createdAt: -1 }).limit(5).lean(),
             Course.aggregate([
-                { $match: { status: 'active' } },
+                { $match: { status: 'Active' } },
                 {
                     $project: {
                         courseCode: 1,
@@ -48,7 +48,7 @@ exports.getDashboardStats = async (req, res) => {
                     }
                 },
                 {
-                    $sort: { enrollmentCount: -1 }
+                    $sort: { enrollmentCount: -1, courseName: 1 }
                 },
                 { $limit: 5 }
             ]),
@@ -96,6 +96,55 @@ exports.getDashboardStats = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'An error occurred while fetching dashboard statistics.',
+        })
+    }
+}
+
+exports.getEnrollmentOverview = async (req, res) => {
+    try {
+        const year = Number(req.query, year) || new Date().getFullYear()
+        const starrDate = new Date(year, 0, 1)
+        const endDate = new Date(year, 1, 0, 1)
+
+        const monthlyData = await Student.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: startDate, $lt: endDate }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: '$createdAt' },
+                    enrollments: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ])
+
+        const enrollmentOverview = Array.from(
+            { length: 12 },
+            (_, index) => {
+                const monthNumber = index + 1
+                const result = monthlyData.find(item => item._id === monthNumber)
+
+                return {
+                    month: new Date(year, index, 1).toLocaleString('en-US', {
+                        month: 'short'
+                    }),
+                    enrollments: result ? result.enrollments : 0,
+                }
+            }
+        )
+        res.status(200).json({
+            success: true,
+            year,
+            enrollmentOverview,
+        })
+    } catch (error) {
+        console.error('Error fetching enrollment overview:', error)
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while fetching enrollment overview.',
         })
     }
 }

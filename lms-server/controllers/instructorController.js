@@ -3,6 +3,7 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const Instructor = require('../models/Instructor')
 const User = require('../models/User')
+const Log = require('../models/Log')
 const ArchivedInstructor = require('../models/ArchivedInstructor')
 const ArchivedUser = require('../models/ArchivedUser')
 
@@ -16,14 +17,24 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-const logActivity = async (user, action, description, req) => {
-    const actor = req.user
+const logActivity = async (req, action, description,) => {
+    const actorId = req.user?.id || req.user?._id
+
+    if (!actorId) {
+        throw new Error('Actor ID is missing in the request')
+    }
+
+    const actor = await User.findById(actorId).select('firstName lastName role')
+
+    if (!actor) {
+        throw new Error('Actor not found')
+    }
     await Log.create({
         firstName: actor.firstName,
         lastName: actor.lastName,
         role: actor.role,
-        action: action,
-        description: description,
+        action,
+        description,
         status: 'Success'
     })
 }
@@ -395,7 +406,11 @@ exports.updateInstructor = async (req, res) => {
             })
         }
 
-        const existingInstructor = await Instructor.findOne({ email: email.toLowerCase() })
+        const existingInstructor = await Instructor.findOne({
+            email: email.toLowerCase(),
+            _id: { $ne: req.params.id }
+        })
+
         if (existingInstructor) {
             return res.status(400).json({
                 message: 'An instructor with this email already exists'
@@ -452,7 +467,7 @@ exports.updateInstructor = async (req, res) => {
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Role:
-                                <strong>${role}</strong>
+                                <strong>${"Instructor"}</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Department:
@@ -490,6 +505,12 @@ exports.updateInstructor = async (req, res) => {
                 </div>
             `
         })
+
+        instructor.firstName = firstName.trim()
+        instructor.lastName = lastName.trim()
+        instructor.email = email.toLowerCase().trim()
+        instructor.department = department.trim()
+        instructor.specialization = specialization.trim()
 
         await instructor.save()
 
@@ -655,7 +676,7 @@ exports.deleteInstructor = async (req, res) => {
         await logActivity(
             req,
             'Delete',
-            `Deleted instructor account for ${normalizedFirstName} ${normalizedLastName}`
+            `Deleted instructor account for ${instructorInformation.firstName} ${instructorInformation.lastName}`
         )
 
         res.status(200).json({ message: 'Instructor deleted successfully' })
@@ -739,7 +760,7 @@ exports.restoreInstructor = async (req, res) => {
         await logActivity(
             req,
             'Restore',
-            `Restored instructor account for ${normalizedFirstName} ${normalizedLastName}`
+            `Restored instructor account for ${restoredInstructor.firstName} ${restoredInstructor.lastName}`
         )
 
         res.status(200).json({ message: 'Instructor restored successfully' })

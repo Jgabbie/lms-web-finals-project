@@ -22,9 +22,6 @@ const transporter = nodemailer.createTransport({
 const logActivity = async (req, action, description) => {
     const actorId = req.user?.id || req.user?._id
 
-    console.log(req.user)
-    console.log('Actor ID:', actorId)
-
     if (!actorId) {
         throw new Error('Actor ID is missing in the request')
     }
@@ -295,11 +292,34 @@ exports.addStudent = async (req, res) => {
             role: 'student',
         })
 
-        await student.save()
-
         await Course.findByIdAndUpdate(selectedCourse._id, {
             $addToSet: { enrolledStudents: student._id }
         })
+
+        await student.save()
+
+        const updatedCourse = await Course.findByIdAndUpdate(
+            selectedCourse._id,
+            {
+                $addToSet: { enrolledStudents: student._id }
+            }
+        )
+
+        if (!updatedCourse) {
+            await Student.findByIdAndDelete(student._id)
+
+            res.status(500).json({
+                message: 'Failed to add student to the course. Student creation rolled back.'
+            })
+            return
+        }
+
+        if (!updatedCourse.enrolledStudents.some(id => id.toString() === student._id.toString())) {
+            res.status(500).json({
+                message: 'Failed to add student to the course. Student creation rolled back.'
+            })
+            return
+        }
 
         res.status(201).json({
             message: 'Student added successfully',
@@ -499,7 +519,7 @@ exports.updateStudent = async (req, res) => {
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Role:
-                                <strong>${role}</strong>
+                                <strong>"Student"</strong>
                             </p>
                             <p style="margin: 0 0 12px; font-size: 14px;">
                                 Account Course:
@@ -739,7 +759,7 @@ exports.deleteStudent = async (req, res) => {
         await logActivity(
             req,
             'Delete',
-            `Deleted student account for ${normalizedFirstName} ${normalizedLastName}`
+            `Deleted student account for ${studentInformation.firstName} ${studentInformation.lastName}`
         )
 
         res.status(200).json({ message: 'Student deleted successfully' })
@@ -823,7 +843,7 @@ exports.restoreStudent = async (req, res) => {
         await logActivity(
             req,
             'Restore',
-            `Restored student account for ${normalizedFirstName} ${normalizedLastName}`
+            `Restored student account for ${restoredStudent.firstName} ${restoredStudent.lastName}`
         )
 
         res.status(200).json({ message: 'Student restored successfully' })
