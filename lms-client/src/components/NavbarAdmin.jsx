@@ -95,7 +95,7 @@ export default function NavbarAdmin() {
                             <Menu anchorEl={anchorElNav} open={Boolean(anchorElNav)} onClose={handleCloseNavMenu} className="md:hidden">
                                 {pages.map((page) => (
                                     <MenuItem
-                                        key={page}
+                                        key={page.path}
                                         onClick={() => handleNavigate(page.path)}
                                     >
                                         <Typography textAlign="center">{page.name}</Typography>
@@ -110,7 +110,7 @@ export default function NavbarAdmin() {
                     <div className="hidden md:flex gap-6 items-center">
                         {pages.map((page) => (
                             <Button
-                                key={page}
+                                key={page.path}
                                 onClick={() => handleNavigate(page.path)}
                                 className="text-slate-600 font-medium hover:text-blue-600 transition-colors duration-200"
                             >

@@ -235,6 +235,8 @@
  .student-notifications .notification-row .flex-col > div:first-child { min-width:0; }
  .student-notifications .notification-filters .MuiButton-root { padding-inline:16px; min-height:40px; }
  .student-notifications .notification-row .MuiIconButton-root { color:#073342!important; }
+ .edu-role-admin.student-notifications .notification-empty-icon { background:linear-gradient(145deg,#0a4658,#073342)!important; border-radius:18px; color:#fff!important; }
+ .edu-role-admin.student-notifications .notification-empty-icon svg { color:#fff!important; }
  .edu-student-screen:is(.edu-role-student,.edu-role-instructor) main [class*='text-indigo-'],
  .edu-student-screen:is(.edu-role-student,.edu-role-instructor) main [class*='text-purple-'] { color:#073342!important; }
  .edu-student-screen:is(.edu-role-student,.edu-role-instructor) main [class*='bg-indigo-'],
