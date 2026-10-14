@@ -140,6 +140,11 @@ exports.updateAssignment = async (req, res) => {
         }
 
         await assignment.save()
+        const maxScore = Number(assignment.points) || 100
+        await Submission.updateMany(
+            { assignmentId: req.params.id },
+            { $set: { maxScore } }
+        )
         res.status(200).json({ message: 'Assignment updated successfully', assignment })
     } catch (err) {
         res.status(500).json({ message: err.message || 'Failed to update assignment' })
@@ -175,7 +180,13 @@ exports.gradeSubmission = async (req, res) => {
         const { score, feedback } = req.body
         const submission = await Submission.findById(req.params.id)
         if (!submission) return res.status(404).json({ message: 'Submission not found' })
-        submission.score = Number(score)
+
+        const assignment = await Assignment.findById(submission.assignmentId)
+        const maxScore = assignment ? Number(assignment.points) || 100 : Number(submission.maxScore) || 100
+        const clampedScore = Math.min(Math.max(Number(score) || 0, 0), maxScore)
+
+        submission.score = clampedScore
+        submission.maxScore = maxScore
         submission.feedback = feedback || ''
         submission.status = 'Graded'
         await submission.save()
@@ -222,6 +233,9 @@ exports.submitAssignment = async (req, res) => {
             fileUrl = uploadResult.secure_url
         }
 
+        const assignment = await Assignment.findById(assignmentId)
+        const maxScore = assignment ? Number(assignment.points) || 100 : 100
+
         const submission = await Submission.create({
             assignmentId,
             assignmentTitle,
@@ -231,6 +245,7 @@ exports.submitAssignment = async (req, res) => {
             studentEmail,
             file: fileName,
             fileUrl,
+            maxScore,
             submittedAt: new Date().toLocaleDateString('en-US', {
                 month: 'short',
                 day: '2-digit',
