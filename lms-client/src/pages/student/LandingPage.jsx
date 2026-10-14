@@ -216,7 +216,7 @@ export default function LandingPage() {
                 </section>
                 <section className='landing-final-cta'><span className='landing-eyebrow'>MAKE YOUR NEXT MOVE</span><h2>Start learning in a way<br />that feels right for you.</h2><Button variant='contained' onClick={navigateSignup}>Get Started <ArrowForward fontSize='small' /></Button><div className='landing-seal' aria-hidden='true'><School /></div></section>
             </main>
-            <footer className='landing-footer'><div className='landing-footer-content'><div><a className='landing-brand' href='#main-content'><School /> EduLearn.</a><p>Empowering learners with practical knowledge and skills for a better future.</p></div><div><h3>Explore</h3><a href='#about'>About Us</a><a href='#courses'>Courses</a><a href='#contact'>Contact Us</a></div><div><h3>Get in touch</h3><p>contactsupport@EduLearn.com</p><p>Manila, Philippines</p></div></div><p className='landing-copyright'>©{new Date().getFullYear()} EduLearn. All rights reserved.</p><div className='landing-footer-wordmark' aria-hidden='true'>EduLearn.</div></footer>
+            <footer className='landing-footer'><div className='landing-footer-content'><div><a className='landing-brand' href='#main-content'><School /> EduLearn.</a><p>Empowering learners with practical knowledge and skills for a better future.</p></div><div><h3>Explore</h3><a href='#about'>About Us</a><a href='#courses'>Courses</a><a href='#contact'>Contact Us</a></div><div><h3>Get in touch</h3><p>EduLearn@LMS.com</p><p>Manila, Philippines</p></div></div><p className='landing-copyright'>©{new Date().getFullYear()} EduLearn. All rights reserved.</p><div className='landing-footer-wordmark' aria-hidden='true'>EduLearn.</div></footer>
 
 
             <Snackbar
