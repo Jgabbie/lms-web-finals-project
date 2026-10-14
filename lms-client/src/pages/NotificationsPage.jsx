@@ -71,8 +71,6 @@ export default function NotificationsPage() {
                 return <CheckCircleOutlined />
             case 'Discussion':
                 return <ForumOutlined />
-            case 'Quiz':
-                return <QuizOutlined />
             case 'Schedule':
                 return <ScheduleOutlined />
             default:
