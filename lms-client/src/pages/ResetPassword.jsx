@@ -1,8 +1,8 @@
-import { TextField, Button, Typography, Link, Snackbar, Alert, Box, Modal, InputAdornment, IconButton } from '@mui/material'
-import { VisibilityOff, Visibility } from '@mui/icons-material'
+import { TextField, Button, Typography, Link, Snackbar, Alert, Modal, InputAdornment, IconButton } from '@mui/material'
+import { VisibilityOff, Visibility, School, LockResetRounded } from '@mui/icons-material'
 import { useState } from 'react'
 import api from '../api/axiosClient'
-import ResetPasswordGraphic from "../assets/graphics/undraw_secure-password_9qv4.svg"
+import './ResetPassword.css'
 
 //test
 
@@ -258,37 +258,32 @@ export default function ResetPassword() {
 
 
     return (
-        <>
-            <div className=' relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-50 px-4 py-10'>
+        <div className='edureset'>
+            <div className='reset-page'>
 
-                <div className='absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blue-200/60 ' />
-                <div className='absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-indigo-200/60 ' />
-                <div className='absolute top-1/3 -right-20 w-64 h-64 rounded-full bg-blue-200/60 ' />
-
-                <div className='relative z-10 w-full max-w-6xl flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16'>
-                    {/* left */}
-                    <div className='w-full lg:w-1/2 flex items-center justify-center'>
-                        <div className='w-full max-w-lg'>
-                            <Box
-                                component="img"
-                                src={ResetPasswordGraphic}
-                                alt='Reset Password Graphics'
-                                className='w-full max-w-lg h-auto object-contain'
-                            />
+                <div className='reset-layout'>
+                    <aside className='reset-story'>
+                        <a className='reset-brand' href='/'><School /> EduLearn.</a>
+                        <div className='reset-story-copy'>
+                            <span className='reset-eyebrow'>YOUR NEXT CHAPTER CONTINUES</span>
+                            <h2>Get back<br />to learning.</h2>
+                            <p>A fresh password. The same possibilities. Recover your account and pick up where you left off.</p>
                         </div>
-                    </div>
-
+                        <ol className='reset-steps'><li><span>01</span> Enter your email</li><li><span>02</span> Verify your code</li><li><span>03</span> Create a new password</li></ol>
+                    </aside>
 
                     {/* right */}
-                    <div className='w-full lg:w-1/2 flex items-center justify-center'>
-                        <div className='w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 sm:p-10'>
+                    <div className='reset-form-panel'>
+                        <div className='reset-card'>
 
-                            <div className='text-center mb-8'>
+                            <div className='reset-heading'>
+                                <div className='reset-heading-icon' aria-hidden='true'><LockResetRounded /></div>
+                                <p className='reset-form-eyebrow'>ACCOUNT RECOVERY</p>
                                 <Typography variant='h5' className='font-bold text-slate-800'>
                                     Forgot Password?
                                 </Typography>
                                 <Typography variant='body2' className='text-slate-500 mt-2'>
-                                    Please enter your email so we can send you a One-Time-Pin (OTP) for reseting your password.
+                                    Enter the email address linked to your account. We’ll send you a verification code to reset your password.
                                 </Typography>
                             </div>
 
@@ -341,9 +336,9 @@ export default function ResetPassword() {
                         setShowOtpModal(false)
                     }
                 }}
-                className='flex items-center justify-center p-4'
+                className='reset-modal flex items-center justify-center p-4'
             >
-                <div className='relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                <div className='reset-modal-card relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
                     <div className='text-center'>
 
                         <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100'>
@@ -355,7 +350,7 @@ export default function ResetPassword() {
                             Verify Your Email
                         </Typography>
                         <Typography variant='body2' className='text-slate-500 mt-2'>
-                            We sent a 6-digits verification code to
+                            We sent a 6-digit verification code to
                         </Typography>
                         <Typography variant='body2' className='font-bold text-blue-600 mt-1 break-all'>
                             {email}
@@ -381,10 +376,7 @@ export default function ResetPassword() {
                                 otpError ||
                                 'The code will expire in 5 minutes'
                             }
-                            inputProps={{
-                                maxLength: 6,
-                                inputMode: 'numeric'
-                            }}
+                            slotProps={{ htmlInput: { maxLength: 6, inputMode: 'numeric', autoComplete: 'one-time-code' } }}
                         />
                     </div>
 
@@ -401,7 +393,7 @@ export default function ResetPassword() {
                     >
                         {otpLoading
                             ? 'Verifying...'
-                            : 'Verify & Create Account'
+                            : 'Verify Code'
                         }
                     </Button>
 
@@ -448,9 +440,9 @@ export default function ResetPassword() {
                         setShowResetModal(false)
                     }
                 }}
-                className='flex items-center justify-center p-4'
+                className='reset-modal flex items-center justify-center p-4'
             >
-                <div className='relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                <div className='reset-modal-card relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
                     <div className='text-center mb-6'>
 
                         <Typography variant='h5' className='font-bold text-slate-800'>
@@ -481,6 +473,7 @@ export default function ResetPassword() {
                                     endAdornment: (
                                         <InputAdornment position='end'>
                                             <IconButton
+                                                aria-label={showPassword ? 'Hide password' : 'Show password'}
                                                 onClick={() =>
                                                     setShowPassword(!showPassword)
                                                 }
@@ -514,6 +507,7 @@ export default function ResetPassword() {
                                     endAdornment: (
                                         <InputAdornment position='end'>
                                             <IconButton
+                                                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                                                 onClick={() =>
                                                     setShowConfirmPassword(!showConfirmPassword)
                                                 }
@@ -563,6 +557,6 @@ export default function ResetPassword() {
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </>
+        </div>
     )
 }

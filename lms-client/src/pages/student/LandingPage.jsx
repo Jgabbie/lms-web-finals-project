@@ -1,5 +1,5 @@
-import { Button, TextField } from '@mui/material'
-import { School, MenuBook, Email, Phone, LocationOn, ArrowForward, AutoAwesome, Groups, Code, Palette, Terminal, LoginRounded, AssignmentRounded, CheckCircleRounded, Alert, Snackbar } from '@mui/icons-material'
+import { Button, TextField, Alert, Snackbar } from '@mui/material'
+import { School, MenuBook, Email, Phone, LocationOn, ArrowForward, AutoAwesome, Groups, Code, Palette, Terminal, LoginRounded, AssignmentRounded, CheckCircleRounded } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import LandingGraphics from '../../assets/graphics/undraw_education_3vwh.svg'
 import StudentDashboardPreview from '../../assets/images/landing-student-dashboard.png'
