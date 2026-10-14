@@ -274,11 +274,7 @@ export default function DashboardStudent() {
                                                         </Typography>
                                                     </div>
                                                 </div>
-                                                <span className='text-sm font-semibold text-slate-600'>
-                                                    {course.progress}%
-                                                </span>
                                             </div>
-                                            <LinearProgress variant='determinate' value={course.progress} className='!h-2 !rounded-full' />
                                             <div className='flex justify-between items-center mt-2'>
                                                 <span className='text-xs text-slate-400'>{course.lessons}</span>
                                                 <Button onClick={() => navigate('/student/courses/details', { state: { course } })} size='small' endIcon={<ArrowForward />} className='!normal-case !text-blue-600'>
