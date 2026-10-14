@@ -57,7 +57,7 @@ export default function LandingPage() {
 
         try {
             setSending(true)
-            await api.post('/contact', contactForm)
+            await api.post('/contact/send-email', contactForm)
             setContactForm({
                 name: '',
                 email: '',
@@ -207,6 +207,7 @@ export default function LandingPage() {
                             type='submit'
                             variant='contained'
                             size='large'
+                            onClick={handleContactSubmit}
                             disabled={sending}
                         >
                             {sending ? 'Sending...' : 'Send Message'}
