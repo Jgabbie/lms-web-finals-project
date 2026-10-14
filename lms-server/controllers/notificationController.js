@@ -11,7 +11,7 @@ const syncStudentNotifications = async (userId) => {
     const courseIds = courses.map(course => course._id)
     const courseNames = courses.flatMap(course => [course.courseName, course.courseCode]).filter(Boolean)
 
-    const [assignments, materials] = await Promise.all([
+    const [assignments, materials, coursesWithAnnouncements] = await Promise.all([
         Assignment.find({
             $or: [
                 { courseId: { $in: courseIds } },
@@ -23,8 +23,22 @@ const syncStudentNotifications = async (userId) => {
                 { courseId: { $in: courseIds } },
                 { course: { $in: courseNames } }
             ]
-        }).select('_id title course createdAt').lean()
+        }).select('_id title course createdAt').lean(),
+        Course.find({
+            _id: { $in: courseIds },
+            'announcements.0': { $exists: true }
+        }).select('_id courseName courseCode announcements updatedAt').lean()
     ])
+
+    const announcements = coursesWithAnnouncements.flatMap(course =>
+        (course.announcements || []).map(announcement => ({
+            _id: announcement._id,
+            title: announcement.title,
+            content: announcement.content,
+            course: course.courseName || course.courseCode,
+            createdAt: announcement.createdAt || course.updatedAt || new Date()
+        }))
+    )
 
     const notifications = [
         ...courses.map(course => ({
@@ -56,6 +70,16 @@ const syncStudentNotifications = async (userId) => {
             sourceType: 'Material',
             sourceId: material._id,
             createdAt: material.createdAt
+        })),
+        ...announcements.map(announcement => ({
+            userId,
+            type: 'Announcement',
+            title: announcement.title,
+            message: announcement.content,
+            course: announcement.course,
+            sourceType: 'Announcement',
+            sourceId: announcement._id,
+            createdAt: announcement.createdAt
         }))
     ]
 

@@ -15,7 +15,8 @@ const moduleSchema = new mongoose.Schema({
 const announcementSchema = new mongoose.Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
-    date: { type: String, default: () => new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) }
+    date: { type: String, default: () => new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) },
+    createdAt: { type: Date, default: Date.now }
 })
 
 const courseSchema = new mongoose.Schema({

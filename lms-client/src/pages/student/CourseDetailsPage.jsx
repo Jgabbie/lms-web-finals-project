@@ -21,7 +21,8 @@ import {
     VideoLibraryRounded as VideoLibrary,
     DescriptionRounded as Description,
     VisibilityRounded as Visibility,
-    DownloadRounded as Download
+    DownloadRounded as Download,
+    AnnouncementRounded as Announcement
 } from '@mui/icons-material'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -273,6 +274,7 @@ export default function CourseDetailsPage() {
                                     <Tab label='Overview' /> 
                                     <Tab label='Modules' /> 
                                     <Tab label='Assignments' /> 
+                                    <Tab label='Announcements' />
                                 </Tabs>
                             </div>
 
@@ -452,6 +454,47 @@ export default function CourseDetailsPage() {
                                             </Typography>
                                             <Typography variant='caption' className='!text-slate-400'>
                                                 No tasks scheduled for this course. 
+                                            </Typography>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Tab 3: Announcements */}
+                            {activeTab === 3 && (
+                                <div className='space-y-4'>
+                                    {course.announcements?.length > 0 ? (
+                                        course.announcements.map(announcement => (
+                                            <div
+                                                key={announcement._id}
+                                                className='bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs'
+                                            >
+                                                <div className='flex items-start gap-4'>
+                                                    <div className='w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0'>
+                                                        <Announcement />
+                                                    </div>
+                                                    <div className='min-w-0'>
+                                                        <Typography className='!font-extrabold !text-slate-800 !text-base'>
+                                                            {announcement.title}
+                                                        </Typography>
+                                                        <Typography variant='caption' className='!text-slate-400'>
+                                                            Posted by Prof. {displayedInstructorName} • {announcement.date}
+                                                        </Typography>
+                                                        <Typography className='!text-slate-600 !text-sm !leading-relaxed !mt-3 whitespace-pre-wrap'>
+                                                            {announcement.content}
+                                                        </Typography>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className='py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300'>
+                                            <Announcement className='text-slate-300 text-5xl mb-2' />
+                                            <Typography className='!font-bold !text-slate-700'>
+                                                No Announcements
+                                            </Typography>
+                                            <Typography variant='caption' className='!text-slate-400'>
+                                                Instructor announcements will appear here.
                                             </Typography>
                                         </div>
                                     )}

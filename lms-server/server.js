@@ -12,6 +12,7 @@ const notificationRouter = require('./routes/notificationRouter')
 const studentRouter = require('./routes/studentRouter')
 const adminRouter = require('./routes/adminRouter')
 const courseRouter = require('./routes/courseRouter')
+const contactRouter = require('./routes/contactRouter')
 
 const cors = require('cors')
 

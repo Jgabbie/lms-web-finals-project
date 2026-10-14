@@ -2,6 +2,7 @@ const Course = require('../models/Course')
 const Log = require('../models/Log')
 const User = require('../models/User')
 const Student = require('../models/Student')
+const Notification = require('../models/Notification')
 const mongoose = require('mongoose')
 
 const logActivity = async (req, action, description) => {
@@ -199,12 +200,34 @@ exports.addAnnouncement = async (req, res) => {
         if (!course) return res.status(404).json({ message: 'Course not found' })
 
         course.announcements = course.announcements || []
-        course.announcements.unshift({
+        const announcement = {
             title,
             content,
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
-        })
+        }
+        course.announcements.unshift(announcement)
         await course.save()
+
+        const savedAnnouncement = course.announcements[0]
+        await Promise.all((course.enrolledStudents || []).map(userId =>
+            Notification.updateOne(
+                { userId, sourceType: 'Announcement', sourceId: savedAnnouncement._id },
+                {
+                    $setOnInsert: {
+                        userId,
+                        type: 'Announcement',
+                        title: savedAnnouncement.title,
+                        message: savedAnnouncement.content,
+                        course: course.courseName,
+                        sourceType: 'Announcement',
+                        sourceId: savedAnnouncement._id,
+                        createdAt: savedAnnouncement.createdAt || new Date()
+                    }
+                },
+                { upsert: true }
+            )
+        ))
+
         await logActivity(
             req,
             'Create',
