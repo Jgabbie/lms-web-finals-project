@@ -88,8 +88,6 @@ export default function NotificationsPage() {
                 return 'bg-green-50 text-green-600'
             case 'Discussion':
                 return 'bg-indigo-50 text-indigo-600'
-            case 'Quiz':
-                return 'bg-purple-50 text-purple-600'
             case 'Schedule':
                 return 'bg-rose-50 text-rose-600'
             default:
@@ -284,7 +282,7 @@ export default function NotificationsPage() {
                                         }}
                                     />
                                     <div className='flex flex-wrap gap-2 lg:justify-end lg:shrink-0'>
-                                        {['All', 'Unread', 'Assignment', 'Announcement', 'Grade', 'Discussion', 'Quiz'].map(item => (
+                                        {['All', 'Unread', 'Assignment', 'Announcement', 'Grade', 'Discussion'].map(item => (
                                             <Button
                                                 key={item}
                                                 size='small'
