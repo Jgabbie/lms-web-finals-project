@@ -153,6 +153,11 @@ export default function LoginPage({ onLogin }) {
                             onChange={handleEmailChange}
                             error={Boolean(emailError)}
                             helperText={emailError}
+                            slotProps={{
+                                htmlInput: {
+                                    maxLength: 50
+                                }
+                            }}
                         />
 
                         <TextField
@@ -162,6 +167,9 @@ export default function LoginPage({ onLogin }) {
                             fullWidth
                             required
                             slotProps={{
+                                htmlInput: {
+                                    maxLength: 50
+                                },
                                 input: {
                                     endAdornment: (
                                         <InputAdornment position='end'>
