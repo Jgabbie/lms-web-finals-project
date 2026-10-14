@@ -1,12 +1,86 @@
 import { Button, TextField } from '@mui/material'
-import { School, MenuBook, Email, Phone, LocationOn, ArrowForward, AutoAwesome, Groups, Code, Palette, Terminal, LoginRounded, AssignmentRounded, CheckCircleRounded } from '@mui/icons-material'
+import { School, MenuBook, Email, Phone, LocationOn, ArrowForward, AutoAwesome, Groups, Code, Palette, Terminal, LoginRounded, AssignmentRounded, CheckCircleRounded, Alert, Snackbar } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import LandingGraphics from '../../assets/graphics/undraw_education_3vwh.svg'
 import StudentDashboardPreview from '../../assets/images/landing-student-dashboard.png'
+import { useState } from 'react'
+import api from '../../api/axiosClient'
 import './LandingPage.css'
 
 export default function LandingPage() {
     const navigate = useNavigate()
+
+    const [contactForm, setContactForm] = useState({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    })
+
+    const [sending, setSending] = useState(false)
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    })
+
+    const handleContactChange = (e) => {
+        const { name, value } = e.target
+        setContactForm(prev => ({
+            ...prev,
+            [name]: value
+        }))
+    }
+
+    const handleContactSubmit = async (e) => {
+        e.preventDefault()
+
+        const { name, email, subject, message } = contactForm
+
+        if (!name || !email || !subject || !message) {
+            setNotification({
+                open: true,
+                message: 'Please fill in all fields.',
+                severity: 'error'
+            })
+            return
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setNotification({
+                open: true,
+                message: 'Please enter a valid email address.',
+                severity: 'error'
+            })
+            return
+        }
+
+        try {
+            setSending(true)
+            await api.post('/contact', contactForm)
+            setContactForm({
+                name: '',
+                email: '',
+                subject: '',
+                message: ''
+            })
+            setNotification({
+                open: true,
+                message: 'Message sent successfully!',
+                severity: 'success'
+            })
+        } catch (error) {
+            console.error('Error sending contact message:', error)
+            setNotification({
+                open: true,
+                message: 'An error occurred while sending the message.',
+                severity: 'error'
+            })
+        } finally {
+            setSending(false)
+        }
+    }
+
     const courses = [
         { title: 'Introduction to React', description: 'Learn the fundamentals of React and build modern interactive web applications', level: 'Beginner' },
         { title: 'Advanced UI/UX Design', description: 'Master modern interface design principles and create engaging user experiences', level: 'Intermediate' },
@@ -85,11 +159,80 @@ export default function LandingPage() {
                     <div><span className='landing-eyebrow'>LET’S TALK</span><h2>Good questions.<br />New beginnings.</h2><p>Have a question about our courses or need help getting started? Send us a message and our team will be happy to assist you.</p>
                         <dl className='landing-contact-details'><div><Email /><dt>Email</dt><dd>contactsupport@EduLearn.com</dd></div><div><Phone /><dt>Phone</dt><dd>+63 912 345 6789</dd></div><div><LocationOn /><dt>Location</dt><dd>Manila, Philippines</dd></div></dl>
                     </div>
-                    <div className='landing-contact-form'><h3>Send your inquiry here!</h3><TextField fullWidth label='Full Name' variant='outlined' /><TextField fullWidth label='Email Address' type='email' variant='outlined' /><TextField fullWidth label='Subject' variant='outlined' /><TextField fullWidth label='Message' multiline rows={5} variant='outlined' /><Button fullWidth variant='contained' size='large'>Send Message <ArrowForward fontSize='small' /></Button></div>
+                    <div className='landing-contact-form'><h3>Send your inquiry here!</h3>
+                        <TextField
+                            fullWidth
+                            label='Full Name'
+                            required
+                            name='name'
+                            value={contactForm.name}
+                            onChange={handleContactChange}
+                            inputProps={{ maxLength: 50 }}
+                            variant='outlined'
+                        />
+                        <TextField
+                            fullWidth
+                            label='Email Address'
+                            type='email'
+                            variant='outlined'
+                            required
+                            name='email'
+                            value={contactForm.email}
+                            onChange={handleContactChange}
+                            inputProps={{ maxLength: 50 }}
+                        />
+                        <TextField
+                            fullWidth
+                            label='Subject'
+                            variant='outlined'
+                            required
+                            name='subject'
+                            value={contactForm.subject}
+                            onChange={handleContactChange}
+                            inputProps={{ maxLength: 50 }}
+                        />
+                        <TextField
+                            fullWidth
+                            label='Message'
+                            multiline
+                            rows={5}
+                            variant='outlined'
+                            name='message'
+                            value={contactForm.message}
+                            onChange={handleContactChange}
+                            inputProps={{ maxLength: 100 }}
+                        />
+                        <Button
+                            fullWidth
+                            type='submit'
+                            variant='contained'
+                            size='large'
+                            disabled={sending}
+                        >
+                            {sending ? 'Sending...' : 'Send Message'}
+                            {!sending && <ArrowForward fontSize='small' />}
+                        </Button>
+                    </div>
                 </section>
                 <section className='landing-final-cta'><span className='landing-eyebrow'>MAKE YOUR NEXT MOVE</span><h2>Start learning in a way<br />that feels right for you.</h2><Button variant='contained' onClick={navigateSignup}>Get Started <ArrowForward fontSize='small' /></Button><div className='landing-seal' aria-hidden='true'><School /></div></section>
             </main>
             <footer className='landing-footer'><div className='landing-footer-content'><div><a className='landing-brand' href='#main-content'><School /> EduLearn.</a><p>Empowering learners with practical knowledge and skills for a better future.</p></div><div><h3>Explore</h3><a href='#about'>About Us</a><a href='#courses'>Courses</a><a href='#contact'>Contact Us</a></div><div><h3>Get in touch</h3><p>contactsupport@EduLearn.com</p><p>Manila, Philippines</p></div></div><p className='landing-copyright'>©{new Date().getFullYear()} EduLearn. All rights reserved.</p><div className='landing-footer-wordmark' aria-hidden='true'>EduLearn.</div></footer>
+
+
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={6000}
+                onClose={() => setNotification(prev => ({ ...prev, open: false }))}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Alert
+                    severity={notification.severity}
+                    variant='filled'
+                    onClose={() => setNotification(prev => ({ ...prev, open: false }))}
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

@@ -406,7 +406,7 @@ export default function DashboardStudent() {
                                 </div>
 
                                 <Typography variant='body2' className='!text-slate-600'>
-                                {learningTip}
+                                    {learningTip}
                                 </Typography>
 
                                 <Divider className='!my-5' />

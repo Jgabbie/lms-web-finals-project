@@ -144,12 +144,12 @@ export default function DiscussionPage() {
                     <div className='student-page-heading flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7'>
                         <div>
                             <Typography variant='h4' className='!font-bold !text-slate-800'>
-                            Discussions
-                        </Typography>
+                                Discussions
+                            </Typography>
 
-                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                            Ask questions, share ideas, and interact with your classmates and instructors
-                        </Typography>
+                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                Ask questions, share ideas, and interact with your classmates and instructors
+                            </Typography>
 
                         </div>
 
@@ -238,11 +238,16 @@ export default function DiscussionPage() {
                                     placeholder='Search discussions...'
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    slotProps={{ input: {
-                                        startAdornment: (
-                                            <Search className='!text-slate-400 !mr-2' />
-                                        )
-                                    } }}
+                                    slotProps={{
+                                        htmlInput: {
+                                            maxLength: 50
+                                        },
+                                        input: {
+                                            startAdornment: (
+                                                <Search className='!text-slate-400 !mr-2' />
+                                            )
+                                        }
+                                    }}
                                 />
 
                                 <FormControl fullWidth size='small'>
@@ -388,6 +393,11 @@ export default function DiscussionPage() {
                                 ...newDiscussion,
                                 title: e.target.value
                             })}
+                            slotProps={{
+                                input: {
+                                    maxLength: 50
+                                }
+                            }}
                         />
 
                         <div className='w-full'>
@@ -429,6 +439,11 @@ export default function DiscussionPage() {
                                 ...newDiscussion,
                                 content: e.target.value
                             })}
+                            slotProps={{
+                                input: {
+                                    maxLength: 50
+                                }
+                            }}
                         />
                     </div>
                 </DialogContent>
@@ -529,6 +544,11 @@ export default function DiscussionPage() {
                                 label='Write a reply'
                                 value={replyContent}
                                 onChange={e => setReplyContent(e.target.value)}
+                                slotProps={{
+                                    htmlInput: {
+                                        maxLength: 50
+                                    },
+                                }}
                             />
                         </div>
                     )}

@@ -332,454 +332,479 @@ export default function ProfilePage() {
 
     return (
         <StudentScreen page="profile" role={userRole} enabled={['student', 'instructor', 'admin'].includes(userRole)}>
-        <div className='min-h-screen bg-slate-50'>
-            {userRole === 'instructor' ? (
-                <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-            ) : (
-                <Navbar />
-            )}
+            <div className='min-h-screen bg-slate-50'>
+                {userRole === 'instructor' ? (
+                    <NavbarInstructor sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+                ) : (
+                    <Navbar />
+                )}
 
-            {/* Render appropriate sidebar for user role */}
-            {userRole === 'instructor' && (
-                <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
-            )}
-            {userRole === 'admin' && (
-                <SidebarAdmin />
-            )}
-            {userRole === 'student' && (
-                <Sidebar />
-            )}
+                {/* Render appropriate sidebar for user role */}
+                {userRole === 'instructor' && (
+                    <SidebarInstructor open={sidebarOpen} setOpen={setSidebarOpen} />
+                )}
+                {userRole === 'admin' && (
+                    <SidebarAdmin />
+                )}
+                {userRole === 'student' && (
+                    <Sidebar />
+                )}
 
-            <div
-                className='transition-all duration-300'
-                style={{
-                    marginLeft: userRole === 'instructor'
-                        ? (sidebarOpen ? '260px' : '72px')
-                        : (userRole === 'student' || userRole === 'admin' ? '260px' : '0px')
-                }}
-            >
-                <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-                    <div className='student-page-heading mb-6'>
-                        <Typography variant='h4' className='!font-bold !text-slate-800'>
-                            My Profile
-                        </Typography>
-                        <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                            Manage your account information and profile settings
-                        </Typography>
-                    </div>
+                <div
+                    className='transition-all duration-300'
+                    style={{
+                        marginLeft: userRole === 'instructor'
+                            ? (sidebarOpen ? '260px' : '72px')
+                            : (userRole === 'student' || userRole === 'admin' ? '260px' : '0px')
+                    }}
+                >
+                    <main className='max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+                        <div className='student-page-heading mb-6'>
+                            <Typography variant='h4' className='!font-bold !text-slate-800'>
+                                My Profile
+                            </Typography>
+                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                Manage your account information and profile settings
+                            </Typography>
+                        </div>
 
-                    <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
-                        <CardContent className='!p-6'>
-                            <div className='flex flex-col sm:flex-row sm:items-center gap-5'>
-                                <div className='relative w-fit'>
-                                    <Avatar
-                                        src={profile.profileImage || ''}
-                                        sx={{ width: 88, height: 88, fontSize: 32 }}
-                                        className='!bg-blue-600'
-                                    >
-                                        {!profile.profileImage && initials}
-                                    </Avatar>
-                                    <input
-                                        id="profile-image-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleProfileImageUpload}
-                                        hidden
-                                        disabled={uploadingImage}
-                                    />
-                                    <label htmlFor="profile-image-upload">
-                                        <IconButton
-                                            component="span"
-                                            disabled={uploadingImage}
-                                            sx={{
-                                                position: 'absolute',
-                                                bottom: 0,
-                                                right: 0,
-                                                width: 32,
-                                                height: 32,
-                                                backgroundColor: '#2563eb',
-                                                color: '#fff',
-                                                '&:hover': {
-                                                    backgroundColor: '#1d4ed8',
-                                                },
-                                            }}
+                        <Card className='!rounded-xl !border !border-slate-200 !shadow-sm'>
+                            <CardContent className='!p-6'>
+                                <div className='flex flex-col sm:flex-row sm:items-center gap-5'>
+                                    <div className='relative w-fit'>
+                                        <Avatar
+                                            src={profile.profileImage || ''}
+                                            sx={{ width: 88, height: 88, fontSize: 32 }}
+                                            className='!bg-blue-600'
                                         >
-                                            {uploadingImage ? (
-                                                <CircularProgress size={17} color='inherit' />
-                                            ) : (
-                                                <Edit />
-                                            )}
-                                        </IconButton>
-                                    </label>
+                                            {!profile.profileImage && initials}
+                                        </Avatar>
+                                        <input
+                                            id="profile-image-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleProfileImageUpload}
+                                            hidden
+                                            disabled={uploadingImage}
+                                        />
+                                        <label htmlFor="profile-image-upload">
+                                            <IconButton
+                                                component="span"
+                                                disabled={uploadingImage}
+                                                sx={{
+                                                    position: 'absolute',
+                                                    bottom: 0,
+                                                    right: 0,
+                                                    width: 32,
+                                                    height: 32,
+                                                    backgroundColor: '#2563eb',
+                                                    color: '#fff',
+                                                    '&:hover': {
+                                                        backgroundColor: '#1d4ed8',
+                                                    },
+                                                }}
+                                            >
+                                                {uploadingImage ? (
+                                                    <CircularProgress size={17} color='inherit' />
+                                                ) : (
+                                                    <Edit />
+                                                )}
+                                            </IconButton>
+                                        </label>
+                                    </div>
+                                    <div className='flex-1'>
+                                        <Typography variant='h5' className='!font-bold !text-slate-800'>
+                                            {displayName}
+                                        </Typography>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            {profile.email}
+                                        </Typography>
+                                        <div className='mt-2'>
+                                            <span className='inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold'>
+                                                {roleLabel}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant='outlined'
+                                        startIcon={<Edit />}
+                                        onClick={() => {
+                                            setDraft(profile)
+                                            setEditing(true)
+                                            setError(null)
+                                            setMessage(null)
+                                        }}
+                                        className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
+                                    >
+                                        Edit Profile
+                                    </Button>
                                 </div>
-                                <div className='flex-1'>
-                                    <Typography variant='h5' className='!font-bold !text-slate-800'>
-                                        {displayName}
+                                <Divider className='!my-6' />
+                                <div className='mb-6'>
+                                    <Typography variant='h6' className='!font-bold !text-slate-800'>
+                                        Personal Information
                                     </Typography>
-                                    <Typography variant='body2' className='!text-slate-500'>
-                                        {profile.email}
+                                    <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                        Update your personal account information
                                     </Typography>
-                                    <div className='mt-2'>
-                                        <span className='inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold'>
-                                            {roleLabel}
-                                        </span>
+                                </div>
+                                {error && (
+                                    <Alert severity='error' className='!mb-5'>
+                                        {error}
+                                    </Alert>
+                                )}
+                                {message && (
+                                    <Alert severity='success' className='!mb-5'>
+                                        {message}
+                                    </Alert>
+                                )}
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+                                    <TextField
+                                        fullWidth
+                                        label="First Name"
+                                        value={draft.firstName}
+                                        onChange={updateDraft('firstName')}
+                                        disabled={!editing || saving}
+                                        slotProps={{
+                                            htmlInput: {
+                                                maxLength: 50
+                                            },
+                                            input: {
+                                                startAdornment: (
+                                                    <Person className='!text-slate-400 !mr-2' />
+                                                )
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Last Name"
+                                        value={draft.lastName}
+                                        onChange={updateDraft('lastName')}
+                                        disabled={!editing || saving}
+                                        slotProps={{
+                                            htmlInput: {
+                                                maxLength: 50
+                                            },
+                                            input: {
+                                                startAdornment: (
+                                                    <Person className='!text-slate-400 !mr-2' />
+                                                )
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Email Address"
+                                        value={draft.email}
+                                        onChange={updateDraft('email')}
+                                        disabled={!editing || saving}
+                                        type='email'
+                                        slotProps={{
+                                            htmlInput: {
+                                                maxLength: 50
+                                            },
+                                            input: {
+                                                startAdornment: (
+                                                    <Email className='!text-slate-400 !mr-2' />
+                                                )
+                                            }
+                                        }}
+                                    />
+                                </div>
+                                {editing && (
+                                    <div className='flex justify-end mt-6 gap-3'>
+                                        <Button
+                                            variant='contained'
+                                            startIcon={<Close />}
+                                            onClick={cancelEdit}
+                                            disabled={saving}
+                                            className='!normal-case !rounded-lg !bg-slate-300 !text-slate-700'
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            variant='contained'
+                                            startIcon={
+                                                saving ? (
+                                                    <CircularProgress size={18} color='inherit' />
+                                                ) : (
+                                                    <Save />
+                                                )
+                                            }
+                                            onClick={handleSaveChanges}
+                                            disabled={saving}
+                                            className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
+                                        >
+                                            {saving ? 'Saving...' : 'Save Changes'}
+                                        </Button>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mt-6'>
+                            <CardContent className='!p-6'>
+                                <div className='flex items-start gap-3 mb-6'>
+                                    <div className='w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center'>
+                                        <Lock />
+                                    </div>
+                                    <div>
+                                        <Typography variant='h6' className='!font-bold !text-slate-800'>
+                                            Security
+                                        </Typography>
+                                        <Typography variant='body2' className='!text-slate-500'>
+                                            Manage your account password
+                                        </Typography>
                                     </div>
                                 </div>
-                                <Button
-                                    variant='outlined'
-                                    startIcon={<Edit />}
-                                    onClick={() => {
-                                        setDraft(profile)
-                                        setEditing(true)
-                                        setError(null)
-                                        setMessage(null)
-                                    }}
-                                    className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
-                                >
-                                    Edit Profile
-                                </Button>
-                            </div>
-                            <Divider className='!my-6' />
-                            <div className='mb-6'>
-                                <Typography variant='h6' className='!font-bold !text-slate-800'>
-                                    Personal Information
-                                </Typography>
-                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                    Update your personal account information
-                                </Typography>
-                            </div>
-                            {error && (
-                                <Alert severity='error' className='!mb-5'>
-                                    {error}
-                                </Alert>
-                            )}
-                            {message && (
-                                <Alert severity='success' className='!mb-5'>
-                                    {message}
-                                </Alert>
-                            )}
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-                                <TextField
-                                    fullWidth
-                                    label="First Name"
-                                    value={draft.firstName}
-                                    onChange={updateDraft('firstName')}
-                                    disabled={!editing || saving}
-                                    slotProps={{ input: {
-                                        startAdornment: (
-                                            <Person className='!text-slate-400 !mr-2' />
-                                        )
-                                    } }}
-                                />
-                                <TextField
-                                    fullWidth
-                                    label="Last Name"
-                                    value={draft.lastName}
-                                    onChange={updateDraft('lastName')}
-                                    disabled={!editing || saving}
-                                    slotProps={{ input: {
-                                        startAdornment: (
-                                            <Person className='!text-slate-400 !mr-2' />
-                                        )
-                                    } }}
-                                />
-                                <TextField
-                                    fullWidth
-                                    label="Email Address"
-                                    value={draft.email}
-                                    onChange={updateDraft('email')}
-                                    disabled={!editing || saving}
-                                    type='email'
-                                    slotProps={{ input: {
-                                        startAdornment: (
-                                            <Email className='!text-slate-400 !mr-2' />
-                                        )
-                                    } }}
-                                />
-                            </div>
-                            {editing && (
-                                <div className='flex justify-end mt-6 gap-3'>
+                                <div className='flex justify-end mt-6'>
                                     <Button
-                                        variant='contained'
-                                        startIcon={<Close />}
-                                        onClick={cancelEdit}
-                                        disabled={saving}
-                                        className='!normal-case !rounded-lg !bg-slate-300 !text-slate-700'
+                                        variant='outlined'
+                                        startIcon={<Lock />}
+                                        onClick={handleSubmit}
+                                        className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
                                     >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant='contained'
-                                        startIcon={
-                                            saving ? (
-                                                <CircularProgress size={18} color='inherit' />
-                                            ) : (
-                                                <Save />
-                                            )
-                                        }
-                                        onClick={handleSaveChanges}
-                                        disabled={saving}
-                                        className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
-                                    >
-                                        {saving ? 'Saving...' : 'Save Changes'}
+                                        Change Password
                                     </Button>
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card className='!rounded-xl !border !border-slate-200 !shadow-sm !mt-6'>
-                        <CardContent className='!p-6'>
-                            <div className='flex items-start gap-3 mb-6'>
-                                <div className='w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center'>
-                                    <Lock />
-                                </div>
-                                <div>
-                                    <Typography variant='h6' className='!font-bold !text-slate-800'>
-                                        Security
-                                    </Typography>
-                                    <Typography variant='body2' className='!text-slate-500'>
-                                        Manage your account password
-                                    </Typography>
-                                </div>
-                            </div>
-                            <div className='flex justify-end mt-6'>
-                                <Button
-                                    variant='outlined'
-                                    startIcon={<Lock />}
-                                    onClick={handleSubmit}
-                                    className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
-                                >
-                                    Change Password
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </main>
-            </div>
-
-            {/* OTP Modal */}
-            <Modal
-                open={showOtpModal}
-                onClose={() => {
-                    if (!otpLoading) {
-                        setShowOtpModal(false)
-                    }
-                }}
-                className='edu-profile-modal flex items-center justify-center p-4'
-            >
-                <div className='edu-profile-modal-surface relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
-                    <div className='text-center'>
-                        <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100'>
-                            <span className='text-2xl font-bold text-blue-600'>EduLearn</span>
-                        </div>
-                        <Typography variant='h5' className='font-bold text-slate-800'>
-                            Verify Your Email
-                        </Typography>
-                        <Typography variant='body2' className='text-slate-500 mt-2'>
-                            We sent a 6-digit verification code to your email
-                        </Typography>
-                    </div>
-                    <div className='mt-6'>
-                        <TextField
-                            label="Verification Code"
-                            placeholder='Enter 6-digit OTP'
-                            fullWidth
-                            value={otp}
-                            onChange={(e) => {
-                                const val = e.target.value.replace(/\D/g, '').slice(0, 6)
-                                setOtp(val)
-                                setOtpError('')
-                            }}
-                            error={Boolean(otpError)}
-                            helperText={otpError || 'The code will expire in 5 minutes'}
-                            slotProps={{ htmlInput: { maxLength: 6, inputMode: 'numeric' } }}
-                        />
-                    </div>
-                    <Button
-                        fullWidth
-                        variant='contained'
-                        size='large'
-                        disabled={otpLoading || otp.length !== 6}
-                        onClick={handleVerifyOtp}
-                        className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-5'
-                    >
-                        {otpLoading ? 'Verifying...' : 'Verify OTP'}
-                    </Button>
-                    <div className='text-center mt-5'>
-                        <Typography variant='body2' className='text-slate-500'>
-                            Didn't receive the code?
-                        </Typography>
-                        <Button
-                            variant='text'
-                            disabled={resendLoading}
-                            onClick={handleResendOtp}
-                            className='text-blue-600 normal-case font-bold'
-                        >
-                            {resendLoading ? 'Sending...' : 'Resend OTP'}
-                        </Button>
-                    </div>
-                    <div className='text-center mt-2'>
-                        <Button
-                            variant='text'
-                            disabled={otpLoading}
-                            onClick={() => {
-                                setShowOtpModal(false)
-                                setOtp('')
-                                setOtpError('')
-                            }}
-                            className='text-slate-500 normal-case'
-                        >
-                            Cancel
-                        </Button>
-                    </div>
+                            </CardContent>
+                        </Card>
+                    </main>
                 </div>
-            </Modal>
 
-            {/* Reset Password Modal */}
-            <Modal
-                open={showResetModal}
-                onClose={() => {
-                    if (!loading) {
-                        setShowResetModal(false)
-                    }
-                }}
-                className='edu-profile-modal flex items-center justify-center p-4'
-            >
-                <div className='edu-profile-modal-surface relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
-                    <div className='text-center mb-6'>
-                        <Typography variant='h5' className='font-bold text-slate-800'>
-                            Create New Password
-                        </Typography>
-                        <Typography variant='body2' className='text-slate-500 mt-2'>
-                            Enter your new password below
-                        </Typography>
-                    </div>
-                    <div className='flex flex-col gap-5'>
-                        <TextField
-                            label="New Password"
-                            type={showPassword ? "text" : "password"}
-                            fullWidth
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value)
-                                setPasswordError('')
-                            }}
-                            error={Boolean(passwordError)}
-                            helperText={passwordError}
-                            autoComplete='new-password'
-                            slotProps={{ input: {
-                                endAdornment: (
-                                    <InputAdornment position='end'>
-                                        <IconButton aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)} edge='end'>
-                                            {showPassword ? <Visibility /> : <VisibilityOff />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                )
-                            } }}
-                        />
-                        <TextField
-                            label="Confirm New Password"
-                            type={showConfirmPassword ? "text" : "password"}
-                            fullWidth
-                            value={confirmPassword}
-                            onChange={(e) => {
-                                setConfirmPassword(e.target.value)
-                                setConfirmPasswordError('')
-                            }}
-                            error={Boolean(confirmPasswordError)}
-                            helperText={confirmPasswordError}
-                            autoComplete='new-password'
-                            slotProps={{ input: {
-                                endAdornment: (
-                                    <InputAdornment position='end'>
-                                        <IconButton aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'} onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge='end'>
-                                            {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                )
-                            } }}
-                        />
+                {/* OTP Modal */}
+                <Modal
+                    open={showOtpModal}
+                    onClose={() => {
+                        if (!otpLoading) {
+                            setShowOtpModal(false)
+                        }
+                    }}
+                    className='edu-profile-modal flex items-center justify-center p-4'
+                >
+                    <div className='edu-profile-modal-surface relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                        <div className='text-center'>
+                            <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100'>
+                                <span className='text-2xl font-bold text-blue-600'>EduLearn</span>
+                            </div>
+                            <Typography variant='h5' className='font-bold text-slate-800'>
+                                Verify Your Email
+                            </Typography>
+                            <Typography variant='body2' className='text-slate-500 mt-2'>
+                                We sent a 6-digit verification code to your email
+                            </Typography>
+                        </div>
+                        <div className='mt-6'>
+                            <TextField
+                                label="Verification Code"
+                                placeholder='Enter 6-digit OTP'
+                                fullWidth
+                                value={otp}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 6)
+                                    setOtp(val)
+                                    setOtpError('')
+                                }}
+                                error={Boolean(otpError)}
+                                helperText={otpError || 'The code will expire in 5 minutes'}
+                                slotProps={{ htmlInput: { maxLength: 6, inputMode: 'numeric' } }}
+                            />
+                        </div>
                         <Button
                             fullWidth
                             variant='contained'
                             size='large'
-                            disabled={loading}
-                            onClick={handleResetPassword}
+                            disabled={otpLoading || otp.length !== 6}
+                            onClick={handleVerifyOtp}
                             className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-5'
                         >
-                            {loading ? 'Resetting Password...' : 'Reset Password'}
+                            {otpLoading ? 'Verifying...' : 'Verify OTP'}
                         </Button>
-                    </div>
-                </div>
-            </Modal>
-
-            {/* Image Preview Modal */}
-            <Modal
-                open={showImagePreview}
-                onClose={() => {
-                    if (!uploadingImage) {
-                        closeImagePreview()
-                    }
-                }}
-                className='edu-profile-modal flex items-center justify-center p-4'
-            >
-                <div className='edu-profile-modal-surface relative w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 outline-none'>
-                    <div className='flex items-center justify-between mb-5'>
-                        <div>
-                            <Typography variant='h6' className='font-bold text-slate-800'>
-                                Preview Profile Image
+                        <div className='text-center mt-5'>
+                            <Typography variant='body2' className='text-slate-500'>
+                                Didn't receive the code?
                             </Typography>
-                            <Typography variant='body2' className='!text-slate-500 !mt-1'>
-                                Click "Upload Image" to save changes
+                            <Button
+                                variant='text'
+                                disabled={resendLoading}
+                                onClick={handleResendOtp}
+                                className='text-blue-600 normal-case font-bold'
+                            >
+                                {resendLoading ? 'Sending...' : 'Resend OTP'}
+                            </Button>
+                        </div>
+                        <div className='text-center mt-2'>
+                            <Button
+                                variant='text'
+                                disabled={otpLoading}
+                                onClick={() => {
+                                    setShowOtpModal(false)
+                                    setOtp('')
+                                    setOtpError('')
+                                }}
+                                className='text-slate-500 normal-case'
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+
+                {/* Reset Password Modal */}
+                <Modal
+                    open={showResetModal}
+                    onClose={() => {
+                        if (!loading) {
+                            setShowResetModal(false)
+                        }
+                    }}
+                    className='edu-profile-modal flex items-center justify-center p-4'
+                >
+                    <div className='edu-profile-modal-surface relative max-w-3xl w-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+                        <div className='text-center mb-6'>
+                            <Typography variant='h5' className='font-bold text-slate-800'>
+                                Create New Password
+                            </Typography>
+                            <Typography variant='body2' className='text-slate-500 mt-2'>
+                                Enter your new password below
                             </Typography>
                         </div>
-                        <IconButton onClick={closeImagePreview} disabled={uploadingImage}>
-                            <Close />
-                        </IconButton>
-                    </div>
-                    <div className='flex justify-center bg-slate-50 rounded-xl p-5'>
-                        {selectedImage && (
-                            <img
-                                src={selectedImage}
-                                alt="Profile Preview"
-                                className='w-48 h-48 object-cover rounded-full border-4 border-white shadow-md'
+                        <div className='flex flex-col gap-5'>
+                            <TextField
+                                label="New Password"
+                                type={showPassword ? "text" : "password"}
+                                fullWidth
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value)
+                                    setPasswordError('')
+                                }}
+                                error={Boolean(passwordError)}
+                                helperText={passwordError}
+                                autoComplete='new-password'
+                                slotProps={{
+                                    htmlInput: {
+                                        maxLength: 50
+                                    },
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <IconButton aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)} edge='end'>
+                                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        )
+                                    }
+                                }}
                             />
-                        )}
+                            <TextField
+                                label="Confirm New Password"
+                                type={showConfirmPassword ? "text" : "password"}
+                                fullWidth
+                                value={confirmPassword}
+                                onChange={(e) => {
+                                    setConfirmPassword(e.target.value)
+                                    setConfirmPasswordError('')
+                                }}
+                                error={Boolean(confirmPasswordError)}
+                                helperText={confirmPasswordError}
+                                autoComplete='new-password'
+                                slotProps={{
+                                    htmlInput: {
+                                        maxLength: 50
+                                    },
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <IconButton aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'} onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge='end'>
+                                                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        )
+                                    }
+                                }}
+                            />
+                            <Button
+                                fullWidth
+                                variant='contained'
+                                size='large'
+                                disabled={loading}
+                                onClick={handleResetPassword}
+                                className='bg-blue-600 hover:bg-blue-700 normal-case shadow-none rounded-lg py-3 mt-5'
+                            >
+                                {loading ? 'Resetting Password...' : 'Reset Password'}
+                            </Button>
+                        </div>
                     </div>
-                    <div className='flex justify-end gap-3 mt-6'>
-                        <Button
-                            variant='outlined'
-                            onClick={closeImagePreview}
-                            disabled={uploadingImage}
-                            className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant='contained'
-                            onClick={confirmProfileImageUpload}
-                            disabled={uploadingImage || !selectedImageFile}
-                            startIcon={uploadingImage ? <CircularProgress size={18} color='inherit' /> : <PhotoCamera />}
-                            className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
-                        >
-                            {uploadingImage ? 'Uploading...' : 'Upload Image'}
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+                </Modal>
 
-            <Snackbar
-                open={notification.open}
-                autoHideDuration={3000}
-                onClose={closeNotification}
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-                <Alert onClose={closeNotification} severity={notification.severity} variant='filled' sx={{ width: "100%" }}>
-                    {notification.message}
-                </Alert>
-            </Snackbar>
-        </div>
+                {/* Image Preview Modal */}
+                <Modal
+                    open={showImagePreview}
+                    onClose={() => {
+                        if (!uploadingImage) {
+                            closeImagePreview()
+                        }
+                    }}
+                    className='edu-profile-modal flex items-center justify-center p-4'
+                >
+                    <div className='edu-profile-modal-surface relative w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8 outline-none'>
+                        <div className='flex items-center justify-between mb-5'>
+                            <div>
+                                <Typography variant='h6' className='font-bold text-slate-800'>
+                                    Preview Profile Image
+                                </Typography>
+                                <Typography variant='body2' className='!text-slate-500 !mt-1'>
+                                    Click "Upload Image" to save changes
+                                </Typography>
+                            </div>
+                            <IconButton onClick={closeImagePreview} disabled={uploadingImage}>
+                                <Close />
+                            </IconButton>
+                        </div>
+                        <div className='flex justify-center bg-slate-50 rounded-xl p-5'>
+                            {selectedImage && (
+                                <img
+                                    src={selectedImage}
+                                    alt="Profile Preview"
+                                    className='w-48 h-48 object-cover rounded-full border-4 border-white shadow-md'
+                                />
+                            )}
+                        </div>
+                        <div className='flex justify-end gap-3 mt-6'>
+                            <Button
+                                variant='outlined'
+                                onClick={closeImagePreview}
+                                disabled={uploadingImage}
+                                className='!normal-case !rounded-lg !border-slate-300 !text-slate-700'
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant='contained'
+                                onClick={confirmProfileImageUpload}
+                                disabled={uploadingImage || !selectedImageFile}
+                                startIcon={uploadingImage ? <CircularProgress size={18} color='inherit' /> : <PhotoCamera />}
+                                className='!bg-blue-600 hover:!bg-blue-700 !normal-case !rounded-lg !shadow-none'
+                            >
+                                {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+
+                <Snackbar
+                    open={notification.open}
+                    autoHideDuration={3000}
+                    onClose={closeNotification}
+                    anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                    <Alert onClose={closeNotification} severity={notification.severity} variant='filled' sx={{ width: "100%" }}>
+                        {notification.message}
+                    </Alert>
+                </Snackbar>
+            </div>
         </StudentScreen>
     )
 }

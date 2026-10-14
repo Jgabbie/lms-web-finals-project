@@ -11,6 +11,7 @@ const userRouter = require('./routes/userRouter')
 const notificationRouter = require('./routes/notificationRouter')
 const studentRouter = require('./routes/studentRouter')
 const adminRouter = require('./routes/adminRouter')
+const courseRouter = require('./routes/courseRouter')
 
 const cors = require('cors')
 
@@ -43,6 +44,7 @@ app.use('/api/admin', adminRouter)
 app.use('/api/user', userRouter)
 app.use('/api/users', userRouter)
 app.use('/api/notifications', notificationRouter)
+app.use('/api/contact', contactRouter)
 app.use('/api/discussions', require('./routes/discussionRouter'))
 
 

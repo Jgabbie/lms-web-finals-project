@@ -133,7 +133,10 @@ export default function LearningMaterialsPage() {
                                     placeholder='Search learning materials...'
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    slotProps={{ input: { startAdornment: <Search className='!text-slate-400 !mr-2' /> } }}
+                                    slotProps={{
+                                        htmlInput: { maxLength: 50 },
+                                        input: { startAdornment: <Search className='!text-slate-400 !mr-2' /> }
+                                    }}
                                 />
                                 <TextField
                                     select
